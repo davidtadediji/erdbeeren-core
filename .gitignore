@@ -1,0 +1,43 @@
+# Dependency directories
+node_modules/
+
+# Optional: Logs and runtime data
+logs/
+*.log
+npm-debug.log*
+
+# Optional: OS or Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.sublime-*
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Optional: Environment variables file
+.env
+
+# Optional: Build output
+dist/
+build/
+*.out
+
+# Optional: OS generated files
+ehthumbs.db
+Desktop.ini
+
+# Optional: Miscellaneous
+.sass-cache/
+*.css.map
+
+# Optional: IDE settings
+.idea/
+*.code-workspace
+.vscode/
+
+# Optional: OS-specific files
+.DS_Store
+Thumbs.db
