@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 
-const configFilePath = '../src/modules/config.json';
+const configFilePath = '../../../config/data-config.json';
 
 const readConfigFile = () => {
   try {
