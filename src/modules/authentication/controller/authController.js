@@ -1,6 +1,5 @@
 // src\modules\authentication\controller\authController.js
 import passport from 'passport';
-import passport from 'passport';
 import { prisma } from '../prisma/client';
 import bcrypt from 'bcrypt';
 
