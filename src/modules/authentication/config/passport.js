@@ -1,3 +1,4 @@
+// src\modules\authentication\config\passport.js
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';

@@ -1,9 +1,11 @@
+// src\modules\authentication\routes\authRoutes.js
 import express from 'express';
-import userController from '../controllers/userController';
-import { isAuthenticated } from '../middlewares/authMiddleware';
+import authController from '../controllers/authController';
 
 const router = express.Router();
 
-router.get('/profile', isAuthenticated, userController.getUserProfile);
+router.post('/signup', authController.signup);
+router.post('/login', authController.login); // Add a login route
+router.get('/logout', authController.logout);
 
 export default router;
