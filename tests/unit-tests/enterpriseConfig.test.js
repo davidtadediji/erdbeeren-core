@@ -1,12 +1,14 @@
 import fs from 'fs';
+import path from 'path'; // Import the path module
+
 import {
   readConfigFile,
   writeConfigFile,
   setEnterpriseDetails,
   getEnterpriseDetails,
-} from "../src/modules/enterprise_config/configurations/enterpriseConfig.js";
+} from "../../src/modules/enterprise_config/configurations/enterpriseConfig.js";
 
-const configFilePath = '../config/data-config.json';
+const configFilePath = path.resolve(__dirname, '../../config/data-config.json');
 
 describe("readConfigFile", () => {
   it("should return an empty object if the config file does not exist", () => {
@@ -17,8 +19,9 @@ describe("readConfigFile", () => {
   it("should return the contents of the config file if it exists", () => {
     const configFileContent =
       '{ "name": "My Enterprise", "industry": "Retail" }';
-    fs.writeFileSync(configFilePath, configFileContent, "utf8");
-    const result = readConfigFile();
+      fs.writeFileSync(configFilePath, JSON.stringify(configFileContent, null, 2), 'utf8');
+      const result = readConfigFile();
+      console.log("result: ", result)
     expect(result).toEqual({ name: "My Enterprise", industry: "Retail" });
   });
 

@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { uploadFile, getFileById } from './FileService';
+import { uploadFile, getFileById } from '../../src/modules/llm_context/services/fileService.js';
 
 jest.mock('fs');
 jest.mock('@prisma/client');

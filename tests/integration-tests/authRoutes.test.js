@@ -2,7 +2,7 @@
 
 import express from 'express';
 import request from 'supertest';
-import app from '../src/modules/authentication/index'; // Adjust the path accordingly
+import app from '../../src/modules/authentication/index.js'; // Adjust the path accordingly
 
 describe('Authentication API', () => {
   // Use this token variable to store the authentication token for subsequent requests

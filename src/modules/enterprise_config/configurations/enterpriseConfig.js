@@ -2,9 +2,9 @@
 
 import fs from 'fs';
 
-const configFilePath = '../../../config/data-config.json';
+const configFilePath = "../../../../config/data-config.json";
 
-const readConfigFile = () => {
+export const readConfigFile = () => {
   try {
     if (fs.existsSync(configFilePath)) {
       const configFileContent = fs.readFileSync(configFilePath, 'utf8');
@@ -17,7 +17,7 @@ const readConfigFile = () => {
   }
 };
 
-const writeConfigFile = (configData) => {
+export const writeConfigFile = (configData) => {
   try {
     fs.writeFileSync(configFilePath, JSON.stringify(configData, null, 2), 'utf8');
     console.log('Configuration file has been successfully updated.');

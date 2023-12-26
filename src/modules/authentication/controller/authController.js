@@ -1,7 +1,7 @@
 // src\modules\authentication\controller\authController.js
 import passport from 'passport';
-import { prisma } from '../prisma/client';
-import bcrypt from 'bcrypt';
+import { prisma } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 export const login = (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {

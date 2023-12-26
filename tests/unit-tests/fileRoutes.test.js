@@ -2,8 +2,8 @@
 
 import request from 'supertest';
 import express from 'express';
-import { uploadFile, getFileById } from '../services/fileService';
-import router from './FileRoutes';
+import { uploadFile, getFileById } from '../../src/modules/llm_context/routes/fileRoutes.js';
+import router from '../../src/modules/llm_context/routes/fileRoutes.js';
 
 jest.mock('../services/fileService');
 

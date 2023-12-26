@@ -1,7 +1,10 @@
 # Dependency directories
 node_modules/
 
-# Optional: Logs and runtime data
+# Prisma
+/prisma/migrations/
+
+# Logs and runtime data
 logs/
 *.log
 npm-debug.log*

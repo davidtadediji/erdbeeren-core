@@ -1,8 +1,8 @@
 // src\modules\authentication\config\passport.js
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import bcrypt from 'bcrypt';
-import { prisma } from '../prisma/client';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@prisma/client'
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {

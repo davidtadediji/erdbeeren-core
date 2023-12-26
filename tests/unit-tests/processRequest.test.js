@@ -1,5 +1,5 @@
 // processRequest.test.js
-import { processRequest } from './processRequest';
+import { processRequest } from '../../src/modules/llm_context/services/processRequest';
 import * as fs from 'fs';
 import { OpenAI } from 'langchain/llms/openai';
 import { RetrievalQAChain } from 'langchain/chains';
