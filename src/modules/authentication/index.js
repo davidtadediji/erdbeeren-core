@@ -1,8 +1,10 @@
 // src\modules\authentication\index.js
 import express from 'express';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
-import errorMiddleware from './middleware/errorMiddleware';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import errorMiddleware from './middleware/errorMiddleware.js';
+import cors from 'cors';
+
 // require = require('esm')(module /*, options */);
 
 // Load environment variables from .env file
@@ -11,9 +13,10 @@ dotenv.config();
 
 const app = express();
 const PORT = 3000;
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cors());
 
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);

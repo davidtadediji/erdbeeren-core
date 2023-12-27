@@ -1,5 +1,8 @@
-// src\modules\authentication\controller\userController.js
-import { prisma } from '../prisma/client';
+// src\modules\authentication\controllers\userController.js
+import { PrismaClient } from '@prisma/client';
+
+// Create an instance of the Prisma client
+const prisma = new PrismaClient();
 
 export const getUserProfile = async (req, res, next) => {
   try {
