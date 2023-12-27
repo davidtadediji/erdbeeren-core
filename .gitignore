@@ -3,7 +3,7 @@ node_modules/
 
 # Prisma
 /prisma/migrations/
-/src/modules/authentication/utils
+
 # Logs and runtime data
 logs/
 *.log
