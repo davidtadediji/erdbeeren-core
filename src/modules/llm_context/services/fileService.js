@@ -1,44 +1,74 @@
-// fileService.test.js
-import { uploadFile, getFileByName, deleteFile, listFiles } from '../path/to/fileService';
+// src\modules\llm_context\services\fileService.js
+import fs from 'fs';
+import logger from '../../../../logger.js';
+import path from 'path';
 
-describe('fileService', () => {
-  test('uploads a file', async () => {
-    const file = { originalname: 'test.txt', buffer: Buffer.from('Test content') };
-    const result = await uploadFile(file);
-    expect(result.filename).toBe('test.txt');
-    expect(result.path).toMatch(/uploads\/test.txt/);
-  });
+const currentModuleURL = new URL(import.meta.url);
+const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
-  test('gets a file by name', async () => {
-    const result = await getFileByName('test.txt');
-    expect(result.filename).toBe('test.txt');
-    expect(result.path).toMatch(/uploads\/test.txt/);
-  });
+logger.info("dir:" + currentModuleDir);
 
-  test('deletes a file by name', async () => {
-    const result = await deleteFile('test.txt');
-    expect(result.success).toBe(true);
-    expect(result.message).toBe('File test.txt deleted successfully.');
-  });
+const FILE_UPLOAD_PATH = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', 'context'); // Adjust the path as needed
 
-  test('tries to get a non-existent file', async () => {
-    const result = await getFileByName('nonexistent.txt');
-    expect(result).toBe(null);
-  });
+logger.info("File upload path: " + FILE_UPLOAD_PATH)
+// Ensure the upload directory exists
+if (!fs.existsSync(FILE_UPLOAD_PATH)) {
+  fs.mkdirSync(FILE_UPLOAD_PATH);
+}
 
-  test('tries to delete a non-existent file', async () => {
-    const result = await deleteFile('nonexistent.txt');
-    expect(result.success).toBe(false);
-    expect(result.message).toBe('File nonexistent.txt not found.');
-  });
+export const uploadFiles = async (files) => {
+  try {
+    const uploadedFiles = [];
 
-  test('lists all files', async () => {
-    // Mock the required dependencies or adjust as needed
-    jest.mock('fs', () => ({
-      readdirSync: jest.fn(() => ['test.txt']),
-    }));
+    for (const file of files) {
+      const { originalname, buffer } = file;
+      const filePath = path.join(FILE_UPLOAD_PATH, originalname);
 
-    const files = await listFiles();
-    expect(files).toEqual(['test.txt']);
-  });
-});
+      // Write each file to the local file system asynchronously
+      await fs.promises.writeFile(filePath, buffer);
+
+      // Collect file metadata for each uploaded file
+      uploadedFiles.push({ filename: originalname, path: filePath });
+    }
+
+    // Return an array of uploaded files
+    return uploadedFiles;
+  } catch (error) {
+    logger.error(`Error uploading files: ${error.message}`);
+    throw error; // Rethrow the error to be caught by the calling code
+  }
+};
+
+
+
+export const deleteFile = async (filename) => {
+  const filePath = path.join(FILE_UPLOAD_PATH, filename);
+
+  try {
+    // Check if the file exists asynchronously
+    await fs.promises.access(filePath);
+
+    // Delete the file asynchronously
+    await fs.promises.unlink(filePath);
+
+    return { success: true, message: `File ${filename} deleted successfully.` };
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return { success: false, message: `File ${filename} not found.` };
+    } else {
+      logger.error(`Error deleting file: ${error.message}`);
+      throw error;
+    }
+  }
+};
+
+
+export const listFiles = async () => {
+  try {
+    const files = fs.readdirSync(FILE_UPLOAD_PATH);
+    return files;
+  } catch (error) {
+    logger.error(`Error listing files: ${error.message}`);
+    throw error;
+  }
+};

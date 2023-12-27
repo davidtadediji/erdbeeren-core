@@ -7,7 +7,7 @@ import logger from '../../../logger.js';
 import cors from 'cors';
 
 const app = express();
-const port = 3000; // Choose an appropriate port
+const port = process.env.PORT || 3000; // Choose an appropriate port
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

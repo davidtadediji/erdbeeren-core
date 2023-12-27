@@ -1,4 +1,4 @@
-// processRequest.js
+// src\modules\llm_context\services\processRequest.js
 import { OpenAI } from "langchain/llms/openai";
 import { RetrievalQAChain } from "langchain/chains";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
@@ -6,7 +6,8 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import * as fs from "fs";
 import { FaissStore } from "langchain/vectorstores/faiss";
 
-import logger from "../../logger.js";
+import logger from "../../../../logger.js";
+
 
 // Define the processRequest function without any identifier parameter
 const processRequest = async (fileNames, message) => {

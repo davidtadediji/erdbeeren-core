@@ -3,6 +3,8 @@ node_modules/
 
 config/*
 
+src/modules/llm_context/context/*
+
 # Prisma
 /prisma/migrations/
 
