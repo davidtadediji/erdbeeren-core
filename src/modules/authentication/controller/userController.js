@@ -3,7 +3,9 @@ import { prisma } from '../prisma/client';
 
 export const getUserProfile = async (req, res, next) => {
   try {
-    const userId = req.user.id; // Assuming user ID is available in the authenticated user object
+    // Assuming user information is already attached to the request by the authenticateJWT middleware
+    const userId = req.user.id;
+    
     const userProfile = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!userProfile) {

@@ -1,10 +1,21 @@
 // src\modules\authentication\middleware\authMiddleware.js
+import jwt from 'jsonwebtoken';
 
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
+const authenticateJWT = (req, res, next) => {
+  const token = req.header('Authorization');
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized access' });
   }
-  res.status(401).json({ message: 'Unauthorized access' });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    req.user = user;
+    next();
+  });
 };
 
 const hasPermission = (requiredPermissions) => (req, res, next) => {
@@ -17,7 +28,8 @@ const hasPermission = (requiredPermissions) => (req, res, next) => {
   res.status(403).json({ message: 'Forbidden' });
 };
 
-export { isAuthenticated, hasPermission };
+export { authenticateJWT, hasPermission };
+
 
 /* for fine grained access control:
 // src\modules\authentication\middleware\authMiddleware.js

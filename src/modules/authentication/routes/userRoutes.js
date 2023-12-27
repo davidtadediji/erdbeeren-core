@@ -1,11 +1,11 @@
 // src\modules\authentication\routes\userRoutes.js
 import express from 'express';
 import userController from '../controllers/userController';
-import authMiddleware from '../middlewares/authMiddleware';
+import { authenticateJWT } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Protect the '/profile' route with both isAuthenticated and hasPermission middlewares
-router.get('/profile', authMiddleware.isAuthenticated, authMiddleware.hasPermission(['VIEW_PROFILE']), userController.getUserProfile);
+// Protect the '/profile' route with the authenticateJWT middleware
+router.get('/profile', authenticateJWT, userController.getUserProfile);
 
 export default router;

@@ -1,30 +1,27 @@
 // src\modules\authentication\controller\authController.js
-import passport from 'passport';
-import { prisma } from '@prisma/client';
+import { prisma } from '../prisma/client';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-export const login = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
+export const login = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { username } });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Authentication failed' });
     }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      return res.json({ message: 'Authentication successful', user });
+
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
     });
-  })(req, res, next);
-};
 
-export const logout = (req, res) => {
-  req.logout();
-  res.json({ message: 'Logout successful' });
+    return res.json({ message: 'Authentication successful', token, user });
+  } catch (error) {
+    next(error);
+  }
 };
-
 
 export const signup = async (req, res, next) => {
   try {
