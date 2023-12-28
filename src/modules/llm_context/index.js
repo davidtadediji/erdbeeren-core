@@ -18,6 +18,16 @@ app.use(cors());
 logger.info("Port: " + process.env.PORT)
 const PORT = process.env.PORT || 3000;
 
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Handle the error, log, or perform cleanup tasks
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error.message);
+  // Handle the error, log, or perform cleanup tasks
+  process.exit(1); // Terminate the application
+});
 
 app.use('/files', fileRoutes);
 app.use('/context', contextRoutes);

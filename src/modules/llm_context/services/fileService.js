@@ -2,6 +2,7 @@
 import fs from 'fs';
 import logger from '../../../../logger.js';
 import path from 'path';
+import { generateVectorStore } from './contextService.js';
 
 const currentModuleURL = new URL(import.meta.url);
 const currentModuleDir = path.dirname(currentModuleURL.pathname);
@@ -31,6 +32,7 @@ export const uploadFiles = async (files) => {
       uploadedFiles.push({ filename: originalname, path: filePath });
     }
 
+    await generateVectorStore()
     // Return an array of uploaded files
     return uploadedFiles;
   } catch (error) {

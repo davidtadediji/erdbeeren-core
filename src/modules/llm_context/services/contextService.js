@@ -29,7 +29,7 @@ const generateVectorStore = async () => {
       throw new Error("Context folder is empty. No files to process.");
     }
 
-    logger.info("Filenames: " + fileNames)
+    logger.info("Filenames: " + fileNames);
     const texts = fileNames.map((fileName) => {
       const filePath = path.join(CONTEXT_FOLDER_PATH, fileName);
       return fs.readFileSync(filePath, "utf-8");
@@ -73,7 +73,7 @@ const generateVectorStore = async () => {
 const respondToMessage = async (message) => {
   try {
     const VECTOR_STORE_PATH = path.join(
-      path.dirname(currentModuleDir.replace(/^\/([A-Z]:)/, "$1")),
+      currentModuleDir,
       "..",
       "index",
       "context.data"
@@ -90,9 +90,7 @@ const respondToMessage = async (message) => {
         new OpenAIEmbeddings()
       );
     } else {
-      // Handle the case when the vector store doesn't exist
-      logger.error("Vector store not found.");
-      return null;
+      throw new Error("Vector store not found.");
     }
 
     const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
@@ -103,7 +101,7 @@ const respondToMessage = async (message) => {
 
     return { res };
   } catch (error) {
-    throw error
+    throw error;
   }
 };
 
