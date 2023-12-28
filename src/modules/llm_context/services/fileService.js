@@ -6,7 +6,7 @@ import path from 'path';
 const currentModuleURL = new URL(import.meta.url);
 const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
-logger.info("dir:" + currentModuleDir);
+logger.info("File service dir: " + currentModuleDir);
 
 const FILE_UPLOAD_PATH = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', 'context'); // Adjust the path as needed
 
