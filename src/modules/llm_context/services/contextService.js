@@ -69,8 +69,9 @@ const generateVectorStore = async () => {
   }
 };
 
+
 // Function to respond to a message using the generated vector store
-const respondToMessage = async (message) => {
+const respondToMessage = async (message, previousMessages = [], isAgent = false) => {
   try {
     const VECTOR_STORE_PATH = path.join(
       currentModuleDir,
@@ -93,16 +94,26 @@ const respondToMessage = async (message) => {
       throw new Error("Vector store not found.");
     }
 
+    // Add context information, like "You are an agent" and title like "Previous Messages:"
+    const contextMessage = [
+      isAgent ? "You are a customer service agent." : "",
+      "Previous Messages:",
+      ...previousMessages,
+      "Current Message:",
+      message
+    ].join(" ");
+
     const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
 
     const res = await chain.call({
-      query: message,
+      query: contextMessage,
     });
 
     return { res };
-  } catch (error) {
+  } catch (error) {    
     throw error;
   }
 };
+
 
 export { generateVectorStore, respondToMessage };
