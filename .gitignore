@@ -6,7 +6,6 @@ config/*
 src/modules/llm_context/context/*
 src/modules/llm_context/index/*
 
-src/modules/communication/twilio/voice/*
 
 # Prisma
 /prisma/migrations/
