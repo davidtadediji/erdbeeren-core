@@ -1,6 +1,6 @@
 // src\modules\communication\twilio\messaging\webhook.js
 import express from 'express';
-import webhookController from './webhookController.js';
+import webhookController from '../controllers/webhookController.js';
 
 const router = express.Router();
 

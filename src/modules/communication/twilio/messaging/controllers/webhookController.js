@@ -1,14 +1,14 @@
 // src\modules\communication\twilio\messaging\webhookController.js
 import twilio from "twilio";
-import { respondToMessage } from "../../../llm_context/services/contextService.js"; // Replace with the actual path
+import { respondToMessage } from "../../../../llm_context/services/contextService.js"; // Replace with the actual path
 import dotenv from "dotenv";
 import {
   updateConversationTimestamp,
   createNewConversation,
   getConversationThread,
-} from "./service/conversationService.js";
-import { saveMessageToConversation } from "./service/messageService.js";
-import logger from "../../../../../logger.js";
+} from "../services/conversationService.js";
+import { saveMessageToConversation } from "../services/messageService.js";
+import logger from "../../../../../../logger.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
