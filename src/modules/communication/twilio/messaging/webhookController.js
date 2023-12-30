@@ -22,7 +22,6 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 const client = twilio(accountSid, authToken);
 
 const webhookController = async (req, res) => {
-    
   logger.info("Message webhook triggered: " + JSON.stringify(req.body, null, 2));
 
   try {
