@@ -80,10 +80,11 @@ const respondToMessage = async (message, previousMessages = [], isAgent = false)
       "context.data"
     );
 
+    logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY)
     const model = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     let vectorStore;
-
+    logger.info("Vector store path: " + VECTOR_STORE_PATH)
     if (fs.existsSync(VECTOR_STORE_PATH)) {
       logger.info("Vector exists..");
       vectorStore = await FaissStore.load(
