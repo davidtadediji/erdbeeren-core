@@ -10,9 +10,9 @@ const updateConversationTimestamp = async (conversationId) => {
   });
 };
 
-const createNewConversation = async (phoneNumber) => {
+const createNewConversation = async (phoneNumber, type) => {
   return await prisma.conversation.create({
-    data: { participantSid: phoneNumber },
+    data: { participantSid: phoneNumber, type },
   });
 };
 

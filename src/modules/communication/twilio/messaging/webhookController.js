@@ -22,57 +22,74 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 const client = twilio(accountSid, authToken);
 
 const webhookController = async (req, res) => {
-  logger.info("Message webhook triggered: " + JSON.stringify(req.body, null, 2));
+  logger.info(
+    "Message webhook triggered: " + JSON.stringify(req.body, null, 2)
+  );
 
   try {
     const { From: phoneNumber, Body: messageContent } = req.body;
+
+    // Identify the message source (SMS or WhatsApp) based on the 'From' field format
+    const isWhatsApp = phoneNumber.startsWith("whatsapp:");
 
     // Check if there's an existing conversation with this phone number
     let conversation = await prisma.conversation.findFirst({
       where: { participantSid: phoneNumber },
     });
 
-    logger.info("Conversation found")
+    logger.info("Conversation found");
 
     if (!conversation) {
       // Create a new conversation if not found
-      conversation = await createNewConversation(phoneNumber);
+      conversation = await createNewConversation(phoneNumber, isWhatsApp ? "whatsapp": "sms");
     } else {
       // Update the last updated timestamp for an existing conversation
       await updateConversationTimestamp(conversation.id);
     }
 
-    logger.info("Conversation created or updated")
+    logger.info("Conversation created or updated");
 
     // Save the incoming message to the conversation
     await saveMessageToConversation(
       conversation.id,
-      "customer", // Assuming the customer is always the sender
+      "customer", // Use different identifier for WhatsApp messages
       messageContent
     );
-    logger.info("New message created")
+    logger.info("New message created");
 
     const previousMessages = await getConversationThread(conversation.id);
 
-    logger.info("Previous messages: ", previousMessages)
+    logger.info("Previous messages: ", previousMessages);
+
     // Respond to the message using the context service
     const response = await respondToMessage(
       messageContent,
       previousMessages,
-      true
+      true,
+      isWhatsApp
     );
 
     // Your logic to send the response back to the user using Twilio
-    await client.messages.create({
-      body: response.res, // Assuming the response is a string, adjust accordingly
-      from: twilioPhoneNumber,
-      to: phoneNumber,
-    });
+    if (isWhatsApp) {
+      // Send response in WhatsApp format
+      await client.messages.create({
+        body: response.res,
+        from: "whatsapp:" + twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    } else {
+      // Send response in SMS format
+      await client.messages.create({
+        body: response.res,
+        from: twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    }
 
     // Create a new message in the conversation as the agent
     await saveMessageToConversation(
       conversation.id,
-      "agent", // Assuming the agent is the sender
+       "agent", // Use different identifier for WhatsApp messages
       response.res // Assuming the response is the content of the agent's message
     );
 

@@ -21,6 +21,7 @@ model User {
 model Conversation {
   id              String       @id @default(uuid())
   participantSid  String
+  type            String?
   metadata        Json?
   createdAt       DateTime     @default(now())
   lastUpdatedAt       DateTime     @updatedAt
