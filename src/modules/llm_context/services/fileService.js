@@ -9,7 +9,7 @@ const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
 logger.info("File service dir: " + currentModuleDir);
 
-const FILE_UPLOAD_PATH = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', 'context'); // Adjust the path as needed
+const FILE_UPLOAD_PATH = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', 'repository'); // Adjust the path as needed
 
 logger.info("File upload path: " + FILE_UPLOAD_PATH)
 // Ensure the upload directory exists

@@ -3,7 +3,7 @@ node_modules/
 
 config/*
 
-src/modules/llm_context/context/*
+src/modules/llm_context/repository/*
 src/modules/llm_context/index/*
 
 

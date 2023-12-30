@@ -16,10 +16,17 @@ logger.info("Context service dir: " + currentModuleDir);
 
 currentModuleDir = currentModuleDir.replace(/^\/([A-Z]:)/, "$1");
 
+const VECTOR_STORE_PATH = path.join(
+  currentModuleDir,
+  "..",
+  "index",
+  "context.index"
+); // Adjust the path as needed
+
 // Function to generate the vector store
 const generateVectorStore = async () => {
   try {
-    const CONTEXT_FOLDER_PATH = path.join(currentModuleDir, "..", "context");
+    const CONTEXT_FOLDER_PATH = path.join(currentModuleDir, "..", "repository");
 
     logger.info("Context File Path: " + CONTEXT_FOLDER_PATH);
 
@@ -37,13 +44,7 @@ const generateVectorStore = async () => {
 
     const combinedText = texts.join(" ");
 
-    const VECTOR_STORE_PATH = path.join(
-      currentModuleDir,
-      "..",
-      "index",
-      "context.data"
-    ); // Adjust the path as needed
-
+ 
     logger.info("Vector store path: " + VECTOR_STORE_PATH);
 
     await fs.promises.mkdir(path.dirname(VECTOR_STORE_PATH), {
@@ -73,13 +74,7 @@ const generateVectorStore = async () => {
 // Function to respond to a message using the generated vector store
 const respondToMessage = async (message, previousMessages = [], isAgent = false) => {
   try {
-    const VECTOR_STORE_PATH = path.join(
-      currentModuleDir,
-      "..",
-      "index",
-      "context.data"
-    );
-
+ 
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY)
     const model = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
