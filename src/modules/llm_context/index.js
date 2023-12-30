@@ -1,4 +1,5 @@
 // src\modules\llm_context\index.js
+
 import express from 'express';
 import fileRoutes from './routes/fileRoutes.js';
 import contextRoutes from "./routes/contextRoutes.js";
@@ -10,9 +11,10 @@ import logger from "../../../logger.js";
 dotenv.config();
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cors());
 
 logger.info("Port: " + process.env.PORT)
@@ -29,12 +31,9 @@ process.on('uncaughtException', (error) => {
   process.exit(1); // Terminate the application
 });
 
-app.use('/files', fileRoutes);
+// Routes
+app.use('/repository', fileRoutes);
 app.use('/context', contextRoutes);
 app.use(errorMiddleware); // Use the error handling middleware
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-
+export default app;

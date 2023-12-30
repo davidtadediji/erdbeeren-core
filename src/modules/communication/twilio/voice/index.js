@@ -1,10 +1,11 @@
-// index.js
-import express from "express";
-import http from "http";
-import logger from "../../../../../logger.js";
-import routes from "./routes/callRoutes.js";
-import { setupWebSocketServer } from "./websocket.js";
-import { generateResponse } from "./services/gptService.js";
+// src\modules\communication\twilio\voice\index.js
+
+import express from 'express';
+import http from 'http';
+import logger from '../../../../../logger.js';
+import routes from './routes/callRoutes.js';
+import { setupWebSocketServer } from './websocket.js';
+import { generateResponse } from './services/gptService.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -16,10 +17,11 @@ const gptResponseGenerator = generateResponse;
 setupWebSocketServer(server, gptResponseGenerator);
 
 // Use routes from the 'routes' module
-app.use("/call", routes);
+app.use('/call', routes);
 
-logger.info("Listening at Port 8080");
-server.listen(8080);
+
+// Export both the Express app and the HTTP server
+export { app, server };
 
 
 

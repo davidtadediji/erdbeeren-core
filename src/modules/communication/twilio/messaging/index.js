@@ -1,19 +1,16 @@
 // src\modules\communication\twilio\messaging\index.js
+
 import express from 'express';
 import webhook from './webhook.js';
-import logger from "../../../../../logger.js"
+import logger from "../../../../../logger.js";
 
 const app = express();
 
+// Middleware
 app.use(express.json());
-
-// Parse URL-encoded bodies (for form data)
 app.use(express.urlencoded({ extended: true }));
 
-// Use the routes
-app.use('/message-webhook', webhook);
+// Routes
+app.use('/webhook', webhook);
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+export default app;
