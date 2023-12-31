@@ -4,7 +4,8 @@ node_modules/
 config/*
 
 src/modules/llm_context/repository/*
-src/modules/llm_context/index/*
+src/modules/llm_context/enterprise_index/*
+src/modules/llm_context/customer_index/*
 
 
 # Prisma
