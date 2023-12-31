@@ -1,6 +1,6 @@
 // src\modules\communication\twilio\messaging\webhookController.js
 import twilio from "twilio";
-import { respondToMessage } from "../../../../llm_context/services/contextService.js"; // Replace with the actual path
+import { generateCustomerVectorStore, respondToMessage } from "../../../../llm_context/services/contextService.js"; // Replace with the actual path
 import dotenv from "dotenv";
 import {
   updateConversationTimestamp,
@@ -64,7 +64,6 @@ const webhookController = async (req, res) => {
     // Respond to the message using the context service
     const response = await respondToMessage(
       messageContent,
-      previousMessages,
       true,
       isWhatsApp
     );
@@ -92,6 +91,8 @@ const webhookController = async (req, res) => {
        "agent", // Use different identifier for WhatsApp messages
       response.res // Assuming the response is the content of the agent's message
     );
+
+    await generateCustomerVectorStore(conversation.participantSid, [message, response]);
 
     res.status(200).send("Message received and responded successfully");
   } catch (error) {
