@@ -4,7 +4,7 @@ import express from 'express';
 import fileRoutes from './routes/fileRoutes.js';
 import contextRoutes from "./routes/contextRoutes.js";
 import cors from 'cors';
-import errorMiddleware from './middleware/errorMiddleware.js';
+import errorMiddleware from './middlewares/errorMiddleware.js';
 import dotenv from "dotenv";
 import logger from "../../../logger.js";
 
@@ -18,7 +18,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 logger.info("Port: " + process.env.PORT)
-const PORT = process.env.PORT || 3000;
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);

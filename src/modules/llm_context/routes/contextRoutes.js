@@ -13,7 +13,22 @@ router.post('/generate', async (req, res, next) => {
     }
 });
 
-router.post('/message', async (req, res, next) => {
+
+const messageValidation = (req, res, next) => {
+    const schema = Joi.object({
+      message: Joi.string().required(),
+    });
+  
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+  
+    next();
+  };
+
+  
+router.post('/message', messageValidation, async (req, res, next) => {
     try {
         const reply = await respondToMessage(req.body.message);
         res.json({reply});

@@ -1,11 +1,12 @@
 // src/routes/broadcastRoute.js
 import express from 'express';
 import { broadcastMessage } from '../controllers/broadcastController.js';
+import { validateTwilioBroadcast } from '../middlewares/validationMiddleware.js';
 
 const router = express.Router();
 
 // Broadcast message to all conversations
-router.post('/', async (req, res) => {
+router.post('/', validateTwilioBroadcast, async (req, res) => {
   const { content } = req.body;
 
   try {

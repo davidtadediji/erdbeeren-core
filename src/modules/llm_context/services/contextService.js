@@ -44,7 +44,7 @@ const generateEnterpriseVectorStore = async () => {
 
     const combinedText = texts.join(" ");
 
-    logger.info("Enterprise ector store path: " + ENTERPRISE_VECTOR_STORE_PATH);
+    logger.info("Enterprise vector store path: " + ENTERPRISE_VECTOR_STORE_PATH);
 
     await fs.promises.mkdir(path.dirname(ENTERPRISE_VECTOR_STORE_PATH), {
       recursive: true,

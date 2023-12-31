@@ -20,12 +20,13 @@ export const readConfigFile = () => {
       logger.info("Config file content: " + configFileContent);
       return JSON.parse(configFileContent);
     } else {
-      logger.error("File path is not recognized.")
-      return {};
+      const error = new Error('File path is not recognized.');
+      logger.error(error.message);
+      throw error;
     }
   } catch (error) {
     logger.error('Error reading configuration file:', error);
-    return {};
+    throw error;
   }
 };
 
@@ -35,7 +36,8 @@ export const writeConfigFile = (configData) => {
     fs.writeFileSync(configFilePath, JSON.stringify(configData, null, 2), 'utf8');
     logger.info('Configuration file has been successfully updated.');
   } catch (error) {
-    console.error('Error writing configuration file:', error);
+    logger.error('Error writing configuration file:', error);
+    throw error;
   }
 };
 
@@ -44,7 +46,6 @@ export const setEnterpriseDetails = ({ name, industry, location, contactEmail, c
 
   const existingConfig = readConfigFile();
 
-  logger.info("Read existing config file: " + JSON.stringify(existingConfig,  null, 2))
 
   // Update the properties directly
   existingConfig.name = name || existingConfig.name;
@@ -64,6 +65,5 @@ export const getEnterpriseDetails = () => {
   logger.info("Get config file triggered.")
 
   const configData = readConfigFile();
-  logger.info("config file: " + JSON.stringify(configData, null, 2))
   return configData || {};
 };
