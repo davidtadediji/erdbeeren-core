@@ -1,17 +1,25 @@
-// src\modules\llm_context\routes\contextRoutes.js
+// Import necessary modules and middlewares
 import express from 'express';
 import { generateEnterpriseVectorStore, respondToMessage } from '../services/contextService.js';
+import Joi from "joi";
+import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
+import { ROLES } from "../../authentication/config/roles.js";
 
 const router = express.Router();
 
-router.post('/generate', async (req, res, next) => {
+router.post(
+  '/generate',
+  authenticateJWT, // Ensure the user is authenticated
+  hasPermission([ROLES.ADMIN]), // Ensure the user has the 'admin' role
+  async (req, res, next) => {
     try {
-        await generateEnterpriseVectorStore();
-        res.status(200).json({ success: true, message: 'Vector store generated successfully.' });
+      await generateEnterpriseVectorStore();
+      res.status(200).json({ success: true, message: 'Vector store generated successfully.' });
     } catch (error) {
-        next(error); // Pass the error to the error handling middleware
+      next(error); // Pass the error to the error handling middleware
     }
-});
+  }
+);
 
 
 const messageValidation = (req, res, next) => {

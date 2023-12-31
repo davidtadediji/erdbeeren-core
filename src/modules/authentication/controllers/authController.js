@@ -49,13 +49,16 @@ export const login = async (req, res, next) => {
     }
 
     // If verified, generate a token for authentication
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    );
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role, // Assuming the user object has a 'role' property
+    };
+    
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    
 
     return res.json({ message: "Authentication successful", token, user });
   } catch (error) {

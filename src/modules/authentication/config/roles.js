@@ -6,9 +6,9 @@ const ROLES = {
   };
   
   const ROLE_PERMISSIONS = {
-    [ROLES.ADMIN]: ['viewProfile', 'manageUsers', 'manageSettings', 'viewAdminDashboard'],
-    [ROLES.MONITOR]: ['viewProfile','viewMonitorDashboard', 'viewReports'],
-    [ROLES.AGENT]: ['viewProfile','viewAgentDashboard', 'submitRequests'],
+    [ROLES.ADMIN]: ['manageUsers', 'manageConfiguration', 'viewAdminDashboard'],
+    [ROLES.MONITOR]: ['viewMonitorDashboard', 'viewReports'],
+    [ROLES.AGENT]: ['viewAgentDashboard', 'submitRequests'],
   };
   
   export { ROLES, ROLE_PERMISSIONS };

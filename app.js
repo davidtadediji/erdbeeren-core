@@ -22,7 +22,7 @@ app.use("/api/enterprise", enterpriseConfigModule);
 app.use("/api/llm", llmContextModule);
 
 // Use middleware/routes from the authentication module with /api/auth prefix
-app.use("/api/auth", authenticationModule);
+app.use("/api/authentication", authenticationModule);
 
 // Use middleware/routes from the twilio messaging module with /api/communication/twilio/messaging prefix
 app.use("/api/twilio/messaging", twilioMessagingModule);
