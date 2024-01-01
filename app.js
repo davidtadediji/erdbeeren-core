@@ -6,6 +6,8 @@ import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
+import dotenv from "dotenv"
+dotenv.config()
 import {
   app as twilioVoiceApp,
   server as twilioVoiceServer,
@@ -14,6 +16,30 @@ import logger from "./logger.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Perform cleanup tasks or handle the error gracefully
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error.message);
+  // Perform cleanup tasks or handle the error gracefully
+  gracefulShutdown();
+});
+
+// Graceful shutdown function
+const gracefulShutdown = async () => {
+  // Close the Prisma client connection (replace this with your actual Prisma cleanup logic)
+  await prisma.$disconnect();
+
+  // Log a message indicating the cleanup is complete
+  logger.info('Graceful shutdown complete');
+
+  // Allow the process to exit naturally
+  process.exit(1);
+};
 
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);
