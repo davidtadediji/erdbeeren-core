@@ -2,6 +2,7 @@
 
 import express from "express";
 import http from "http";
+import analyticsModule from  "./src/modules/analytics/index.js"
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
 import authenticationModule from "./src/modules/authentication/index.js";
@@ -41,6 +42,7 @@ const gracefulShutdown = async () => {
   process.exit(1);
 };
 
+app.use("/api/analytics", analyticsModule)
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);
 
