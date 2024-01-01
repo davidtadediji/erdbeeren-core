@@ -17,14 +17,19 @@ model User {
   isVerified       Boolean    @default(false)
 }
 
-
 model Conversation {
   id              String       @id @default(uuid())
   participantSid  String
   type            String?
-  metadata        Json?
+  avgAgentRes     Float?
+  avgCustomerRes  Float?
+  rating          Int?         // Feedback rating (number rating/5)
+  profile         Json?        // Customer profile details
+  duration        Int?         // Total duration of the conversation in seconds or minutes
+  length          Int?         // Total number of messages
+  sentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
   createdAt       DateTime     @default(now())
-  lastUpdatedAt       DateTime     @updatedAt
+  lastUpdatedAt   DateTime     @updatedAt
   messages        Message[]
 }
 
@@ -37,6 +42,12 @@ model Message {
   sentAt          DateTime     @default(now())
   deliveredAt     DateTime?
   seenAt          DateTime?
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
 }
 
 
