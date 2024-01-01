@@ -1,7 +1,7 @@
 # Dependency directories
 node_modules/
 
-config/*
+json_store/*
 
 src/modules/llm_context/repository/*
 src/modules/llm_context/enterprise_index/*

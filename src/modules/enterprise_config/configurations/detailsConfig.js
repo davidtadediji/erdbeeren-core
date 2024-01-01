@@ -8,7 +8,7 @@ const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
 logger.info("dir:" + currentModuleDir);
 
-const configFilePath = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', '..', '..', '..', 'config', 'details.json');
+const configFilePath = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', '..', '..', '..', 'json_store', 'master.json');
 
 logger.info("Config file path: " + configFilePath)
 
