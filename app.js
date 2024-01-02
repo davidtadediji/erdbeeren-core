@@ -22,12 +22,12 @@ const port = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection at:' + promise + 'reason:' + reason);
   // Perform cleanup tasks or handle the error gracefully
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error.message);
+  logger.error('Uncaught Exception:'+ error.message);
   // Perform cleanup tasks or handle the error gracefully
   gracefulShutdown();
 });

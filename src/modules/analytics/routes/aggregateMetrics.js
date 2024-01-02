@@ -1,67 +1,127 @@
-// src\modules\analytics\routes\aggregateMetrics.js
 import express from 'express';
+import fs from 'fs/promises';
+import logger from '../../../../logger.js';
+import path from 'path';
+
+const currentModuleURL = new URL(import.meta.url);
+const currentModuleDir = path.dirname(currentModuleURL.pathname);
+
+logger.info("dir:" + currentModuleDir);
+
+const metricsFilePath = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', '..', '..', '..', 'json_store', 'metrics.json');
+
+logger.info("Metrics file path: " + metricsFilePath)
+
 const router = express.Router();
 
-// // Example route for Customer Satisfaction Trend Analysis
-router.get('/customer-satisfaction-trend', (req, res) => {
-  // Implement logic to fetch and return satisfaction ratings over time
-  // and factors influencing high and low satisfaction scores
-  res.json({ metric: 'Customer Satisfaction Trend Analysis' });
+router.get('/customer-satisfaction-trend', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const customerSatisfactionData = metrics.customerSatisfaction;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'Customer Satisfaction Trend Analysis', data: customerSatisfactionData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+  }
 });
 
-// Example route for Average Conversation Duration Analysis
-router.get('/average-conversation-duration', (req, res) => {
-  // Implement logic to fetch and return average duration for each type of inquiry
-  // and identification of outliers in conversation duration
-  res.json({ metric: 'Average Conversation Duration Analysis' });
+router.get('/average-conversation-duration', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const avgConversationDurationData = metrics.averageConversationDuration;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'Average Conversation Duration Analysis', data: avgConversationDurationData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+
+  }
 });
 
-// Example route for Response Time Trend Analysis
-router.get('/response-time-trend', (req, res) => {
-  // Implement logic to fetch and return average response times over time
-  // and identification of bottlenecks in response times
-  res.json({ metric: 'Response Time Trend Analysis' });
+router.get('/response-time-trend', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const responseTimeTrendData = metrics.responseTimeTrend;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'Response Time Trend Analysis', data: responseTimeTrendData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+
+  }
 });
 
-// Example route for Demographic Customer Analysis
-router.get('/demographic-customer-analysis', (req, res) => {
-  // Implement logic to fetch and return analysis of customer profiles
-  // and personalization strategies based on demographics
-  res.json({ metric: 'Demographic Customer Analysis' });
+router.get('/demographic-customer-analysis', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const demographicCustomerData = metrics.demographicCustomerAnalysis;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'Demographic Customer Analysis', data: demographicCustomerData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+
+  }
 });
 
-// Example route for High-Frequency Customer Identification
-router.get('/high-frequency-customer-identification', (req, res) => {
-  // Implement logic to fetch and return identification of customers with high interaction frequency
-  // and analysis of trends in interaction frequency
-  res.json({ metric: 'High-Frequency Customer Identification' });
+router.get('/high-frequency-customer-identification', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const highFrequencyCustomerData = metrics.highFrequencyCustomerIdentification;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'High-Frequency Customer Identification', data: highFrequencyCustomerData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+
+  }
 });
 
-// Example route for Overall Sentiment Trend Analysis
-router.get('/overall-sentiment-trend', (req, res) => {
-  // Implement logic to fetch and return sentiment trends over time
-  // and correlation between sentiment and other metrics
-  res.json({ metric: 'Overall Sentiment Trend Analysis' });
+router.get('/overall-sentiment-trend', async (req, res, next) => {
+  try {
+    const metricsData = await fs.readFile(metricsFilePath, 'utf-8');
+    const metrics = JSON.parse(metricsData);
+    const overallSentimentTrendData = metrics.overallSentimentTrend;
+
+    // Implement your logic to process the data as needed
+
+    res.json({ metric: 'Overall Sentiment Trend Analysis', data: overallSentimentTrendData });
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+
+  }
 });
 
 export default router;
 
+
 // // Example route for Agent-Specific Performance Analysis
-// router.get('/agent-performance-analysis', (req, res) => {
+// router.get('/agent-performance-analysis', (req, res, next) => {
 //   // Implement logic to fetch and return individual agent satisfaction ratings
 //   // and feedback comments and suggestions for each agent
 //   res.json({ metric: 'Agent-Specific Performance Analysis' });
 // });
 
 // // Example route for Common Issues Resolution Analysis
-// router.get('/common-issues-resolution-analysis', (req, res) => {
+// router.get('/common-issues-resolution-analysis', (req, res, next) => {
 //   // Implement logic to fetch and return resolution rate trend analysis
 //   // and breakdown of resolution status by issue type
 //   res.json({ metric: 'Common Issues Resolution Analysis' });
 // });
 
 // // Example route for Inquiry Type Distribution Analysis
-// router.get('/inquiry-type-distribution', (req, res) => {
+// router.get('/inquiry-type-distribution', (req, res, next) => {
 //   // Implement logic to fetch and return distribution of conversation types
 //   // and resolution rate comparison across different inquiry types
 //   res.json({ metric: 'Inquiry Type Distribution Analysis' });

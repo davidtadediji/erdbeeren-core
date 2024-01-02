@@ -5,7 +5,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "concurrently \"node src/modules/analytics_engine/messageConsumer.js\" \"node app.js\"",
+    "start": "concurrently \"nodemon src/modules/analytics_engine/messageConsumer.js\" \"nodemon app.js\"",
     "test": "jest"
   },
   "keywords": [],
