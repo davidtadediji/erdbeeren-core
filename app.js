@@ -1,23 +1,25 @@
 // app.js
 
+import { PrismaClient } from '@prisma/client';
+import dotenv from "dotenv";
 import express from "express";
 import http from "http";
-import analyticsModule from  "./src/modules/analytics/index.js"
-import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
-import llmContextModule from "./src/modules/llm_context/index.js";
+import logger from "./logger.js";
+import analyticsModule from "./src/modules/analytics/index.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
-import dotenv from "dotenv"
-dotenv.config()
 import {
   app as twilioVoiceApp,
   server as twilioVoiceServer,
 } from "./src/modules/communication/twilio/voice/index.js";
-import logger from "./logger.js";
+import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
+import llmContextModule from "./src/modules/llm_context/index.js";
+dotenv.config()
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const prisma = new PrismaClient();
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
