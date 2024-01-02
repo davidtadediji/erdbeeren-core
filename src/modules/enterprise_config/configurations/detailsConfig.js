@@ -1,69 +1,86 @@
-// src\modules\enterprise_config\configurations\detailsConfig.js
-import fs from 'fs';
-import logger from '../../../../logger.js';
-import path from 'path';
+import fs from "fs/promises"; // Import the promise-based version of fs
+import logger from "../../../../logger.js";
+import path from "path";
 
 const currentModuleURL = new URL(import.meta.url);
 const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
 logger.info("dir:" + currentModuleDir);
 
-const configFilePath = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', '..', '..', '..', 'json_store', 'master.json');
+const configFilePath = path.join(
+  currentModuleDir.replace(/^\/([A-Z]:)/, "$1"),
+  "..",
+  "..",
+  "..",
+  "..",
+  "json_store",
+  "master.json"
+);
 
-logger.info("Config file path: " + configFilePath)
+logger.info("Config file path: " + configFilePath);
 
-export const readConfigFile = () => {
-  logger.info("Read config file triggered.")
+export const readConfigFile = async () => {
+  logger.info("Read config file triggered.");
   try {
-    if (fs.existsSync(configFilePath)) {
-      const configFileContent = fs.readFileSync(configFilePath, 'utf8');
-      logger.info("Config file content: " + configFileContent);
-      return JSON.parse(configFileContent);
-    } else {
-      const error = new Error('File path is not recognized.');
-      logger.error(error.message);
-      throw error;
-    }
+    const configFileContent = await fs.readFile(configFilePath, "utf8");
+    logger.info("Config file content: " + configFileContent);
+    return JSON.parse(configFileContent);
   } catch (error) {
-    logger.error('Error reading configuration file:', error);
     throw error;
   }
 };
 
-export const writeConfigFile = (configData) => {
-  logger.info("Write config file triggered.")
+export const writeConfigFile = async (configData) => {
+  logger.info("Write config file triggered.");
   try {
-    fs.writeFileSync(configFilePath, JSON.stringify(configData, null, 2), 'utf8');
-    logger.info('Configuration file has been successfully updated.');
+    await fs.writeFile(
+      configFilePath,
+      JSON.stringify(configData, null, 2),
+      "utf8"
+    );
+    logger.info("Configuration file has been successfully updated.");
   } catch (error) {
-    logger.error('Error writing configuration file:', error);
     throw error;
   }
 };
 
-export const setEnterpriseDetails = ({ name, industry, location, contactEmail, customSettings }) => {
+export const setEnterpriseDetails = async ({
+  name,
+  industry,
+  location,
+  contactEmail,
+  customSettings,
+}) => {
   logger.info("Set config file triggered: " + name);
+  try {
+    const existingConfig = await readConfigFile();
 
-  const existingConfig = readConfigFile();
+    // Update the properties directly
+    existingConfig.name = name || existingConfig.name;
+    existingConfig.industry = industry || existingConfig.industry;
+    existingConfig.location = location || existingConfig.location;
+    existingConfig.contactEmail = contactEmail || existingConfig.contactEmail;
+    existingConfig.customSettings = {
+      ...existingConfig.customSettings,
+      ...customSettings,
+    };
 
+    // Write the updated configuration to the file
+    await writeConfigFile(existingConfig);
 
-  // Update the properties directly
-  existingConfig.name = name || existingConfig.name;
-  existingConfig.industry = industry || existingConfig.industry;
-  existingConfig.location = location || existingConfig.location;
-  existingConfig.contactEmail = contactEmail || existingConfig.contactEmail;
-  existingConfig.customSettings = { ...existingConfig.customSettings, ...customSettings };
-
-  // Write the updated configuration to the file
-  writeConfigFile(existingConfig);
-
-  return readConfigFile();
+    return await readConfigFile();
+  } catch (error) {
+    throw error; // This will propagate the error to the error handling middleware
+  }
 };
 
+export const getEnterpriseDetails = async () => {
+  logger.info("Get config file triggered.");
 
-export const getEnterpriseDetails = () => {
-  logger.info("Get config file triggered.")
-
-  const configData = readConfigFile();
-  return configData || {};
+  try {
+    const configData = await readConfigFile();
+    return configData || {};
+  } catch (error) {
+    throw error; // This will propagate the error to the error handling middleware
+  }
 };

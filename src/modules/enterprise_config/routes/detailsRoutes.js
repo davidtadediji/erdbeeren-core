@@ -18,7 +18,7 @@ router.post(
   async (req, res, next) => {
     try {
       logger.info("Body: ", req.body);
-      const details = enterpriseConfig.setEnterpriseDetails(req.body);
+      const details = await enterpriseConfig.setEnterpriseDetails(req.body);
       res.json({ message: "Enterprise details updated successfully", details });
     } catch (error) {
       next(error); // Pass the error to the error handling middleware
@@ -28,7 +28,7 @@ router.post(
 
 router.get("/getEnterpriseDetails", async (req, res, next) => {
   try {
-    const details = enterpriseConfig.getEnterpriseDetails();
+    const details = await enterpriseConfig.getEnterpriseDetails();
     res.json(details);
   } catch (error) {
     next(error); // Pass the error to the error handling middleware
