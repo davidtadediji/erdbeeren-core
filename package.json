@@ -16,6 +16,7 @@
     "@babel/preset-env": "^7.23.6",
     "babel-jest": "^29.7.0",
     "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2",
     "prisma": "^5.7.1"
   },
   "jest": {
