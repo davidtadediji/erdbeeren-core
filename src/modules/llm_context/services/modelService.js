@@ -1,7 +1,10 @@
 // src\modules\llm_context\services\modelService.js
+import { PromptTemplate } from "@langchain/core/prompts"; // Import PromptTemplate
+import { RunnableSequence } from "@langchain/core/runnables";
 import { RetrievalQAChain } from "langchain/chains";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { OpenAI } from "langchain/llms/openai";
+import { StructuredOutputParser } from "langchain/output_parsers";
 import path from "path";
 import logger from "../../../../logger.js";
 import { getEnterpriseVectorStorePath } from "../util/contextFilePathsUtil.js";
@@ -15,6 +18,7 @@ logger.info("Model Service dir: " + currentModuleDir);
 
 currentModuleDir = currentModuleDir.replace(/^\/([A-Z]:)/, "$1");
 
+// Create a PromptTemplate with placeholders for context and message
 const respondToMessage = async (message, customersSid, isAgent = false) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
@@ -33,17 +37,25 @@ const respondToMessage = async (message, customersSid, isAgent = false) => {
 
     logger.info("Gotten customer vector store");
 
-    // If customer-specific vector store exists, merge it with the general vector store
+    // Merge customer-specific vector store if available
     if (customerVectorStore) {
       generalVectorStore.merge_from(customerVectorStore);
     }
 
-    // Add context information, like "You are an agent" and title like "Previous Messages:"
-    const contextMessage = [
-      isAgent ? "You are a customer service agent." : "",
-      "Current Message:",
+    // Prepare context information
+    const context = isAgent ? "You are a customer service agent." : "";
+
+    // Create a PromptTemplate with placeholders for context and message
+    const promptTemplate = PromptTemplate.fromTemplate(
+      `{context}
+      Reply to Customer Message: {message}`
+    );
+
+    // Format the prompt with placeholders
+    const formattedPrompt = await promptTemplate.format({
+      context,
       message,
-    ].join(" ");
+    });
 
     const chain = RetrievalQAChain.fromLLM(
       model,
@@ -51,7 +63,7 @@ const respondToMessage = async (message, customersSid, isAgent = false) => {
     );
 
     const res = await chain.call({
-      query: contextMessage,
+      query: formattedPrompt,
     });
 
     return { res };
@@ -60,4 +72,49 @@ const respondToMessage = async (message, customersSid, isAgent = false) => {
   }
 };
 
-export { respondToMessage };
+const customerProfiling = async (message) => {
+  try {
+    logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
+
+    const parser = StructuredOutputParser.fromNamesAndDescriptions({
+      name: "name of the customer",
+      location: "location of the customer",
+      age: "age of the customer",
+    });
+
+    const parameterNames = Object.keys(parser.schema);
+
+    const promptTemplate = PromptTemplate.fromTemplate(
+      `Extract the following information from the message (if available):\n{format_instructions}\n{message}\nQuestion:\nWhat are ${parameterNames.join(
+        ", "
+      )} of the customer having the message?`
+    );
+
+    const chain = RunnableSequence.from([
+      promptTemplate,
+      new OpenAI({ apiKey: process.env.OPENAI_API_KEY, temperature: 0 }),
+      parser,
+    ]);
+
+
+    const response = await chain.invoke({
+      message,
+      format_instructions: parser.getFormatInstructions(),
+    });
+
+    const userInfo = {};
+
+    for (const [key, value] of Object.entries(response)) {
+      if (value) {
+        userInfo[key] = value;
+      }
+    }
+
+    return userInfo;
+  } catch (error) {
+    logger.error("Error during customer profiling: " + error);
+    throw error;
+  }
+};
+
+export { customerProfiling, respondToMessage };

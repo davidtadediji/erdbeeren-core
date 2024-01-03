@@ -14,7 +14,7 @@ eventEmitter.on('newMessageCreated', (message) => {
 eventEmitter.on('customerResponded', (message) => {
   sendMessageToQueue('customerProfileQueue', 'customerResponded', message);
   sendMessageToQueue('customerResponseTimeQueue', 'customerResponded', message);
-  sendMessageToQueue('sentimentAnalysisQueue', 'interactionTurnCompleted', message);
+  sendMessageToQueue('sentimentAnalysisQueue', 'customerResponded', message);
 
 });
 

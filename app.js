@@ -44,6 +44,7 @@ const gracefulShutdown = async () => {
   // Allow the process to exit naturally
   process.exit(1);
 };
+
  // Emit the newMessageCreated event
  logger.info("About to emit newMessageCreated event");
  eventEmitter.emit("newMessageCreated", "675fb465-58e7-4719-90eb-0a4f24278bb3");

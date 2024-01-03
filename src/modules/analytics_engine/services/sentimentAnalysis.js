@@ -5,7 +5,8 @@ import logger from "../../../../logger.js";
 const prisma = new PrismaClient();
 
 export async function handleSentimentAnalysis(data) {
-  logger.info("Handle sentiment analysis triggered.");
+  logger.info("Handle sentiment analysis triggered: " + data);
+  
   const messageId = data[1];
   const message = await prisma.message.findUnique({
     where: { id: messageId },
@@ -18,7 +19,6 @@ export async function handleSentimentAnalysis(data) {
   }
 
   const text = encodeURIComponent(message.content);
-
   try {
     const response = await axios.post(
       "https://api.twinword.com/api/sentiment/analyze/latest/",
