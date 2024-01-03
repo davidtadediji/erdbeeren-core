@@ -41,10 +41,6 @@ export async function handleSentimentAnalysis(data) {
     const data = response.data;
     logger.info("Sentiment Analysis result: " + messageId, data);
 
-    if(!data.type || !data.score){
-      logger.error("Exceeded quota limit.")
-    }
-
     // Update the Message model with sentiment analysis results
     await prisma.message.update({
       where: { id: messageId },
