@@ -1,12 +1,14 @@
 // src\modules\analyticsEngine\eventListener.js
 import eventEmitter from './eventEmitter.js';
 import messageQueue from './messageQueue.js';
+import logger from "../../../logger.js"
 
 eventEmitter.on('interactionTurnCompleted', (message) => {
   sendMessageToQueue('sentimentAnalysisQueue', 'interactionTurnCompleted', message);
 });
 
 eventEmitter.on('newMessageCreated', (message) => {
+  logger.info("New message created listened.")
   sendMessageToQueue('frequencyOfInteractionsQueue', 'newMessageCreated', message);
   sendMessageToQueue('conversationDurationQueue', 'newMessageCreated', message);
   // Add other queues as needed
@@ -14,10 +16,12 @@ eventEmitter.on('newMessageCreated', (message) => {
 
 eventEmitter.on('customerResponded', (message) => {
   sendMessageToQueue('customerProfileQueue', 'customerResponded', message);
+  sendMessageToQueue('customerResponseTimeQueue', 'customerResponded', message);
+
 });
 
 eventEmitter.on('agentResponded', (message) => {
-  sendMessageToQueue('responseTimeMetricsQueue', 'agentResponded', message);
+  sendMessageToQueue('agentResponseTimeQueue', 'agentResponded', message);
 });
 
 eventEmitter.on('interactionEnded', (message) => {

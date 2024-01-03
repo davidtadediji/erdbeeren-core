@@ -3,9 +3,9 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
 import express from "express";
-import http from "http";
 import logger from "./logger.js";
 import analyticsModule from "./src/modules/analytics/index.js";
+import "./src/modules/analytics_engine/eventListener.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
 import {
@@ -44,6 +44,7 @@ const gracefulShutdown = async () => {
   process.exit(1);
 };
 
+   
 app.use("/api/analytics", analyticsModule)
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);

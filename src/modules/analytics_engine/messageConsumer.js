@@ -1,7 +1,10 @@
 // src\modules\analyticsEngine\messageConsumer.js
 import amqp from 'amqplib';
-import * as AnalyticsService from './analyticsService.js';
 import logger from '../../../logger.js';
+import { handleConversationDuration, handleFeedback, handleFrequencyOfInteractions } from "./services/basicMetrics.js";
+import { handleCustomerProfile } from "./services/customerProfile.js";
+import { handleAgentResponseTime, handleCustomerResponseTime } from "./services/responseTime.js";
+import { handleSentimentAnalysis } from './services/sentimentAnalysis.js';
 
 const QUEUE_URL = 'amqp://localhost'; // Replace with your RabbitMQ server URL
 
@@ -26,11 +29,12 @@ async function consumeMessage(queueName, callback) {
   }
 }
 
-consumeMessage('sentimentAnalysisQueue', AnalyticsService.handleSentimentAnalysis);
-consumeMessage('frequencyOfInteractionsQueue', AnalyticsService.handleFrequencyOfInteractions);
-consumeMessage('conversationDurationQueue', AnalyticsService.handleConversationDuration);
-consumeMessage('customerProfileQueue', AnalyticsService.handleCustomerProfile);
-consumeMessage('responseTimeMetricsQueue', AnalyticsService.handleResponseTimeMetrics);
-consumeMessage('feedbackQueue', AnalyticsService.handleFeedback);
+consumeMessage('sentimentAnalysisQueue', handleSentimentAnalysis);
+consumeMessage('frequencyOfInteractionsQueue', handleFrequencyOfInteractions);
+consumeMessage('conversationDurationQueue', handleConversationDuration);
+consumeMessage('customerProfileQueue', handleCustomerProfile);
+consumeMessage('agentResponseTimeQueue', handleAgentResponseTime);
+consumeMessage('customerResponseTimeQueue', handleCustomerResponseTime);
+consumeMessage('feedbackQueue', handleFeedback);
 
 // Run this file to start the consumers

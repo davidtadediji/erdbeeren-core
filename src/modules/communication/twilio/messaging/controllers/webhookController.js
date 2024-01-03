@@ -1,7 +1,7 @@
 // src\modules\communication\twilio\messaging\webhookController.js
 import twilio from "twilio";
 import { respondToMessage } from "../../../../llm_context/services/modelService.js"; // Replace with the actual path
-import {generateCustomerVectorStore} from "../../../../llm_context/services/customerContextService.js";
+import { generateCustomerVectorStore } from "../../../../llm_context/services/customerContextService.js";
 import dotenv from "dotenv";
 import {
   updateConversationTimestamp,
@@ -11,6 +11,7 @@ import {
 import { saveMessageToConversation } from "../services/messageService.js";
 import logger from "../../../../../../logger.js";
 import { PrismaClient } from "@prisma/client";
+import eventEmitter from "../../../../analytics_engine/eventEmitter.js";
 
 const prisma = new PrismaClient();
 
@@ -48,7 +49,7 @@ const webhookController = async (req, res) => {
       );
     } else {
       // Update the last updated timestamp for an existing conversation
-      await updateConversationTimestamp(conversation.id);
+      conversation = await updateConversationTimestamp(conversation.id);
     }
 
     logger.info("Conversation created or updated");
@@ -60,6 +61,22 @@ const webhookController = async (req, res) => {
       messageContent
     );
     logger.info("New message created");
+
+    // Emit the newMessageCreated event
+    logger.info("About to emit newMessageCreated event");
+    eventEmitter.emit("newMessageCreated", conversation.id);
+
+    
+    // Find appropriate places for the responded events later
+    // Emit the newMessageCreated event
+    logger.info("About to emit customerResponded event");
+    eventEmitter.emit("customerResponded", conversation.id);
+
+    
+    // Emit the newMessageCreated event
+    logger.info("About to emit agentResponded event");
+    eventEmitter.emit("agentResponded", conversation.id);
+
 
     const previousMessages = await getConversationThread(conversation.id);
 
@@ -96,9 +113,16 @@ const webhookController = async (req, res) => {
       response.res // Assuming the response is the content of the agent's message
     );
 
+    
+
+
+    // Emit the newMessageCreated event
+    logger.info("About to emit interactionTurnCompleted event");
+    eventEmitter.emit("interactionTurnCompleted", conversation.id);
+
     await generateCustomerVectorStore(conversation.participantSid, [
       message,
-      response,
+      response.res,
     ]);
 
     res.status(200).send("Message received and responded successfully");

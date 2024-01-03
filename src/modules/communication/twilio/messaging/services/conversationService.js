@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const updateConversationTimestamp = async (conversationId) => {
-  await prisma.conversation.update({
+  return await prisma.conversation.update({
     where: { id: conversationId },
     data: { lastUpdatedAt: new Date() },
   });
