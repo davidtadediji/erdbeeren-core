@@ -1,11 +1,10 @@
 // src\modules\enterprise_config\routes\detailsRoutes.js
-import * as enterpriseConfig from "../configurations/detailsConfig.js";
 import logger from "../../../../logger.js";
+import * as enterpriseConfig from "../configurations/detailsConfig.js";
 
 import express from "express";
-import { validateEnterpriseDetails } from "../middlewares/validationMiddleware.js";
 import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
-import { ROLES } from "../../authentication/config/roles.js";
+import { validateEnterpriseDetails } from "../middlewares/validationMiddleware.js";
 
 const router = express.Router();
 
@@ -13,7 +12,7 @@ const router = express.Router();
 router.post(
   "/setEnterpriseDetails",
   authenticateJWT, // Ensure the user is authenticated
-  hasPermission([ROLES.ADMIN]), // Ensure the user has the 'admin' role
+  hasPermission(["manageConfiguration"]), // Ensure the user has the 'admin' role
   validateEnterpriseDetails, // Validate the request payload
   async (req, res, next) => {
     try {

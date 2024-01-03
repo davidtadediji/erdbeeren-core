@@ -1,10 +1,8 @@
 // Import necessary modules and middlewares
 import express from 'express';
 import multer from 'multer';
-import { uploadFiles, deleteFile, listFiles } from '../services/fileService.js';
-import logger from "../../../../logger.js";
 import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
-import { ROLES } from "../../authentication/config/roles.js";
+import { deleteFile, listFiles, uploadFiles } from '../services/fileService.js';
 
 const router = express.Router();
 const upload = multer();
@@ -13,7 +11,7 @@ const upload = multer();
 router.post(
   '/upload',
   authenticateJWT, // Ensure the user is authenticated
-  hasPermission([ROLES.ADMIN]), // Ensure the user has the 'admin' role
+  hasPermission(["manageLLM"]), // Ensure the user has the 'admin' role
   upload.array('file', 7), // Handle file upload
   async (req, res, next) => {
     try {
@@ -26,7 +24,7 @@ router.post(
 );
 
 // Protect the '/:filename' (delete) route with authentication and permission check
-router.delete('/:filename', authenticateJWT, hasPermission([ROLES.ADMIN]), async (req, res, next) => {
+router.delete('/:filename', authenticateJWT, hasPermission(["manageLLM"]), async (req, res, next) => {
   const { filename } = req.params;
   try {
     const result = await deleteFile(filename);
@@ -41,7 +39,7 @@ router.delete('/:filename', authenticateJWT, hasPermission([ROLES.ADMIN]), async
 });
 
 // Protect the '/list' route with authentication and permission check
-router.get('/list', authenticateJWT, hasPermission([ROLES.ADMIN]), async (req, res, next) => {
+router.get('/list', authenticateJWT, hasPermission(["manageLLM"]), async (req, res, next) => {
   try {
     const files = await listFiles();
     res.json({ files });

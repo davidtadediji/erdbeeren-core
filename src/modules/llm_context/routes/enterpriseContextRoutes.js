@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
   '/generate',
   authenticateJWT, // Ensure the user is authenticated
-  hasPermission([ROLES.ADMIN]), // Ensure the user has the 'admin' role
+  hasPermission(["manageLLM"]), // Ensure the user has the 'admin' role
   async (req, res, next) => {
     try {
       await generateEnterpriseVectorStore();

@@ -5,27 +5,26 @@ import {
   authenticateJWT,
   hasPermission,
 } from "../../authentication/middleware/authMiddleware.js";
-import { ROLES } from "../../authentication/config/roles.js";
 
 const router = express.Router();
 
 router.get(
   "/customer-satisfaction-trend",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewMonitorDashboard']),
   metricsController.getCustomerSatisfactionTrend
 );
 router.get(
   "/average-conversation-duration",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewMonitorDashboard']),
   metricsController.getAverageConversationDuration
 );
 router.get(
   "/response-time-trend",
 
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewMonitorDashboard']),
   metricsController.getResponseTimeTrend
 );
 router.get(
@@ -35,13 +34,13 @@ router.get(
 router.get(
   "/high-frequency-customer-identification",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewMonitorDashboard']),
   metricsController.getHighFrequencyCustomerIdentification
 );
 router.get(
   "/overall-sentiment-trend",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewMonitorDashboard']),
   metricsController.getOverallSentimentTrend
 );
 

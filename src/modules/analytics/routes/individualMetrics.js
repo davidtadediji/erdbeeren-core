@@ -1,11 +1,7 @@
 // src\modules\analytics\routes\individualMetrics.js
 import express from "express";
 import * as individualMetricsController from "../controllers/individualMetricsController.js";
-import {
-  authenticateJWT,
-  hasPermission,
-} from "../../authentication/middleware/authMiddleware.js";
-import { ROLES } from "../../authentication/config/roles.js";
+import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -13,7 +9,7 @@ const router = express.Router();
 router.get(
   "/:customerId/satisfaction",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getSatisfactionMetric
 );
 
@@ -21,7 +17,7 @@ router.get(
 router.get(
   "/:customerId/conversation-duration",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getConversationDuration
 );
 
@@ -29,14 +25,14 @@ router.get(
 router.get(
   "/:customerId/avg-agent-response-time",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getAvgAgentResponseTime
 );
 
 router.get(
   "/:customerId/avg-customer-response-time",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getAvgCustomerResponseTime
 );
 
@@ -50,7 +46,7 @@ router.get(
 router.get(
   "/:customerId/frequency-of-interactions",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getFrequencyOfInteractions
 );
 
@@ -58,7 +54,7 @@ router.get(
 router.get(
   "/:customerId/sentiment-analysis",
   authenticateJWT,
-  hasPermission([ROLES.MINOTOR]),
+  hasPermission(['viewReports']),
   individualMetricsController.getSentimentAnalysis
 );
 

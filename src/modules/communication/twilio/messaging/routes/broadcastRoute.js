@@ -3,7 +3,6 @@ import express from 'express';
 import { broadcastMessage } from '../controllers/broadcastController.js';
 import { validateTwilioBroadcast } from '../middlewares/validationMiddleware.js';
 import { authenticateJWT, hasPermission } from "../../../../authentication/middleware/authMiddleware.js";
-import { ROLES } from "../../../../authentication/config/roles.js";
 
 const router = express.Router();
 
@@ -11,7 +10,7 @@ const router = express.Router();
 router.post(
   '/',
   authenticateJWT, // Ensure the user is authenticated
-  hasPermission([ROLES.ADMIN]), // Ensure the user has the 'admin' role
+  hasPermission(["broadcastMessage"]), // Ensure the user has the 'admin' role
   validateTwilioBroadcast, // Validate the request payload
   async (req, res) => {
     const { content } = req.body;

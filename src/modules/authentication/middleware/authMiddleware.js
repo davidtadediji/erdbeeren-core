@@ -1,5 +1,6 @@
 // src\modules\authentication\middleware\authMiddleware.js
 import jwt from 'jsonwebtoken';
+import { ROLE_PERMISSIONS } from '../config/roles.js'; // Make sure to import ROLE_PERMISSIONS
 
 const authenticateJWT = (req, res, next) => {
   const token = req.header('Authorization');
@@ -21,21 +22,6 @@ const authenticateJWT = (req, res, next) => {
 const hasPermission = (requiredPermissions) => (req, res, next) => {
   const user = req.user;
 
-  if (user && user.role && requiredPermissions.includes(user.role)) {
-    return next();
-  }
-
-  res.status(403).json({ message: 'Forbidden' });
-};
-
-export { authenticateJWT, hasPermission };
-
-
-/* for fine grained access control:
-// src\modules\authentication\middleware\authMiddleware.js
-const hasPermission = (requiredPermissions) => (req, res, next) => {
-  const user = req.user;
-
   if (user && user.role) {
     const userPermissions = ROLE_PERMISSIONS[user.role];
 
@@ -47,5 +33,4 @@ const hasPermission = (requiredPermissions) => (req, res, next) => {
   res.status(403).json({ message: 'Forbidden' });
 };
 
-export { isAuthenticated, hasPermission };
-*/
+export { authenticateJWT, hasPermission };
