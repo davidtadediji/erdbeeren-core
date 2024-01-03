@@ -27,7 +27,8 @@ model Conversation {
   profile         Json?        // Customer profile details
   duration        Int?         // Total duration of the conversation in seconds or minutes
   length          Int?         // Total number of messages
-  sentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
+  overallSentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
+  overallSentimentScore  Float?
   createdAt       DateTime     @default(now())
   lastUpdatedAt   DateTime     @updatedAt
   messages        Message[]
@@ -42,12 +43,14 @@ model Message {
   sentAt          DateTime     @default(now())
   deliveredAt     DateTime?
   seenAt          DateTime?
+  sentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
+  sentimentScore  Float?
 }
 
 enum Sentiment {
-  POSITIVE
-  NEUTRAL
-  NEGATIVE
+  positive
+  neutral
+  negative
 }
 
 

@@ -55,7 +55,7 @@ const webhookController = async (req, res) => {
     logger.info("Conversation created or updated");
 
     // Save the incoming message to the conversation
-    await saveMessageToConversation(
+    const customerMessage = await saveMessageToConversation(
       conversation.id,
       "customer", // Use different identifier for WhatsApp messages
       messageContent
@@ -67,15 +67,10 @@ const webhookController = async (req, res) => {
     eventEmitter.emit("newMessageCreated", conversation.id);
 
     
-    // Find appropriate places for the responded events later
     // Emit the newMessageCreated event
     logger.info("About to emit customerResponded event");
-    eventEmitter.emit("customerResponded", conversation.id);
+    eventEmitter.emit("customerResponded",[conversation.id, customerMessage.id] );
 
-    
-    // Emit the newMessageCreated event
-    logger.info("About to emit agentResponded event");
-    eventEmitter.emit("agentResponded", conversation.id);
 
 
     const previousMessages = await getConversationThread(conversation.id);
@@ -107,13 +102,17 @@ const webhookController = async (req, res) => {
     }
 
     // Create a new message in the conversation as the agent
-    await saveMessageToConversation(
+    const agentMessage = await saveMessageToConversation(
       conversation.id,
       "agent", // Use different identifier for WhatsApp messages
       response.res // Assuming the response is the content of the agent's message
     );
 
     
+    
+    // Emit the newMessageCreated event
+    logger.info("About to emit agentResponded event");
+    eventEmitter.emit("agentResponded", conversation.id);    
 
 
     // Emit the newMessageCreated event

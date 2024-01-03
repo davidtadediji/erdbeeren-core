@@ -43,6 +43,7 @@
     "@google-cloud/speech": "^6.1.0",
     "@prisma/client": "^5.7.1",
     "amqplib": "^0.10.3",
+    "assemblyai": "^4.1.0",
     "axios": "^1.6.3",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

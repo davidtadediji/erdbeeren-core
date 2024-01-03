@@ -55,8 +55,9 @@ export async function handleAgentResponseTime(conversationId) {
   }
 }
 
-export async function handleCustomerResponseTime(conversationId) {
-  logger.info("Handle customer response time triggered.");
+export async function handleCustomerResponseTime(data) {
+  logger.info("Handle customer response time triggered.");  
+  const conversationId = data[0]
   try {
     // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({

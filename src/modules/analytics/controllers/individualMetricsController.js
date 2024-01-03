@@ -125,7 +125,7 @@ export async function getSentimentAnalysis(req, res, next) {
       where: { participantSid: customerId },
     });
 
-    const sentimentAnalysis = conversation.sentiment;
+    const sentimentAnalysis = [conversation.overallSentiment, conversation.overallSentimentScore];
 
     res.json({ customer: customerId, metric: 'Sentiment Analysis', sentimentAnalysis });
   } catch (error) {

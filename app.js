@@ -14,6 +14,7 @@ import {
 } from "./src/modules/communication/twilio/voice/index.js";
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
+import eventEmitter from './src/modules/analytics_engine/eventEmitter.js';
 dotenv.config()
 
 const app = express();
@@ -31,7 +32,7 @@ process.on('uncaughtException', (error) => {
   // Perform cleanup tasks or handle the error gracefully
   gracefulShutdown();
 });
-
+ 
 // Graceful shutdown function
 const gracefulShutdown = async () => {
   // Close the Prisma client connection (replace this with your actual Prisma cleanup logic)
@@ -43,7 +44,20 @@ const gracefulShutdown = async () => {
   // Allow the process to exit naturally
   process.exit(1);
 };
+ // Emit the newMessageCreated event
+ logger.info("About to emit newMessageCreated event");
+ eventEmitter.emit("newMessageCreated", "675fb465-58e7-4719-90eb-0a4f24278bb3");
 
+ 
+ // Find appropriate places for the responded events later
+ // Emit the newMessageCreated event
+ logger.info("About to emit customerResponded event");
+ eventEmitter.emit("customerResponded", ["ace84ef4-24ef-40c2-aab2-e19ef4cbbd3a", "1b23afce-7579-45fa-b7de-9a58ecf0bcd1"]);
+
+ 
+ // Emit the newMessageCreated event
+ logger.info("About to emit agentResponded event");
+ eventEmitter.emit("agentResponded", "675fb465-58e7-4719-90eb-0a4f24278bb3");
    
 app.use("/api/analytics", analyticsModule)
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient()
 const saveMessageToConversation = async (conversationId, sender, content) => {
-  await prisma.message.create({
+  return await prisma.message.create({
     data: {
       conversationId: conversationId,
       sender: sender,
