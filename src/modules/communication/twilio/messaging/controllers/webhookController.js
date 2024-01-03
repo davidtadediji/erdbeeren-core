@@ -1,6 +1,7 @@
 // src\modules\communication\twilio\messaging\webhookController.js
 import twilio from "twilio";
-import { generateCustomerVectorStore, respondToMessage } from "../../../../llm_context/services/contextService.js"; // Replace with the actual path
+import { respondToMessage } from "../../../../llm_context/services/modelService.js"; // Replace with the actual path
+import {generateCustomerVectorStore} from "../../../../llm_context/services/customerContextService.js";
 import dotenv from "dotenv";
 import {
   updateConversationTimestamp,
@@ -41,7 +42,10 @@ const webhookController = async (req, res) => {
 
     if (!conversation) {
       // Create a new conversation if not found
-      conversation = await createNewConversation(phoneNumber, isWhatsApp ? "whatsapp": "sms");
+      conversation = await createNewConversation(
+        phoneNumber,
+        isWhatsApp ? "whatsapp" : "sms"
+      );
     } else {
       // Update the last updated timestamp for an existing conversation
       await updateConversationTimestamp(conversation.id);
@@ -64,8 +68,8 @@ const webhookController = async (req, res) => {
     // Respond to the message using the context service
     const response = await respondToMessage(
       messageContent,
-      true,
-      isWhatsApp
+      conversation.participantSid,
+      true
     );
 
     // Your logic to send the response back to the user using Twilio
@@ -88,11 +92,14 @@ const webhookController = async (req, res) => {
     // Create a new message in the conversation as the agent
     await saveMessageToConversation(
       conversation.id,
-       "agent", // Use different identifier for WhatsApp messages
+      "agent", // Use different identifier for WhatsApp messages
       response.res // Assuming the response is the content of the agent's message
     );
 
-    await generateCustomerVectorStore(conversation.participantSid, [message, response]);
+    await generateCustomerVectorStore(conversation.participantSid, [
+      message,
+      response,
+    ]);
 
     res.status(200).send("Message received and responded successfully");
   } catch (error) {
