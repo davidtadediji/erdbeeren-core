@@ -16,9 +16,10 @@ const ROLE_PERMISSIONS = {
     "viewReports",
     "viewAgentDashboard",
     "submitRequests",
+    "sendMessage"
   ],
   [ROLES.MONITOR]: ["viewMonitorDashboard", "viewReports"],
-  [ROLES.AGENT]: ["viewAgentDashboard", "submitRequests"],
+  [ROLES.AGENT]: ["viewAgentDashboard", "submitRequests", "sendMessage"],
 };
 
 export { ROLES, ROLE_PERMISSIONS };
