@@ -1,6 +1,6 @@
 // src\modules\communication\twilio\messaging\webhookController.js
 import twilio from "twilio";
-import { respondToMessage } from "../../../../llm_context/services/modelService.js"; // Replace with the actual path
+import { respondToMessage } from "../../../../llm_context/services/modelService.js";
 import { generateCustomerVectorStore } from "../../../../llm_context/services/customerContextService.js";
 import dotenv from "dotenv";
 import {
@@ -23,76 +23,59 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 const client = twilio(accountSid, authToken);
 
-const webhookController = async (req, res) => {
-  logger.info(
-    "Message webhook triggered: " + JSON.stringify(req.body, null, 2)
-  );
-
+const receiveMessage = async (req) => {
   try {
     const { From: phoneNumber, Body: messageContent } = req.body;
 
-    // Identify the message source (SMS or WhatsApp) based on the 'From' field format
     const isWhatsApp = phoneNumber.startsWith("whatsapp:");
 
-    // Check if there's an existing conversation with this phone number
     let conversation = await prisma.conversation.findUnique({
       where: { participantSid: phoneNumber },
     });
 
-    logger.info("Conversation found");
-
     if (!conversation) {
-      // Create a new conversation if not found
       conversation = await createNewConversation(
         phoneNumber,
         isWhatsApp ? "whatsapp" : "sms"
       );
     } else {
-      // Update the last updated timestamp for an existing conversation
       conversation = await updateConversationTimestamp(conversation.id);
     }
 
-    logger.info("Conversation created or updated");
-
-    // Save the incoming message to the conversation
     const customerMessage = await saveMessageToConversation(
       conversation.id,
-      "customer", // Use different identifier for WhatsApp messages
+      "customer",
       messageContent
     );
-    logger.info("New message created");
 
-    // Emit the newMessageCreated event
-    logger.info("About to emit newMessageCreated event");
-    eventEmitter.emit("newMessageCreated", { conversationId: conversation.id, messageId: customerMessage.id });
-
-    
-    logger.info("About to emit customerResponded event");
-    eventEmitter.emit("customerResponded", { conversationId: conversation.id, messageId: customerMessage.id });
-
-
+    eventEmitter.emit("newMessageCreated", {
+      conversationId: conversation.id,
+      messageId: customerMessage.id,
+    });
 
     const previousMessages = await getConversationThread(conversation.id);
 
-    logger.info("Previous messages: ", previousMessages);
-
-    // Respond to the message using the context service
     const response = await respondToMessage(
       messageContent,
       conversation.participantSid,
       true
     );
 
-    // Your logic to send the response back to the user using Twilio
+    return { conversation, response, isWhatsApp, phoneNumber };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const sendMessage = async ({ conversation, response, isWhatsApp, phoneNumber }) => {
+  try {
     if (isWhatsApp) {
-      // Send response in WhatsApp format
       await client.messages.create({
         body: response.res,
         from: "whatsapp:" + twilioPhoneNumber,
         to: phoneNumber,
       });
     } else {
-      // Send response in SMS format
       await client.messages.create({
         body: response.res,
         from: twilioPhoneNumber,
@@ -100,30 +83,41 @@ const webhookController = async (req, res) => {
       });
     }
 
-    // Create a new message in the conversation as the agent
     const agentMessage = await saveMessageToConversation(
       conversation.id,
-      "agent", // Use different identifier for WhatsApp messages
-      response.res // Assuming the response is the content of the agent's message
+      "agent",
+      response.res
     );
 
-    // Emit the newMessageCreated event
-    logger.info("About to emit newMessageCreated event");
-    eventEmitter.emit("newMessageCreated", { conversationId: conversation.id, messageId: agentMessage.id });
-    
-    
-    logger.info("About to emit agentResponded event");
-    eventEmitter.emit("agentResponded", { conversationId: conversation.id, messageId: agentMessage.id });    
+    eventEmitter.emit("newMessageCreated", {
+      conversationId: conversation.id,
+      messageId: agentMessage.id,
+    });
 
+    eventEmitter.emit("agentResponded", {
+      conversationId: conversation.id,
+      messageId: agentMessage.id,
+    });
 
-    // Emit the newMessageCreated event
-    logger.info("About to emit interactionTurnCompleted event");
     eventEmitter.emit("interactionTurnCompleted", conversation.id);
 
     await generateCustomerVectorStore(conversation.participantSid, [
       message,
       response.res,
     ]);
+
+    return "Message sent successfully";
+  } catch (error) {
+    throw error;
+  }
+};
+
+const webhookController = async (req, res) => {
+  logger.info("Message webhook triggered: " + JSON.stringify(req.body, null, 2));
+
+  try {
+    const { conversation, response, isWhatsApp, phoneNumber } = await receiveMessage(req);
+    await sendMessage({ conversation, response, isWhatsApp, phoneNumber });
 
     res.status(200).send("Message received and responded successfully");
   } catch (error) {
