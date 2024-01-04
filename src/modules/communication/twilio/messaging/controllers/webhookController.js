@@ -35,7 +35,7 @@ const webhookController = async (req, res) => {
     const isWhatsApp = phoneNumber.startsWith("whatsapp:");
 
     // Check if there's an existing conversation with this phone number
-    let conversation = await prisma.conversation.findFirst({
+    let conversation = await prisma.conversation.findUnique({
       where: { participantSid: phoneNumber },
     });
 

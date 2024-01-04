@@ -9,7 +9,7 @@ export async function handleCustomerProfile(messageId) {
   logger.info("Handle customer profile triggered: " + messageId);
   try {
 
-    const message = await prisma.message.findFirst({
+    const message = await prisma.message.findUnique({
       where: { id: messageId },
       include: { conversation: true },
     });

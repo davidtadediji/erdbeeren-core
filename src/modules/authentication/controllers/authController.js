@@ -32,7 +32,7 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await prisma.user.findFirst({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Authentication failed" });
@@ -132,7 +132,7 @@ export const verify = async (req, res, next) => {
     }
 
     // Find the user in the database
-    const user = await prisma.user.findFirst({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     // Check if the user exists
     if (!user) {
@@ -173,7 +173,7 @@ export const resendVerificationCode = async (req, res, next) => {
     logger.info("Email exists: " + email);
 
     // Find the user in the database
-    const user = await prisma.user.findFirst({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     // Check if the user exists
     if (!user) {

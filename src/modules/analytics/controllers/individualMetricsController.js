@@ -9,7 +9,7 @@ export async function getSatisfactionMetric(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return satisfaction metrics for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
@@ -27,7 +27,7 @@ export async function getConversationDuration(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return conversation duration for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
@@ -44,7 +44,7 @@ export async function getAvgAgentResponseTime(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return average agent response time for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
@@ -61,7 +61,7 @@ export async function getAvgCustomerResponseTime(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return average customer response time for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
@@ -84,7 +84,7 @@ export async function getCustomerProfile(req, res, next) {
     logger.info(customerId);
 
     // Use Prisma to fetch and return profile-specific analysis for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
@@ -103,7 +103,7 @@ export async function getFrequencyOfInteractions(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return frequency of interactions for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
       include: { messages: true },
     });
@@ -121,7 +121,7 @@ export async function getSentimentAnalysis(req, res, next) {
     const customerId = req.params.customerId;
 
     // Use Prisma to fetch and return sentiment analysis for the specific customer
-    const conversation = await prisma.conversation.findFirst({
+    const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 

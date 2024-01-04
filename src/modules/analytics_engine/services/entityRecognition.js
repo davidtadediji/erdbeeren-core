@@ -9,7 +9,7 @@ dotenv.config();
 export async function handleEntityRecognition(messageId) {
   logger.info("Handle entity recognition: " + messageId);
   try {
-    const message = await prisma.message.findFirst({
+    const message = await prisma.message.findUnique({
       where: { id: messageId },
       include: { conversation: true },
     });

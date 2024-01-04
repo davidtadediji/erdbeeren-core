@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function handleSentimentAnalysis(messageId) {
   logger.info("Handle sentiment analysis triggered: " + messageId);
   
-  const message = await prisma.message.findFirst({
+  const message = await prisma.message.findUnique({
     where: { id: messageId },
     include: { conversation: true },
   });

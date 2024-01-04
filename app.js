@@ -45,6 +45,18 @@ const gracefulShutdown = async () => {
   process.exit(1);
 };
 
+ // Emit the newMessageCreated event
+ logger.info("About to emit newMessageCreated event");
+ eventEmitter.emit("newMessageCreated",  { conversationId: "ace84ef4-24ef-40c2-aab2-e19ef4cbbd3a", messageId: "1b23afce-7579-45fa-b7de-9a58ecf0bcd1" });
+
+ 
+ logger.info("About to emit customerResponded event");
+ eventEmitter.emit("customerResponded", { conversationId: "ace84ef4-24ef-40c2-aab2-e19ef4cbbd3a", messageId: "1b23afce-7579-45fa-b7de-9a58ecf0bcd1" });
+
+ 
+ logger.info("About to emit agentResponded event");
+ eventEmitter.emit("agentResponded", { conversationId: "ace84ef4-24ef-40c2-aab2-e19ef4cbbd3a", messageId: "1b23afce-7579-45fa-b7de-9a58ecf0bcd1" });
+   
 app.use("/api/analytics", analyticsModule)
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);
