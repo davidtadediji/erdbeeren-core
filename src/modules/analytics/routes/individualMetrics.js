@@ -36,10 +36,18 @@ router.get(
   individualMetricsController.getAvgCustomerResponseTime
 );
 
-// Example route for Customer Profile-Specific Analysis
 router.get(
-  "/:customerId/profile",
+  "/:customerId/profile",  
+  authenticateJWT,
+  hasPermission(['viewReports']),
   individualMetricsController.getCustomerProfile
+);
+
+router.get(
+  "/:customerId/entities",  
+  authenticateJWT,
+  hasPermission(['viewReports']),
+  individualMetricsController.getEntities
 );
 
 // Example route for Frequency of Interactions for Individual Customers

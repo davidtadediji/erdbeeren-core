@@ -132,3 +132,21 @@ export async function getSentimentAnalysis(req, res, next) {
     next(error);
   }
 }
+
+
+export async function getEntities(req, res, next) {
+  try {
+    const customerId = req.params.customerId;
+
+    // Use Prisma to fetch and return sentiment analysis for the specific customer
+    const conversation = await prisma.conversation.findUnique({
+      where: { participantSid: customerId },
+    });
+
+    const entities = conversation.entities
+
+    res.json({ customer: customerId, metric: 'Conversation Entities', entities });
+  } catch (error) {
+    next(error);
+  }
+}
