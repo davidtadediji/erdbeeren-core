@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 import logger from "../../../../logger.js";
 
 export async function handleAgentResponseTime(conversationId) {
-  logger.info("Handle agent response time triggered.");
+  logger.info("Handle agent response time triggered: " + conversationId);
   try {
     // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({
@@ -51,13 +51,12 @@ export async function handleAgentResponseTime(conversationId) {
       `Average Agent Response Time for conversation ${conversationId}: ${avgAgentResponseTime} seconds`
     );
   } catch (error) {
-    logger.error("Error handling agent response time:", error.message);
+    logger.error("Error handling agent response time: " + error.message);
   }
 }
 
-export async function handleCustomerResponseTime(data) {
-  logger.info("Handle customer response time triggered.");  
-  const conversationId = data[0]
+export async function handleCustomerResponseTime(conversationId) {
+  logger.info("Handle customer response time triggered: " + conversationId);  
   try {
     // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({
@@ -105,6 +104,6 @@ export async function handleCustomerResponseTime(data) {
       `Average Customer Response Time for conversation ${conversationId}: ${avgCustomerResponseTime} seconds`
     );
   } catch (error) {
-    logger.error("Error handling customer response time:", error.message);
+    logger.error("Error handling customer response time: " + error.message);
   }
 }

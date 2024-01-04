@@ -25,6 +25,7 @@ model Conversation {
   avgCustomerRes  Float?
   rating          Int?         // Feedback rating (number rating/5)
   profile         Json?        // Customer profile details
+  entities        Json?        // Entity details
   duration        Int?         // Total duration of the conversation in seconds or minutes
   length          Int?         // Total number of messages
   overallSentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)

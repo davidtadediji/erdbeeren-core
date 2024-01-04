@@ -5,6 +5,7 @@ import { handleConversationDuration, handleFeedback, handleFrequencyOfInteractio
 import { handleCustomerProfile } from "./services/customerProfile.js";
 import { handleAgentResponseTime, handleCustomerResponseTime } from "./services/responseTime.js";
 import { handleSentimentAnalysis } from './services/sentimentAnalysis.js';
+import { handleEntityRecognition} from './services/entityRecognition.js';
 
 const QUEUE_URL = 'amqp://localhost'; // Replace with your RabbitMQ server URL
 
@@ -30,6 +31,7 @@ async function consumeMessage(queueName, callback) {
 }
 
 consumeMessage('sentimentAnalysisQueue', handleSentimentAnalysis);
+consumeMessage('entityRecognitionQueue', handleEntityRecognition);
 consumeMessage('frequencyOfInteractionsQueue', handleFrequencyOfInteractions);
 consumeMessage('conversationDurationQueue', handleConversationDuration);
 consumeMessage('customerProfileQueue', handleCustomerProfile);

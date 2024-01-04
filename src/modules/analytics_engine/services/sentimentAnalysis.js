@@ -4,11 +4,10 @@ import logger from "../../../../logger.js";
 
 const prisma = new PrismaClient();
 
-export async function handleSentimentAnalysis(data) {
-  logger.info("Handle sentiment analysis triggered: " + data);
+export async function handleSentimentAnalysis(messageId) {
+  logger.info("Handle sentiment analysis triggered: " + messageId);
   
-  const messageId = data[1];
-  const message = await prisma.message.findUnique({
+  const message = await prisma.message.findFirst({
     where: { id: messageId },
     include: { conversation: true },
   });
@@ -39,7 +38,7 @@ export async function handleSentimentAnalysis(data) {
     );
 
     const data = response.data;
-    logger.info("Sentiment Analysis result: " + messageId, data);
+    logger.info("Sentiment analysis result: " + messageId, data);
 
     // Update the Message model with sentiment analysis results
     await prisma.message.update({

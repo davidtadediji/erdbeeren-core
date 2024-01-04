@@ -64,12 +64,11 @@ const webhookController = async (req, res) => {
 
     // Emit the newMessageCreated event
     logger.info("About to emit newMessageCreated event");
-    eventEmitter.emit("newMessageCreated", conversation.id);
+    eventEmitter.emit("newMessageCreated", { conversationId: conversation.id, messageId: customerMessage.id });
 
     
-    // Emit the newMessageCreated event
     logger.info("About to emit customerResponded event");
-    eventEmitter.emit("customerResponded",[conversation.id, customerMessage.id] );
+    eventEmitter.emit("customerResponded", { conversationId: conversation.id, messageId: customerMessage.id });
 
 
 
@@ -108,11 +107,13 @@ const webhookController = async (req, res) => {
       response.res // Assuming the response is the content of the agent's message
     );
 
-    
-    
     // Emit the newMessageCreated event
+    logger.info("About to emit newMessageCreated event");
+    eventEmitter.emit("newMessageCreated", { conversationId: conversation.id, messageId: agentMessage.id });
+    
+    
     logger.info("About to emit agentResponded event");
-    eventEmitter.emit("agentResponded", conversation.id);    
+    eventEmitter.emit("agentResponded", { conversationId: conversation.id, messageId: agentMessage.id });    
 
 
     // Emit the newMessageCreated event

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 import logger from "../../../../logger.js";
 
 export async function handleFrequencyOfInteractions(conversationId) {
-  logger.info("Handle frequency of interactions triggered.");
+  logger.info("Handle frequency of interactions triggered: " + conversationId);
   try {
     // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({
@@ -38,7 +38,7 @@ export async function handleFrequencyOfInteractions(conversationId) {
 }
 
 export async function handleConversationDuration(conversationId) {
-  logger.info("Handle conversation duration triggered.");
+  logger.info("Handle conversation duration triggered: " + conversationId);
   try {
     // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({

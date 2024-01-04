@@ -5,16 +5,17 @@ import logger from "../../../../logger.js";
 
 const prisma = new PrismaClient();
 
-export async function handleCustomerProfile(data) { 
-  logger.info("Handle customer profile triggered: " + data);
+export async function handleCustomerProfile(messageId) { 
+  logger.info("Handle customer profile triggered: " + messageId);
   try {
 
-    const conversationId = data[0]
-    const messageId = data[1];
-    const message = await prisma.message.findUnique({
+    const message = await prisma.message.findFirst({
       where: { id: messageId },
       include: { conversation: true },
     });
+
+    const conversationId = message.conversation.id
+    logger.info("Conversation id: ", conversationId)
   
     if (!message) {
       logger.error("Message not found: " + messageId);
