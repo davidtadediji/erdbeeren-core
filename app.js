@@ -1,6 +1,7 @@
 // app.js
 
 import { PrismaClient } from '@prisma/client';
+import cors from 'cors';
 import dotenv from "dotenv";
 import express from "express";
 import logger from "./logger.js";
@@ -14,10 +15,11 @@ import {
 } from "./src/modules/communication/twilio/voice/index.js";
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
-import eventEmitter from './src/modules/analytics_engine/eventEmitter.js';
 dotenv.config()
 
 const app = express();
+app.use(cors());
+
 const port = process.env.PORT || 3000;
 
 const prisma = new PrismaClient();
