@@ -38,21 +38,12 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ message: "Authentication failed" });
     }
 
-    // Check if the user is verified
-    if (!user.isVerified) {
-      // If not verified, generate a new verification code and update the user
-      await generateAndSendVerificationCode(user);
-
-      return res.status(401).json({
-        message: `Email not verified. A new verification code has been sent to your email. Please check your email for the verification code.`,
-      });
-    }
-
     // If verified, generate a token for authentication
     const tokenPayload = {
       id: user.id,
       email: user.email,
       role: user.role, // Assuming the user object has a 'role' property
+      isVerified: user.isVerified
     };
     
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -119,10 +110,16 @@ export const signup = async (req, res, next) => {
 
 
 export const verify = async (req, res, next) => {
-  logger.info("verify triggered: " + JSON.stringify(req.body, null, 2));
+  logger.info("verify triggered: " + JSON.stringify(req.body, null, 2) + " " + req.headers.authorization);
 
   try {
-    const { email, verificationCode } = req.body;
+    const { verificationCode } = req.body;
+
+    // Extract email from the token
+    const email = req.user.email;
+
+    logger.info("Email gotten: " + email);
+    logger.info("VerificationCode gotten: " + verificationCode);
 
     // Validate input
     if (!email || !verificationCode) {
@@ -150,9 +147,22 @@ export const verify = async (req, res, next) => {
       data: { isVerified: true },
     });
 
+    // Generate a new token with the updated information
+    const tokenPayload = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      isVerified: updatedUser.isVerified,
+    };
+
+    const newToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     return res.json({
       message: "Email verification successful",
       user: updatedUser,
+      token: newToken, // Include the new token in the response
     });
   } catch (error) {
     next(error);
@@ -160,16 +170,19 @@ export const verify = async (req, res, next) => {
 };
 
 
+
 export const resendVerificationCode = async (req, res, next) => {
-  logger.info("resend triggered: " + JSON.stringify(req.body, null, 2));
+  logger.info("Resend triggered with token: " + req.headers.authorization);
 
   try {
-    const { email } = req.body; // Assuming email is sent as a query parameter
+    // Extract email from the token
+    const email = req.user.email;
 
-    // Validate input
+    // Validate email
     if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+      return res.status(400).json({ message: "Email not found in the token" });
     }
+
     logger.info("Email exists: " + email);
 
     // Find the user in the database
