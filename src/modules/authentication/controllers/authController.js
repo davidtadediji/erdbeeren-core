@@ -1,16 +1,17 @@
 // src\modules\authentication\controllers\authController.js
+
 import { PrismaClient } from "@prisma/client";
-// Create an instance of the Prisma client
-const prisma = new PrismaClient();
 import bcrypt from "bcryptjs";
+import crypto from 'crypto';
 import jwt from "jsonwebtoken";
 import logger from "../../../../logger.js";
 import { ROLES } from "../config/roles.js";
 import {
   generateVerificationCode,
+  sendResetPasswordEmail,
   sendVerificationCodeToEmail,
 } from "../utils/verification.js";
-
+const prisma = new PrismaClient();
 
 async function generateAndSendVerificationCode(user) {
   const newVerificationCode = generateVerificationCode();
@@ -99,14 +100,28 @@ export const signup = async (req, res, next) => {
 
     logger.info("User created successfully" + newUser);
 
+    // Generate a token for the newly created user
+    const tokenPayload = {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      isVerified: newUser.isVerified,
+    };
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     // Send the verification code to the user's email
     sendVerificationCodeToEmail(email, verificationCode);
 
-    return res.json({ message: "User created successfully", user: newUser });
+    // Include the token in the response
+    return res.json({ message: "User created successfully", user: newUser, token });
   } catch (error) {
     next(error);
   }
 };
+
 
 
 export const verify = async (req, res, next) => {
@@ -202,3 +217,82 @@ export const resendVerificationCode = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+  
+    // Extract email from the token
+    const {email} = req.body;
+
+    // Find the user in the database
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate a reset password token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    
+    
+// Calculate the timestamp for one hour from now
+const oneHourFromNow = new Date();
+oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
+
+// Save the token to the user in the database
+await prisma.user.update({
+  where: { id: user.id },
+    data: {
+    resetToken,
+    resetTokenExpires: oneHourFromNow,
+  },
+});
+
+    // Send an email with the reset password link
+    // You should implement a function similar to sendVerificationCodeToEmail
+    sendResetPasswordEmail(user.email, resetToken);
+
+    return res.json({ message: "Password reset email sent successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    // Convert the timestamp to a Date object
+    const currentTimestamp = new Date();
+
+    // Find the user by the reset token
+    const user = await prisma.user.findUnique({
+      where: {
+        resetToken,
+        resetTokenExpires: { gte: currentTimestamp },
+      },
+    });
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(401).json({ message: "Invalid or expired reset token" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password and remove the reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword, resetToken: null, resetTokenExpires: null },
+    });
+
+    return res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
