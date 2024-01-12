@@ -39,7 +39,7 @@ export const sendResetPasswordEmail = async (email, resetToken) => {
         <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
           <h2 style="color: #888; font-size: 24px; text-align: center;">${enterpriseName}</h2>
           <p style="font-size: 18px; font-weight: bold;">Dear User,</p>
-          <p style="font-size: 24px; color: #4caf50; font-weight: bold;">Click the following link to reset your password: <a href="${resetLink}" style="color: #333;">Reset Password</a></p>
+          <p style="font-size: 24px; color: #4caf50; font-weight: bold;">Click the link to reset your password: <a href="${resetLink}" style="text-decoration: underline; font-size: 20px">Reset Password Link</a></p>
           <p style="margin-top: 10px; font-size: 16px;">Thank you for working at ${enterpriseName}!</p>
           <hr style="border: 1px solid #ddd; margin-top: 20px; margin-bottom: 20px;">
           <p style="font-size: 14px; color: #888;">This email was sent by ${enterpriseName}. Please do not reply to this email.</p>
