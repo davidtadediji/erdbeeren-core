@@ -53,6 +53,12 @@ const receiveMessage = async (req) => {
       messageId: customerMessage.id,
     });
 
+    eventEmitter.emit("customerResponded", {
+      conversationId: conversation.id,
+      messageId: customerMessage.id,
+    });
+
+
     const previousMessages = await getConversationThread(conversation.id);
 
     const response = await respondToMessage(

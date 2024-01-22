@@ -66,6 +66,13 @@ router.get(
   individualMetricsController.getSentimentAnalysis
 );
 
+router.get(
+  "/:customerId/message-sentiment-analysis",
+  authenticateJWT,
+  hasPermission(['viewReports']),
+  individualMetricsController.getMessageSentimentAnalysis
+);
+
 export default router;
 
 // // Example route for Customer Feedback Analysis

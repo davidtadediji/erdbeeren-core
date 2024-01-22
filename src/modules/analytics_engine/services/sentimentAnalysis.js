@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export async function handleSentimentAnalysis(messageId) {
   logger.info("Handle sentiment analysis triggered: " + messageId);
-  
+
   const message = await prisma.message.findUnique({
     where: { id: messageId },
     include: { conversation: true },
@@ -24,12 +24,13 @@ export async function handleSentimentAnalysis(messageId) {
       `text=${text}`,
       {
         headers: {
-          "accept": "application/json, text/javascript, */*; q=0.01",
+          accept: "application/json, text/javascript, */*; q=0.01",
           "accept-language": "en-US,en;q=0.9",
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
+          "sec-ch-ua":
+            '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
           "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-platform": '"Windows"',
           "sec-fetch-dest": "empty",
           "sec-fetch-mode": "cors",
           "sec-fetch-site": "same-site",
@@ -39,6 +40,8 @@ export async function handleSentimentAnalysis(messageId) {
 
     const data = response.data;
     logger.info("Sentiment analysis result: " + messageId, data);
+
+    logger.info("Sentiment type: " + data.type + " Sentiment score: " + data.score);
 
     // Update the Message model with sentiment analysis results
     await prisma.message.update({
@@ -58,6 +61,13 @@ export async function handleSentimentAnalysis(messageId) {
     const overallSentiment = calculateOverallSentiment(messages);
     const overallSentimentScore = calculateOverallSentimentScore(messages);
 
+    logger.info(
+      "OverallSentiment: " +
+        overallSentiment +
+        " OverallSentimentScore: " +
+        overallSentimentScore
+    );
+
     await prisma.conversation.update({
       where: { id: conversationId },
       data: {
@@ -74,7 +84,10 @@ function calculateOverallSentiment(messages) {
   const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
 
   for (const message of messages) {
-    sentimentCounts[message.sentiment]++;
+    // Exclude messages with null sentiment
+    if (message.sentiment !== null) {
+      sentimentCounts[message.sentiment]++;
+    }
   }
 
   const maxSentiment = Object.keys(sentimentCounts).reduce(
@@ -85,8 +98,12 @@ function calculateOverallSentiment(messages) {
   return maxSentiment;
 }
 
+
 function calculateOverallSentimentScore(messages) {
-  const totalScore = messages.reduce((sum, message) => sum + message.sentimentScore, 0);
+  const totalScore = messages.reduce(
+    (sum, message) => sum + message.sentimentScore,
+    0
+  );
   const averageScore = totalScore / messages.length;
 
   return averageScore;
