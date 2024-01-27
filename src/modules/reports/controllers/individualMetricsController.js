@@ -1,4 +1,4 @@
-// src\modules\analytics\controllers\individualMetricsController.js
+// src\modules\reports\controllers\individualMetricsController.js
 import { PrismaClient } from "@prisma/client";
 import logger from "../../../../logger.js";
 
@@ -95,7 +95,7 @@ export async function getCustomerProfile(req, res, next) {
 
     logger.info(customerId);
 
-    // Use Prisma to fetch and return profile-specific analysis for the specific customer
+    // Use Prisma to fetch and return profile-specific report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
@@ -106,7 +106,7 @@ export async function getCustomerProfile(req, res, next) {
 
     res.json({
       customer: customerId,
-      metric: "Profile-Specific Analysis",
+      metric: "Profile-Specific Report",
       customerProfile,
     });
   } catch (error) {
@@ -136,18 +136,18 @@ export async function getFrequencyOfInteractions(req, res, next) {
   }
 }
 
-export async function getSentimentAnalysis(req, res, next) {
+export async function getSentimentReport(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment analysis for the specific customer
+    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
 
     res.json({
       customer: customerId,
-      metric: "Sentiment Analysis",
+      metric: "Sentiment Report",
       overallSentimentScore: conversation.overallSentimentScore,
       overallSentiment: conversation.overallSentiment,
     });
@@ -156,11 +156,11 @@ export async function getSentimentAnalysis(req, res, next) {
   }
 }
 
-export async function getMessageSentimentAnalysis(req, res, next) {
+export async function getMessageSentimentReport(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment analysis for the specific customer
+    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
@@ -189,7 +189,7 @@ export async function getEntities(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment analysis for the specific customer
+    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });

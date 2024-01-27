@@ -1,4 +1,4 @@
-// src\modules\analytics\index.js
+// src\modules\reports\index.js
 
 import express from 'express';
 import errorMiddleware from './middleware/errorMiddleware.js';

@@ -5,7 +5,7 @@ import cors from 'cors';
 import dotenv from "dotenv";
 import express from "express";
 import logger from "./logger.js";
-import analyticsModule from "./src/modules/analytics/index.js";
+import reportsModule from "./src/modules/reports/index.js";
 import "./src/modules/analytics_engine/eventListener.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
@@ -48,7 +48,7 @@ const gracefulShutdown = async () => {
 };
 
 
-app.use("/api/analytics", analyticsModule)
+app.use("/api/report", reportsModule);
 // Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);
 

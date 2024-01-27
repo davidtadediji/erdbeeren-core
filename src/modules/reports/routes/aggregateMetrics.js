@@ -1,4 +1,4 @@
-// src\modules\analytics\routes\metrics.js
+// src\modules\reports\routes\metrics.js
 import express from "express";
 import * as metricsController from "../controllers/aggregateMetricsController.js";
 import {
@@ -28,8 +28,8 @@ router.get(
   metricsController.getResponseTimeTrend
 );
 router.get(
-  "/demographic-customer-analysis",
-  metricsController.getDemographicCustomerAnalysis
+  "/demographic-customer-report",
+  metricsController.getDemographicCustomerReport
 );
 router.get(
   "/high-frequency-customer-identification",
