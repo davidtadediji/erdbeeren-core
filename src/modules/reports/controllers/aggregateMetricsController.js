@@ -60,9 +60,14 @@ export async function getAverageConversationDuration(req, res, next) {
 
 export async function getResponseTimeTrend(req, res, next) {
   try {
-    const metricsData = await fs.readFile(metricsFilePath, "utf-8");
-    const metrics = JSON.parse(metricsData);
-    const responseTimeTrendData = metrics.responseTimeTrend;
+    const responseTimeTrendData = await prisma.conversation.aggregate({
+      _avg: {
+        avgCustomerRes,
+        avgAgentRes,
+      },
+    });
+
+    logger.info(responseTimeTrendData)
 
     // Implement your logic to process the data as needed
 
@@ -112,14 +117,13 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
 
 export async function getOverallSentimentTrend(req, res, next) {
   try {
-    // const metricsData = await fs.readFile(metricsFilePath, "utf-8");
-    // const metrics = JSON.parse(metricsData);
-
     const aggregateSentimentScore = await prisma.conversation.aggregate({
       _avg: {
         overallSentimentScore: true,
       },
     });
+
+    logger.info("Aggregate Sentiment Score: ", aggregateSentimentScore)
 
     const aggregateSentiment =
       aggregateSentimentScore && aggregateSentimentScore > 0
