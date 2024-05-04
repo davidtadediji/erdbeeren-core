@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
-import logger from "../../../../logger.js";
 import dotenv from "dotenv";
+import logger from "../../../../logger.js";
 const prisma = new PrismaClient();
 
 dotenv.config();

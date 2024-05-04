@@ -21,7 +21,7 @@ export const sendResetPasswordEmail = async (email, resetToken) => {
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      pass: process.env.EMAIL_APP_PASSWORD,
     },
   });
   const appUrl = process.env.APP_URL;
@@ -65,7 +65,7 @@ export async function sendVerificationCodeToEmail(email, verificationCode) {
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      pass: process.env.EMAIL_APP_PASSWORD,
     },
   });
 

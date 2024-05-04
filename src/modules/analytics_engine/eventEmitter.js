@@ -1,8 +1,8 @@
 // src\modules\analyticsEngine\eventEmitter.js
 import EventEmitter from 'events';
 
-class CustomEventEmitter extends EventEmitter {}
+class ConversationEventEmitter extends EventEmitter {}
 
-const eventEmitter = new CustomEventEmitter();
+const conversationEventEmitter = new ConversationEventEmitter();
 
-export default eventEmitter;
+export default conversationEventEmitter;

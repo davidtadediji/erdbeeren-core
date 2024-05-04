@@ -1,110 +1,109 @@
+// src\modules\analytics_engine\services\basicMetrics.js
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
-
 import logger from "../../../../logger.js";
 
-export async function handleFrequencyOfInteractions(conversationId) {
-  logger.info("Handle frequency of interactions triggered: " + conversationId);
-  try {
-    // Fetch the conversation from the database
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: { messages: true },
-    });
-
-    if (!conversation) {
-      logger.error("Conversation not found.");
-      return;
-    }
-    logger.info("Conversation found.");
-    // Calculate the total number of messages
-    const messageCount = conversation.messages.length;
-
-    logger.info("Message count: " + messageCount);
-
-    // Update the length field of the conversation
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { length: messageCount },
-    });
-
-    logger.info(
-      `Frequency of Interactions for conversation ${conversationId}: ${messageCount} messages.`
-    );
-  } catch (error) {
-    logger.error("Error handling frequency of interactions:" + error.message);
-  }
-}
-
+// function to calculate and store conversation duration
 export async function handleConversationDuration(conversationId) {
   logger.info("Handle conversation duration triggered: " + conversationId);
   try {
-    // Fetch the conversation from the database
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
       include: { messages: true },
     });
 
-    // Ensure there are messages in the conversation
+    // return error if conversation doesn't exists or if it doesn't contain messages or if the conversation length is less than 2
     if (
-      !conversation ||
       !conversation.messages ||
+      !conversation ||
       conversation.messages.length < 2
     ) {
       logger.error(
-        "Invalid conversation or insufficient messages for duration calculation."
+        "Conversation is not valid or insufficient messages for calculating duration."
       );
       return;
     }
-
-    // Sort messages by timestamp
+    
+    // sort conversation messages by date from first to last 
     const sortedMessages = conversation.messages.sort(
       (a, b) => new Date(a.sentAt) - new Date(b.sentAt)
     );
 
-    // Log the sorted timestamps for debugging
     logger.info(
       "Sorted Timestamps:",
       sortedMessages.map((msg) => msg.sentAt)
     );
 
-    // Get the timestamps of the first incoming and last outgoing messages
-    const firstIncomingTimestamp = new Date(sortedMessages[0].sentAt);
-    const lastOutgoingTimestamp = new Date(
+    const firstTimestamp = new Date(sortedMessages[0].sentAt);
+    const lastTimestamp = new Date(
       sortedMessages[sortedMessages.length - 1].sentAt
     );
 
-    // Log the timestamps for debugging
-    logger.info("First Incoming Timestamp:", firstIncomingTimestamp);
-    logger.info("Last Outgoing Timestamp:", lastOutgoingTimestamp);
+    logger.info("First Message Timestamp:", firstTimestamp);
+    logger.info("Last Message Timestamp:", lastTimestamp);
 
-    // Calculate conversation duration in milliseconds
-    const durationInMilliseconds =
-      lastOutgoingTimestamp - firstIncomingTimestamp;
+    // subtract the first and last timestamps to get conversation duration
+    const conversationDuration =
+    lastTimestamp - firstTimestamp;
 
-    // Check for NaN or negative duration
-    if (isNaN(durationInMilliseconds) || durationInMilliseconds < 0) {
+    // if the first conversation check is passed but conversations do not have timestamps this check serves to avoid an error
+    if (isNaN(conversationDuration) || conversationDuration < 0) {
       logger.error("Invalid duration calculation.");
       return;
     }
 
-    // Convert duration to minutes, rounding up if less than a minute
-    const durationInMinutes = Math.ceil(durationInMilliseconds / (1000 * 60));
+    // convert conversation duration to minutes 
+    const conversationDurationMin = Math.ceil(conversationDuration / (1000 * 60));
 
-    // Update the duration field in the conversation
+
+    // update the duration field of the conversation table
     await prisma.conversation.update({
       where: { id: conversationId },
-      data: { duration: durationInMinutes },
+      data: { duration: conversationDurationMin },
     });
 
-    logger.info(`Conversation Duration: ${durationInMinutes} minutes`);
+    logger.info(`Conversation Duration: ${conversationDurationMin} minutes`);
   } catch (error) {
     logger.error("Error handling conversation duration:", error.message);
   }
 }
 
-export function handleFeedback(data) {
-  // Implement feedback logic
-  logger.info("Feedback: " + data);
+// function to calculate and store conversation length
+export async function handleConversationLength(conversationId) {
+  logger.info("Handle conversation length triggered: " + conversationId);
+  try {
+    // get conversation with messages
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: { messages: true },
+    });
+
+    // check if conversation was found
+    if (!conversation) {
+      logger.error("Conversation was not found.");
+      return;
+    }
+
+    logger.info("Conversation exists.");
+
+    // get number of messages in conversation
+    const conversationLength = conversation.messages.length;
+
+    logger.info("Message count: " + conversationLength);
+
+    // update the conversation length field of the conversation table
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { length: conversationLength },
+    });
+
+    logger.info(
+      `Length of Conversation ${conversationId}: ${conversationLength} messages.`
+    );
+  } catch (error) {
+    logger.error("Error handling conversation length:" + error.message);
+  }
 }
+
+
+

@@ -1,7 +1,72 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
 import logger from "../../../../logger.js";
+const prisma = new PrismaClient();
 
+// function to calculate customer response time
+export async function handleCustomerResponseTime(conversationId) {
+  logger.info("Handle customer response time triggered: " + conversationId);
+  try {
+    // Fetch the conversation from the database
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: { messages: true },
+    });
+
+    //  return error if doesn't conversation exists or if it doesn't contain messages or if the conversation length is = 0
+    if (
+      !conversation.messages ||
+      !conversation ||
+      conversation.messages.length === 0
+    ) {
+      logger.error("Conversation is invalid or no messages found.");
+      return;
+    }
+    logger.info("Conversation found.");
+
+    // Get messages sent by customer
+    const customerMessages = conversation.messages.filter(
+      (message) => message.sender === "customer"
+    );
+
+    const customerMessagesLength = customerMessages.length;
+    
+    const averageCustomerResponseTime = 0;
+
+    if (customerMessagesLength > 1) {
+      // Calculate total customer response time using the reduce function
+      const totalCustomerResponseTime = customerMessages.reduce(
+        (accumulate, message, index, messages) => {
+          // Returns the accumulate if index is on the last message
+          if (index === messages.length - 1) return accumulate;
+          // add the difference between time differences between sent messages to the accumulator which is 0 in the beginning.
+          return (
+            accumulate +
+            (new Date(messages[index + 1].sentAt) - new Date(message.sentAt))
+          );
+        },
+        0
+      );
+
+      // check if customer calculate average response time and convert to seconds.
+      averageCustomerResponseTime =
+        totalCustomerResponseTime / (customerMessagesLength - 1) / 1000;
+    }
+
+    // update the avgCustomerRes field in the conversation
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { avgCustomerRes: averageCustomerResponseTime },
+    });
+
+    logger.info(
+      `Average Customer Response Time for conversation ${conversationId}: ${averageCustomerResponseTime} seconds`
+    );
+  } catch (error) {
+    logger.error("Error occured while handling customer response time: " + error.message);
+  }
+}
+
+// function to calculate agent response time
 export async function handleAgentResponseTime(conversationId) {
   logger.info("Handle agent response time triggered: " + conversationId);
   try {
@@ -11,99 +76,59 @@ export async function handleAgentResponseTime(conversationId) {
       include: { messages: true },
     });
 
+    //  return error if doesn't conversation exists or if it doesn't contain messages or if the conversation length is = 0
     if (
-      !conversation ||
       !conversation.messages ||
+      !conversation ||
       conversation.messages.length === 0
     ) {
-      logger.error("Invalid conversation or no messages found.");
+      logger.error("Conversation is invalid or no messages found.");
       return;
     }
     logger.info("Conversation found.");
 
-    // Filter agent messages
+    // Get messages sent by agent
     const agentMessages = conversation.messages.filter(
       (message) => message.sender === "agent"
     );
 
-    // Calculate average agent response time in seconds
-    const totalAgentResponseTime = agentMessages.reduce(
-      (acc, message, index, array) => {
-        if (index === array.length - 1) return acc; // Skip last message
-        const nextMessage = array[index + 1];
-        return acc + (new Date(nextMessage.sentAt) - new Date(message.sentAt));
-      },
-      0
-    );
+    const agentMessagesLength = agentMessages.length;
+    
+    const averageAgentResponseTime = 0;
 
-    const avgAgentResponseTime =
-      agentMessages.length > 1
-        ? totalAgentResponseTime / (agentMessages.length - 1) / 1000
-        : 0;
+    if (agentMessagesLength > 1) {
+      // Calculate total agent response time using the reduce function
+      const totalAgentResponseTime = agentMessages.reduce(
+        (accumulate, message, index, messages) => {
+          // Returns the accumulate if index is on the last message
+          if (index === messages.length - 1) return accumulate;
+          // add the difference between time differences between sent messages to the accumulator which is 0 in the beginning.
+          return (
+            accumulate +
+            (new Date(messages[index + 1].sentAt) - new Date(message.sentAt))
+          );
+        },
+        0
+      );
 
-    // Update the avgAgentRes field in the conversation
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { avgAgentRes: avgAgentResponseTime },
-    });
-
-    logger.info(
-      `Average Agent Response Time for conversation ${conversationId}: ${avgAgentResponseTime} seconds`
-    );
-  } catch (error) {
-    logger.error("Error handling agent response time: " + error.message);
-  }
-}
-
-export async function handleCustomerResponseTime(conversationId) {
-  logger.info("Handle customer response time triggered: " + conversationId);  
-  try {
-    // Fetch the conversation from the database
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: { messages: true },
-    });
-
-    if (
-      !conversation ||
-      !conversation.messages ||
-      conversation.messages.length === 0
-    ) {
-      logger.error("Invalid conversation or no messages found.");
-      return;
+      // check if agent calculate average response time and convert to seconds.
+      averageAgentResponseTime =
+        totalAgentResponseTime / (agentMessagesLength - 1) / 1000;
     }
-    logger.info("Conversation found.");
 
-    // Filter customer messages
-    const customerMessages = conversation.messages.filter(
-      (message) => message.sender === "customer"
-    );
-
-    // Calculate average customer response time in seconds
-    const totalCustomerResponseTime = customerMessages.reduce(
-      (acc, message, index, array) => {
-        if (index === array.length - 1) return acc; // Skip last message
-        const nextMessage = array[index + 1];
-        return acc + (new Date(nextMessage.sentAt) - new Date(message.sentAt));
-      },
-      0
-    );
-
-    const avgCustomerResponseTime =
-      customerMessages.length > 1
-        ? totalCustomerResponseTime / (customerMessages.length - 1) / 1000
-        : 0;
-
-    // Update the avgCustomerRes field in the conversation
+    // update the avgAgentRes field in the conversation
     await prisma.conversation.update({
       where: { id: conversationId },
-      data: { avgCustomerRes: avgCustomerResponseTime },
+      data: { avgAgentRes: averageAgentResponseTime },
     });
 
     logger.info(
-      `Average Customer Response Time for conversation ${conversationId}: ${avgCustomerResponseTime} seconds`
+      `Average Agent Response Time for conversation ${conversationId}: ${averageAgentResponseTime} seconds`
     );
   } catch (error) {
-    logger.error("Error handling customer response time: " + error.message);
+    logger.error("Error occured while handling agent response time: " + error.message);
   }
 }
+
+
+

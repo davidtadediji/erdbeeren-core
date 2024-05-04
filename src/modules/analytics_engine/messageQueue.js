@@ -1,26 +1,31 @@
 // src\modules\analyticsEngine\messageQueue.js
-import amqp from 'amqplib';
-import logger from '../../../logger.js';
+import amqp from "amqplib";
+import logger from "../../../logger.js";
 
-const QUEUE_URL = 'amqp://localhost'; // Replace with your RabbitMQ server URL
+const AMQP_URL = "amqp://localhost";
 
-async function produceMessage(queueName, message) {
+// function to produce and send message to queue
+async function produceMessage(queue, message) {
   try {
-    const connection = await amqp.connect(QUEUE_URL);
-    const channel = await connection.createChannel();
+    const connection = await amqp.connect(AMQP_URL);
+    const amqp_channel = await connection.createChannel();
 
-    await channel.assertQueue(queueName, { durable: true });
-    channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), { persistent: true });
+    // check if queue exists
+    await amqp_channel.assertQueue(queue, { durable: true });
+    parsedMessage = JSON.stringify(message);
 
-    logger.info(`Message sent to ${queueName}:`, message);
+    // send message to queue and persist if service is restarted to prevent message loss
+    amqp_channel.sendToQueue(queue, Buffer.from(parsedMessage), {
+      persistent: true,
+    });
 
-    await channel.close();
+    logger.info(`A message was sent to ${queue}:`, message);
+
+    await amqp_channel.close();
     await connection.close();
   } catch (error) {
-    logger.error('Error producing message:', error);
+    logger.error("Error occured while producing message:", error);
   }
 }
 
-export default {
-  produceMessage,
-};
+export default { produceMessage };

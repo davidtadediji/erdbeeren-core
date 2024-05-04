@@ -1,42 +1,52 @@
 // src\modules\analyticsEngine\messageConsumer.js
-import amqp from 'amqplib';
-import logger from '../../../logger.js';
-import { handleConversationDuration, handleFeedback, handleFrequencyOfInteractions } from "./services/basicMetrics.js";
+import amqp from "amqplib";
+import logger from "../../../logger.js";
+import {
+  handleConversationDuration,
+  handleConversationLength,
+} from "./services/basicMetrics.js";
 import { handleCustomerProfile } from "./services/customerProfile.js";
-import { handleAgentResponseTime, handleCustomerResponseTime } from "./services/responseTime.js";
-import { handleSentimentAnalysis } from './services/sentimentAnalysis.js';
-import { handleEntityRecognition} from './services/entityRecognition.js';
+import {
+  handleAgentResponseTime,
+  handleCustomerResponseTime,
+} from "./services/responseTime.js";
+import { handleSentimentAnalysis } from "./services/sentimentAnalysis.js";
 
-const QUEUE_URL = 'amqp://localhost'; // Replace with your RabbitMQ server URL
+const AMQP_URL = "amqp://localhost";
 
-async function consumeMessage(queueName, callback) {
+// function to consume and process message sent to queue
+async function consumeMessage(queue, callback) {
   try {
-    const connection = await amqp.connect(QUEUE_URL);
-    const channel = await connection.createChannel();
+    const connection = await amqp.connect(AMQP_URL);
+    const amqp_channel = await connection.createChannel();
 
-    await channel.assertQueue(queueName, { durable: true });
-    channel.prefetch(1);
+    // check if queue exists
+    await amqp_channel.assertQueue(queue, { durable: true });
 
-    logger.info(`Waiting for messages from ${queueName}`);
+    // Set channel to only process one message per time
+    amqp_channel.prefetch(1);
 
-    channel.consume(queueName, async (message) => {
-      const content = JSON.parse(message.content.toString());
-      await callback(content.data);
+    logger.info(`Awaiting messages from ${queue}`);
 
-      channel.ack(message);
+    // parse message, trigger callback function to process the parsed content and acknowlege success
+    amqp_channel.consume(queue, async (message) => {
+      const messageContent = message.content.toString();
+      const parsedContent = JSON.parse(messageContent);
+      await callback(parsedContent.data);
+      amqp_channel.ack(message);
     });
   } catch (error) {
-    logger.error(`Error consuming messages from ${queueName}:`, error);
+    logger.error(
+      `Error occured while consuming messages from ${queue}:`,
+      error
+    );
   }
 }
 
-consumeMessage('sentimentAnalysisQueue', handleSentimentAnalysis);
-consumeMessage('entityRecognitionQueue', handleEntityRecognition);
-consumeMessage('frequencyOfInteractionsQueue', handleFrequencyOfInteractions);
-consumeMessage('conversationDurationQueue', handleConversationDuration);
-consumeMessage('customerProfileQueue', handleCustomerProfile);
-consumeMessage('agentResponseTimeQueue', handleAgentResponseTime);
-consumeMessage('customerResponseTimeQueue', handleCustomerResponseTime);
-consumeMessage('feedbackQueue', handleFeedback);
-
-// Run this file to start the consumers
+// start consumers
+consumeMessage("conversationLengthQueue", handleConversationLength);
+consumeMessage("conversationDurationQueue", handleConversationDuration);
+consumeMessage("customerResponseTimeQueue", handleCustomerResponseTime);
+consumeMessage("agentResponseTimeQueue", handleAgentResponseTime);
+consumeMessage("customerProfileQueue", handleCustomerProfile);
+consumeMessage("sentimentAnalysisQueue", handleSentimentAnalysis);

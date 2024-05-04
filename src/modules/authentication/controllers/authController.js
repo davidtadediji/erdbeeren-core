@@ -2,7 +2,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import crypto from 'crypto';
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import logger from "../../../../logger.js";
 import { ROLES } from "../config/roles.js";
@@ -13,7 +13,7 @@ import {
 } from "../utils/verification.js";
 const prisma = new PrismaClient();
 
-async function generateAndSendVerificationCode(user) {
+const generateAndSendVerificationCode = async (user) => {
   const newVerificationCode = generateVerificationCode();
   await prisma.user.update({
     where: { id: user.id },
@@ -23,9 +23,87 @@ async function generateAndSendVerificationCode(user) {
   logger.info("Verification code: " + newVerificationCode);
 
   sendVerificationCodeToEmail(user.email, newVerificationCode);
-  return newVerificationCode;
-}
 
+  return newVerificationCode;
+};
+
+export const signup = async (req, res, next) => {
+  logger.info("signup triggered: " + JSON.stringify(req.body, null, 2));
+
+  try {
+    const { username, password, email, role } = req.body;
+
+    logger.info("Username is: " + username);
+
+    const user = await prisma.user.findFirst({
+      where: { email: email },
+    });
+
+    // check if user exists
+    if (user) {
+      logger.info("User already exists");
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    logger.info("User doesn't exist yet");
+
+    // convert the password to hash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    logger.info("Hashed password:" + hashedPassword);
+
+    // check if the role provided is valid
+    const existingRoles = Object.values(ROLES);
+    const userRole = "";
+    if (existingRoles.includes(role)) {
+      userRole = role;
+    } else {
+      userRole = ROLES.AGENT;
+    }
+
+    const verificationCode = generateVerificationCode();
+
+    // create the new user
+    const newUser = await prisma.user.create({
+      data: {
+        email: email,
+        password: hashedPassword,
+        role: userRole,
+        username,
+        verificationCode: verificationCode,
+      },
+    });
+
+    logger.info("User was created successfully" + newUser);
+
+    // generate jwt for the newly created user
+
+    const token = jwt.sign(
+      {
+        id: newUser.id,
+        email: newUser.email,
+        isVerified: newUser.isVerified,
+        role: newUser.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    // Send the verification code to the user's email
+    sendVerificationCodeToEmail(email, verificationCode);
+
+    // Include the token in the response
+    return res.json({
+      message: "User created successfully",
+      user: newUser,
+      token,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const login = async (req, res, next) => {
   logger.info("Login triggered");
@@ -44,13 +122,12 @@ export const login = async (req, res, next) => {
       id: user.id,
       email: user.email,
       role: user.role, // Assuming the user object has a 'role' property
-      isVerified: user.isVerified
+      isVerified: user.isVerified,
     };
-    
+
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    
 
     return res.json({ message: "Authentication successful", token, user });
   } catch (error) {
@@ -58,74 +135,13 @@ export const login = async (req, res, next) => {
   }
 };
 
-
-export const signup = async (req, res, next) => {
-  logger.info("signup triggered: " + JSON.stringify(req.body, null, 2));
-  try {
-    const { username, password, email, role } = req.body;
-
-    logger.info("Username: " + username);
-    // Check if the user already exists
-    const existingUser = await prisma.user.findFirst({
-      where: { email: email },
-    });
-
-    if (existingUser) {
-      logger.info("User already exists");
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    logger.info("User does not exist yet");
-
-    // Hash the password before storing it
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    logger.info("Hashed password:" + hashedPassword);
-
-    // Ensure the provided role is valid
-    const validRoles = Object.values(ROLES);
-    const userRole = validRoles.includes(role) ? role : ROLES.AGENT;
-
-    const verificationCode = generateVerificationCode();
-    // Create the new user with the specified role
-    const newUser = await prisma.user.create({
-      data: {
-        username,
-        password: hashedPassword,
-        email: email,
-        role: userRole,
-        verificationCode: verificationCode,
-      },
-    });
-
-    logger.info("User created successfully" + newUser);
-
-    // Generate a token for the newly created user
-    const tokenPayload = {
-      id: newUser.id,
-      email: newUser.email,
-      role: newUser.role,
-      isVerified: newUser.isVerified,
-    };
-
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    // Send the verification code to the user's email
-    sendVerificationCodeToEmail(email, verificationCode);
-
-    // Include the token in the response
-    return res.json({ message: "User created successfully", user: newUser, token });
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-
 export const verify = async (req, res, next) => {
-  logger.info("verify triggered: " + JSON.stringify(req.body, null, 2) + " " + req.headers.authorization);
+  logger.info(
+    "verify triggered: " +
+      JSON.stringify(req.body, null, 2) +
+      " " +
+      req.headers.authorization
+  );
 
   try {
     const { verificationCode } = req.body;
@@ -184,8 +200,6 @@ export const verify = async (req, res, next) => {
   }
 };
 
-
-
 export const resendVerificationCode = async (req, res, next) => {
   logger.info("Resend triggered with token: " + req.headers.authorization);
 
@@ -205,7 +219,7 @@ export const resendVerificationCode = async (req, res, next) => {
 
     // Check if the user exists
     if (!user) {
-      logger.info("User exists");
+      logger.info("User doesn't exist");
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -218,12 +232,10 @@ export const resendVerificationCode = async (req, res, next) => {
   }
 };
 
-
 export const forgotPassword = async (req, res, next) => {
   try {
-  
     // Extract email from the token
-    const {email} = req.body;
+    const { email } = req.body;
 
     // Find the user in the database
     const user = await prisma.user.findUnique({ where: { email } });
@@ -234,21 +246,20 @@ export const forgotPassword = async (req, res, next) => {
     }
 
     // Generate a reset password token
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    
-    
-// Calculate the timestamp for one hour from now
-const oneHourFromNow = new Date();
-oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
+    const resetToken = crypto.randomBytes(20).toString("hex");
 
-// Save the token to the user in the database
-await prisma.user.update({
-  where: { id: user.id },
-    data: {
-    resetToken,
-    resetTokenExpires: oneHourFromNow,
-  },
-});
+    // Calculate the timestamp for one hour from now
+    const oneHourFromNow = new Date();
+    oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
+
+    // Save the token to the user in the database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpires: oneHourFromNow,
+      },
+    });
 
     // Send an email with the reset password link
     // You should implement a function similar to sendVerificationCodeToEmail
@@ -259,7 +270,6 @@ await prisma.user.update({
     next(error);
   }
 };
-
 
 export const resetPassword = async (req, res, next) => {
   try {
@@ -278,7 +288,9 @@ export const resetPassword = async (req, res, next) => {
 
     // Check if the user exists
     if (!user) {
-      return res.status(401).json({ message: "Invalid or expired reset token" });
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired reset token" });
     }
 
     // Hash the new password
@@ -287,7 +299,11 @@ export const resetPassword = async (req, res, next) => {
     // Update the user's password and remove the reset token
     await prisma.user.update({
       where: { id: user.id },
-      data: { password: hashedPassword, resetToken: null, resetTokenExpires: null },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
     });
 
     return res.json({ message: "Password reset successfully" });
@@ -295,4 +311,3 @@ export const resetPassword = async (req, res, next) => {
     next(error);
   }
 };
-
