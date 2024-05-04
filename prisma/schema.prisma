@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  username         String
+  password         String
+  email            String   @unique
+  role             String
+  verificationCode String
+  resetToken       String? @unique
+  resetTokenExpires DateTime?
+  isVerified       Boolean    @default(false)
+}
+
+model Conversation {
+  id              String       @id @default(uuid()) @unique
+  participantSid  String       @unique
+  type            String?
+  avgAgentRes     Float?
+  avgCustomerRes  Float?
+  rating          Int?         // Feedback rating (number rating/5)
+  profile         Json?        // Customer profile details
+  entities        Json?        // Entity details
+  duration        Int?         // Total duration of the conversation in seconds or minutes
+  length          Int?         // Total number of messages
+  overallSentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
+  overallSentimentScore  Float?
+  createdAt       DateTime     @default(now())
+  lastUpdatedAt   DateTime     @updatedAt
+  messages        Message[]
+}
+
+model Message {
+  id              String       @id @default(uuid()) @unique // Use native UUID generation
+  conversation    Conversation  @relation(fields: [conversationId], references: [id])
+  conversationId  String
+  sender          String
+  content         String
+  sentAt          DateTime     @default(now())
+  deliveredAt     DateTime?
+  seenAt          DateTime?
+  sentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
+  sentimentScore  Float?
+}
+
+enum Sentiment {
+  positive
+  neutral
+  negative
+}
+
+
