@@ -8,52 +8,96 @@ datasource db {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  username         String
-  password         String
-  email            String   @unique
-  role             String
+  id          Int     @id @default(autoincrement())
+  username    String
+  password    String
+  email       String   @unique
+  role        String
   verificationCode String
-  resetToken       String? @unique
+  resetToken  String?  @unique
   resetTokenExpires DateTime?
-  isVerified       Boolean    @default(false)
+  isVerified  Boolean  @default(false)
+  department  String?
+  conversationSid String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?  
+  ticketsAssigned  Ticket[]   
+  auditLogs AuditLog[] 
 }
 
 model Conversation {
-  id              String       @id @default(uuid()) @unique
-  participantSid  String       @unique
-  type            String?
-  avgAgentRes     Float?
-  avgCustomerRes  Float?
-  rating          Int?         // Feedback rating (number rating/5)
-  profile         Json?        // Customer profile details
-  entities        Json?        // Entity details
-  duration        Int?         // Total duration of the conversation in seconds or minutes
-  length          Int?         // Total number of messages
-  overallSentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
-  overallSentimentScore  Float?
-  createdAt       DateTime     @default(now())
-  lastUpdatedAt   DateTime     @updatedAt
-  messages        Message[]
+  id            String      @id @default(uuid())
+  participantSid String?    @unique
+  channelType    String
+  language       String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime?
+  metrics        ConversationMetrics?
+  messages       Message[]
+  tickets        Ticket[]
+}
+
+model ConversationMetrics {
+  id                   Int       @id @default(autoincrement())
+  conversationId       String    @unique
+  avgAgentResponse     Float
+  avgCustomerResponse  Float
+  rating               Int
+  overallSentiment     Sentiment
+  overallSentimentScore Float
+  customerProfile      Json
+  entities             Json
+  duration             Int
+  length               Int
+  updatedAt            DateTime
+  conversation         Conversation @relation(fields: [conversationId], references: [id])
 }
 
 model Message {
-  id              String       @id @default(uuid()) @unique // Use native UUID generation
-  conversation    Conversation  @relation(fields: [conversationId], references: [id])
-  conversationId  String
-  sender          String
-  content         String
-  sentAt          DateTime     @default(now())
-  deliveredAt     DateTime?
-  seenAt          DateTime?
-  sentiment       Sentiment?   // Sentiment analysis category (define the enum 'Sentiment' accordingly)
-  sentimentScore  Float?
+  id          String      @id @default(uuid())
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+  sender      String
+  content     String
+  sentAt      DateTime    @default(now())
+  deliveredAt DateTime?
+  seenAt      DateTime?
+  sentiment   Sentiment
+  sentimentScore Float
+  createdAt   DateTime    @default(now())
 }
 
+model AuditLog {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  actionType String
+  entityName String
+  entityId   String
+  details    Json
+  createdAt  DateTime  @default(now())
+
+  @@index([userId], name: "idx_user_audit_log")
+}
+
+model Ticket {
+  id             Int         @id @default(autoincrement())
+  subject        String
+  description    String
+  status         String
+  priority       String
+  assignedTo     User        @relation(fields: [userId], references: [id])
+  userId   Int         
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime?
+}
+
+
+// Define enum for Sentiment
 enum Sentiment {
-  positive
-  neutral
   negative
+  neutral
+  positive
 }
-
-
