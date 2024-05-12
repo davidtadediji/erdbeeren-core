@@ -105,5 +105,11 @@ export async function handleConversationLength(conversationId) {
   }
 }
 
+export async function handleTicketVolume (conversationId) {
+
+}
 
 
+export async function handleIssueCategory (conversationId) {
+  
+}

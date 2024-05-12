@@ -143,3 +143,12 @@ export async function getOverallSentimentTrend(req, res, next) {
     next(error);
   }
 }
+
+export async function TicketVolume (req, res, next){
+
+}
+
+export async function IssueCategory (req, res, next){
+
+}
+

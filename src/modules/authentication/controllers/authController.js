@@ -77,7 +77,6 @@ export const signup = async (req, res, next) => {
     logger.info("User was created successfully" + newUser);
 
     // generate jwt for the newly created user
-
     const token = jwt.sign(
       {
         id: newUser.id,
@@ -86,15 +85,12 @@ export const signup = async (req, res, next) => {
         role: newUser.role,
       },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
     );
 
-    // Send the verification code to the user's email
+    // send the verification code to the user's email
     sendVerificationCodeToEmail(email, verificationCode);
 
-    // Include the token in the response
+    // include the token in the response
     return res.json({
       message: "User created successfully",
       user: newUser,
@@ -125,9 +121,7 @@ export const login = async (req, res, next) => {
       isVerified: user.isVerified,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET,);
 
     return res.json({ message: "Authentication successful", token, user });
   } catch (error) {
@@ -186,9 +180,7 @@ export const verify = async (req, res, next) => {
       isVerified: updatedUser.isVerified,
     };
 
-    const newToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const newToken = jwt.sign(tokenPayload, process.env.JWT_SECRET);
 
     return res.json({
       message: "Email verification successful",
