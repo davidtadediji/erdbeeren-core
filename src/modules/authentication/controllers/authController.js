@@ -50,11 +50,11 @@ export const signup = async (req, res, next) => {
     // convert the password to hash
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    logger.info("Hashed password:" + hashedPassword);
+    logger.info("Hashed password: " + hashedPassword);
 
     // check if the role provided is valid
     const existingRoles = Object.values(ROLES);
-    const userRole = "";
+    let userRole = "";
     if (existingRoles.includes(role)) {
       userRole = role;
     } else {
