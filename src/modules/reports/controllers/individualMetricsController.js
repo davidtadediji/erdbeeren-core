@@ -125,7 +125,7 @@ export async function getFrequencyOfInteractions(req, res, next) {
     });
 
     const messageCount = conversation ? conversation.length : 0;
-
+we
     res.json({
       customer: customerId,
       metric: "Frequency of Interactions",
