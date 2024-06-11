@@ -42,6 +42,16 @@ const receiveMessage = async (req) => {
       conversation = await updateConversationTimestamp(conversation.id);
     }
 
+    const metricsExists = await prisma.conversationMetrics.findUnique({
+      where: { conversationId: conversation.id },
+    });
+
+    if (!metricsExists) {
+      await prisma.conversationMetrics.create({
+        data: { conversationId: conversation.id },
+      });
+    }
+
     const customerMessage = await saveMessageToConversation(
       conversation.id,
       "customer",
@@ -58,7 +68,6 @@ const receiveMessage = async (req) => {
       messageId: customerMessage.id,
     });
 
-
     const previousMessages = await getConversationThread(conversation.id);
 
     const response = await respondToMessage(
@@ -67,27 +76,41 @@ const receiveMessage = async (req) => {
       true
     );
 
-    return { conversation, response, isWhatsApp, phoneNumber };
+    // const response = { res: { text: "Okay" } };
+
+    logger.info("Agent response: " + response.res);
+
+    return { conversation, response, isWhatsApp, phoneNumber, messageContent };
   } catch (error) {
     throw error;
   }
 };
 
-const sendMessage = async ({ conversation, response, isWhatsApp, phoneNumber }) => {
+const sendMessage = async ({
+  conversation,
+  response,
+  isWhatsApp,
+  phoneNumber,
+  messageContent,
+}) => {
+  logger.info(
+    `${conversation} ${response} ${isWhatsApp} ${phoneNumber} ${messageContent} were retrieved successfully`
+  );
+
   try {
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: response.res,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    } else {
-      await client.messages.create({
-        body: response.res,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: response.res,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // } else {
+    //   await client.messages.create({
+    //     body: response.res,
+    //     from: twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // }
 
     const agentMessage = await saveMessageToConversation(
       conversation.id,
@@ -107,10 +130,9 @@ const sendMessage = async ({ conversation, response, isWhatsApp, phoneNumber }) 
 
     eventEmitter.emit("interactionTurnCompleted", conversation.id);
 
-    await generateCustomerVectorStore(conversation.participantSid, [
-      message,
-      response.res,
-    ]);
+    const turn = [`Customer: ${messageContent}`, `Agent: ${response.res}`]
+
+    await generateCustomerVectorStore(conversation.participantSid, turn);
 
     return "Message sent successfully";
   } catch (error) {
@@ -119,11 +141,22 @@ const sendMessage = async ({ conversation, response, isWhatsApp, phoneNumber }) 
 };
 
 const webhookController = async (req, res) => {
-  logger.info("Message webhook triggered: " + JSON.stringify(req.body, null, 2));
+  logger.info(
+    "Message webhook triggered: " + JSON.stringify(req.body, null, 2)
+  );
 
   try {
-    const { conversation, response, isWhatsApp, phoneNumber } = await receiveMessage(req);
-    await sendMessage({ conversation, response, isWhatsApp, phoneNumber });
+    const { conversation, response, isWhatsApp, phoneNumber, messageContent } =
+      await receiveMessage(req);
+    logger.info("Recieved message");
+
+    await sendMessage({
+      conversation,
+      response,
+      isWhatsApp,
+      phoneNumber,
+      messageContent,
+    });
 
     res.status(200).send("Message received and responded successfully");
   } catch (error) {

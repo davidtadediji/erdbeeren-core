@@ -6,13 +6,13 @@ const prisma = new PrismaClient();
 const updateConversationTimestamp = async (conversationId) => {
   return await prisma.conversation.update({
     where: { id: conversationId },
-    data: { lastUpdatedAt: new Date() },
+    data: { updatedAt: new Date() },
   });
 };
 
-const createNewConversation = async (phoneNumber, type) => {
+const createNewConversation = async (phoneNumber, channelType) => {
   return await prisma.conversation.create({
-    data: { participantSid: phoneNumber, type },
+    data: { participantSid: phoneNumber, channelType, language: "English" },
   });
 };
 

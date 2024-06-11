@@ -28,7 +28,7 @@ export const generateResponse = async (input) => {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-1106",
         messages: [
           {
             role: "user",
