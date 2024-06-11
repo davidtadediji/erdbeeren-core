@@ -8,10 +8,10 @@ const prisma = new PrismaClient();
 // function to update the customer profile json in the database.
 async function updateCustomerProfile(customerInfo, conversationId) {
   try {
-    await prisma.conversation.update({
-      where: { id: conversationId },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
       data: {
-        profile: {
+        customerProfile: {
           ...customerInfo,
         },
       },
@@ -43,10 +43,12 @@ export async function handleCustomerProfile(messageId) {
     }
 
     // extract customer profile from message content using llm function.
-    const customerInfo = await customerProfiling(
-      encodeURIComponent(message.content)
-    );
+    // const customerInfo = await customerProfiling(
+    //   encodeURIComponent(message.content)
+    // );
 
+    const customerInfo = ""
+    
     // update customer profile using the extracted customerInfo object and conversationId
     await updateCustomerProfile(customerInfo, conversationId);
 

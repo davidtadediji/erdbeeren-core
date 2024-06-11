@@ -14,8 +14,8 @@ export async function handleCustomerResponseTime(conversationId) {
 
     //  return error if doesn't conversation exists or if it doesn't contain messages or if the conversation length is = 0
     if (
-      !conversation.messages ||
       !conversation ||
+      !conversation.messages ||
       conversation.messages.length === 0
     ) {
       logger.error("Conversation is invalid or no messages found.");
@@ -29,8 +29,8 @@ export async function handleCustomerResponseTime(conversationId) {
     );
 
     const customerMessagesLength = customerMessages.length;
-    
-    const averageCustomerResponseTime = 0;
+
+    let averageCustomerResponseTime = 0;
 
     if (customerMessagesLength > 1) {
       // Calculate total customer response time using the reduce function
@@ -53,16 +53,18 @@ export async function handleCustomerResponseTime(conversationId) {
     }
 
     // update the avgCustomerRes field in the conversation
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { avgCustomerRes: averageCustomerResponseTime },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
+      data: { avgCustomerResponse: averageCustomerResponseTime },
     });
 
     logger.info(
       `Average Customer Response Time for conversation ${conversationId}: ${averageCustomerResponseTime} seconds`
     );
   } catch (error) {
-    logger.error("Error occured while handling customer response time: " + error.message);
+    logger.error(
+      "Error occured while handling customer response time: " + error.message
+    );
   }
 }
 
@@ -78,8 +80,8 @@ export async function handleAgentResponseTime(conversationId) {
 
     //  return error if doesn't conversation exists or if it doesn't contain messages or if the conversation length is = 0
     if (
-      !conversation.messages ||
       !conversation ||
+      !conversation.messages ||
       conversation.messages.length === 0
     ) {
       logger.error("Conversation is invalid or no messages found.");
@@ -93,8 +95,8 @@ export async function handleAgentResponseTime(conversationId) {
     );
 
     const agentMessagesLength = agentMessages.length;
-    
-    const averageAgentResponseTime = 0;
+
+    let averageAgentResponseTime = 0;
 
     if (agentMessagesLength > 1) {
       // Calculate total agent response time using the reduce function
@@ -117,18 +119,17 @@ export async function handleAgentResponseTime(conversationId) {
     }
 
     // update the avgAgentRes field in the conversation
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { avgAgentRes: averageAgentResponseTime },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
+      data: { avgAgentResponse: averageAgentResponseTime },
     });
 
     logger.info(
       `Average Agent Response Time for conversation ${conversationId}: ${averageAgentResponseTime} seconds`
     );
   } catch (error) {
-    logger.error("Error occured while handling agent response time: " + error.message);
+    logger.error(
+      "Error occured while handling agent response time: " + error.message
+    );
   }
 }
-
-
-

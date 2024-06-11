@@ -12,7 +12,7 @@ async function produceMessage(queue, message) {
 
     // check if queue exists
     await amqp_channel.assertQueue(queue, { durable: true });
-    parsedMessage = JSON.stringify(message);
+    const parsedMessage = JSON.stringify(message);
 
     // send message to queue and persist if service is restarted to prevent message loss
     amqp_channel.sendToQueue(queue, Buffer.from(parsedMessage), {

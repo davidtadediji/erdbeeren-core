@@ -57,8 +57,8 @@ export async function handleConversationDuration(conversationId) {
 
 
     // update the duration field of the conversation table
-    await prisma.conversation.update({
-      where: { id: conversationId },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
       data: { duration: conversationDurationMin },
     });
 
@@ -92,8 +92,8 @@ export async function handleConversationLength(conversationId) {
     logger.info("Message count: " + conversationLength);
 
     // update the conversation length field of the conversation table
-    await prisma.conversation.update({
-      where: { id: conversationId },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
       data: { length: conversationLength },
     });
 

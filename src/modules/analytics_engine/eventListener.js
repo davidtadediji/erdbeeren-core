@@ -37,8 +37,8 @@ conversationEventEmitter.on(
 );
 
 // trigger actions when an agent responds
-conversationEventEmitter.on("agentResponded", ({ messageId }) => {
-  sendMessageToQueue("agentResponseTimeQueue", "agentResponded", messageId);
+conversationEventEmitter.on("agentResponded", ({ messageId, conversationId }) => {
+  sendMessageToQueue("agentResponseTimeQueue", "agentResponded", conversationId);
 });
 
 

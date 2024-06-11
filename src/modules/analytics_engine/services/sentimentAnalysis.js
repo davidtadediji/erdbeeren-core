@@ -18,6 +18,8 @@ export async function handleSentimentAnalysis(messageId) {
   }
 
   const text = encodeURIComponent(message.content);
+
+  logger.info("Analysed text: " + text)
   try {
     const response = await axios.post(
       "https://api.twinword.com/api/sentiment/analyze/latest/",
@@ -68,8 +70,8 @@ export async function handleSentimentAnalysis(messageId) {
         overallSentimentScore
     );
 
-    await prisma.conversation.update({
-      where: { id: conversationId },
+    await prisma.conversationMetrics.update({
+      where: { conversationId: conversationId },
       data: {
         overallSentiment,
         overallSentimentScore,
