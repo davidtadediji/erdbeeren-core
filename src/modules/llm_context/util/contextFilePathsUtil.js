@@ -13,17 +13,29 @@ const getCustomerVectorStorePath = (customersSid) => {
   return path.join(
     currentModuleDir,
     "..",
+    "..",
+    "..",
+    "..",
+    "vector_store",
     "customer_index",
-    `${customersSid}.index`
+    `${customersSid}_index`
   );
 };
 
 const getEnterpriseVectorStorePath = () => {
-  return path.join(currentModuleDir, "..", "enterprise_index", "context.index");
+  return path.join(
+    currentModuleDir,
+    "..",
+    "..",
+    "..",
+    "..",
+    "vector_store",
+    "enterprise_index"
+  );
 };
 
 const getEnterpriseContextFilePath = () => {
-  return path.join(currentModuleDir, "..", "repository");
+  return path.join(currentModuleDir, "..", "..", "..", "..", "repository");
 };
 
 export {

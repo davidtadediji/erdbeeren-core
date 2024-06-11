@@ -1,16 +1,23 @@
 // src\modules\llm_context\services\fileService.js
-import fs from 'fs';
-import logger from '../../../../logger.js';
-import path from 'path';
+import fs from "fs";
+import logger from "../../../../logger.js";
+import path from "path";
 
 const currentModuleURL = new URL(import.meta.url);
 const currentModuleDir = path.dirname(currentModuleURL.pathname);
 
 logger.info("File service dir: " + currentModuleDir);
 
-const FILE_UPLOAD_PATH = path.join(currentModuleDir.replace(/^\/([A-Z]:)/, '$1'), '..', 'repository'); // Adjust the path as needed
+const FILE_UPLOAD_PATH = path.join(
+  currentModuleDir.replace(/^\/([A-Z]:)/, "$1"),
+  "..",
+  "..",
+  "..",
+  "..",
+  "repository"
+); // Adjust the path as needed
 
-logger.info("File upload path: " + FILE_UPLOAD_PATH)
+logger.info("File upload path: " + FILE_UPLOAD_PATH);
 // Ensure the upload directory exists
 if (!fs.existsSync(FILE_UPLOAD_PATH)) {
   fs.mkdirSync(FILE_UPLOAD_PATH);
@@ -39,8 +46,6 @@ export const uploadFiles = async (files) => {
   }
 };
 
-
-
 export const deleteFile = async (filename) => {
   const filePath = path.join(FILE_UPLOAD_PATH, filename);
 
@@ -53,7 +58,7 @@ export const deleteFile = async (filename) => {
 
     return { success: true, message: `File ${filename} deleted successfully.` };
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if (error.code === "ENOENT") {
       return { success: false, message: `File ${filename} not found.` };
     } else {
       logger.error(`Error deleting file: ${error.message}`);
@@ -61,7 +66,6 @@ export const deleteFile = async (filename) => {
     }
   }
 };
-
 
 export const listFiles = async () => {
   try {

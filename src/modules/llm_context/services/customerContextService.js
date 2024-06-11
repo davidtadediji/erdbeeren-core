@@ -1,16 +1,20 @@
 // src\modules\llm_context\services\customerContextService.js
 import * as fs from "fs";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+// import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { FaissStore } from "langchain/vectorstores/faiss";
-import path from 'path';
+// import { FaissStore } from "langchain/vectorstores/faiss";
+import { FaissStore } from "@langchain/community/vectorstores/faiss";
+import path from "path";
 import logger from "../../../../logger.js";
-import {
-    getCustomerVectorStorePath
-} from "../util/contextFilePathsUtil.js";
+import { getCustomerVectorStorePath } from "../util/contextFilePathsUtil.js";
 
+const generateCustomerVectorStore = async (
+  customersSid,
+  turn = ["Query", "Response"]
+) => {
+  logger.info("Generate Customer Vector Store triggered!");
 
-const generateCustomerVectorStore = async (customersSid, turn=["Query", "Response"]) => {
   try {
     const CUSTOMER_VECTOR_STORE_PATH = getCustomerVectorStorePath(customersSid);
 
@@ -43,14 +47,15 @@ const generateCustomerVectorStore = async (customersSid, turn=["Query", "Respons
       );
 
       // Merge the new vector store with the existing one
-      vectorStore.merge_from(newVectorStore);
+      vectorStore.mergeFrom(newVectorStore);
     } else {
       logger.info("Customer vector store does not exist. Creating new...");
 
-      const text = turn.join(" ");
+      const text = "This is your conversation history with the user" + turn.join(" ");
 
       const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
+        chunkSize: 500,
+        chunkOverlap: 0,
       });
 
       const docs = await textSplitter.createDocuments([text]);
@@ -60,7 +65,7 @@ const generateCustomerVectorStore = async (customersSid, turn=["Query", "Respons
       );
     }
 
-    // Save the final vector store
+       // Save the final vector store
     await vectorStore.save(CUSTOMER_VECTOR_STORE_PATH);
 
     return vectorStore;
@@ -70,11 +75,13 @@ const generateCustomerVectorStore = async (customersSid, turn=["Query", "Respons
 };
 
 const loadCustomerVectorStore = async (customersSid) => {
+  logger.info("Load customer vector store triggered!")
   const customerVectorStorePath = getCustomerVectorStorePath(customersSid);
 
-  logger.info("Customer vector store path: " + customerVectorStorePath)
+  logger.info("Customer vector store path: " + customerVectorStorePath);
 
   if (fs.existsSync(customerVectorStorePath)) {
+    logger.info("Customer vector store exists")
     return await FaissStore.load(
       customerVectorStorePath,
       new OpenAIEmbeddings()
@@ -85,4 +92,3 @@ const loadCustomerVectorStore = async (customersSid) => {
 };
 
 export { generateCustomerVectorStore, loadCustomerVectorStore };
-
