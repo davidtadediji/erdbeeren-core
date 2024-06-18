@@ -24,25 +24,34 @@ if (!fs.existsSync(FILE_UPLOAD_PATH)) {
 }
 
 export const uploadFiles = async (files) => {
+  logger.info("File upload triggered!");
+  
+  if (!Array.isArray(files)) {
+    throw new TypeError('Expected an array of files');
+  }
+  
   try {
     const uploadedFiles = [];
 
     for (const file of files) {
-      const { originalname, buffer } = file;
-      const filePath = path.join(FILE_UPLOAD_PATH, originalname);
+      const { originalFilename, path: tempFilePath } = file;
+      const targetFilePath = path.join(FILE_UPLOAD_PATH, originalFilename);
 
-      // Write each file to the local file system asynchronously
-      await fs.promises.writeFile(filePath, buffer);
-
-      // Collect file metadata for each uploaded file
-      uploadedFiles.push({ filename: originalname, path: filePath });
+      try {
+        await fs.promises.rename(tempFilePath, targetFilePath);
+        uploadedFiles.push({
+          filename: originalFilename,
+          path: targetFilePath,
+        });
+      } catch (error) {
+        logger.error(`Error saving file ${originalFilename}: ${error.message}`);
+        throw error;
+      }
     }
-
-    // Return an array of uploaded files
     return uploadedFiles;
   } catch (error) {
     logger.error(`Error uploading files: ${error.message}`);
-    throw error; // Rethrow the error to be caught by the calling code
+    throw error;
   }
 };
 
@@ -50,7 +59,7 @@ export const deleteFile = async (filename) => {
   const filePath = path.join(FILE_UPLOAD_PATH, filename);
 
   try {
-    // Check if the file exists asynchronously
+    // To check if the file exists asynchronously
     await fs.promises.access(filePath);
 
     // Delete the file asynchronously
@@ -74,5 +83,64 @@ export const listFiles = async () => {
   } catch (error) {
     logger.error(`Error listing files: ${error.message}`);
     throw error;
+  }
+};
+
+export const renameFile = async (filename, newFilename) => {
+  const filePath = path.join(FILE_UPLOAD_PATH, filename);
+  const newFilePath = path.join(FILE_UPLOAD_PATH, newFilename);
+
+  try {
+    await fs.promises.access(filePath);
+
+    await fs.promises.rename(filePath, newFilePath);
+
+    return {
+      success: true,
+      message: `File ${filename} renamed to ${newFilename} successfully.`,
+    };
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return { success: false, message: `File ${filename} not found.` };
+    } else {
+      logger.error(`Error renaming file: ${error.message}`);
+      throw error;
+    }
+  }
+};
+
+export const viewFile = async (filename) => {
+  const filePath = path.join(FILE_UPLOAD_PATH, filename);
+
+  return new Promise((resolve, reject) => {
+    try {
+      if (fs.existsSync(filePath)) {
+        const contentType = getContentType(filename);
+
+        const fileStream = fs.createReadStream(filePath);
+        resolve({ fileStream, contentType });
+      } else {
+        reject(new Error(`File ${filename} was not found`));
+      }
+    } catch (error) {
+      logger.error(`Error occured while accessing file: ${error.message}`);
+      reject(error);
+    }
+  });
+};
+
+// Helper function to determine content type based on file extension
+const getContentType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  switch (ext) {
+    case ".pdf":
+      return "application/pdf";
+    case ".doc":
+    case ".docx":
+      return "application/msword";
+    case ".txt":
+      return "text/plain";
+    default:
+      return "application/octet-stream";
   }
 };

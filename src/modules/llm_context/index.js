@@ -25,6 +25,6 @@ app.use("/repository", fileRoutes);
 app.use("/enterprise-context", enterpriseContextRoutes);
 app.use("/customer-context", customerContextRoutes);
 app.use("/model", modelRoutes);
-app.use(errorMiddleware); // Use the error handling middleware
+app.use(errorMiddleware); 
 
 export default app;

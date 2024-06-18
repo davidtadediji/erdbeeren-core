@@ -5,7 +5,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 // import { FaissStore } from "langchain/vectorstores/faiss";
 import { FaissStore } from "@langchain/community/vectorstores/faiss";
-import path from "path"; // Add this line
+import path from "path";
 import logger from "../../../../logger.js";
 import {
   getEnterpriseContextFilePath,
@@ -36,33 +36,21 @@ const generateEnterpriseVectorStore = async () => {
     }
 
     logger.info("Filenames: " + fileNames);
-    // const texts = fileNames.map((fileName) => {
-    //   const filePath = path.join(CONTEXT_FOLDER_PATH, fileName);
-    //   return fs.readFileSync(filePath, "utf-8");
-    // });
 
-    // const texts = await Promise.all(
-    //   fileNames.map(async (fileName) => {
-    //     const filePath = path.join(CONTEXT_FOLDER_PATH, fileName);
-    //     const loader = new DocxLoader(filePath);
-    //     const docs = await loader.load();
-    //     return docs;
-    //   })
-    // );
-
-    const loader = new DirectoryLoader(
-      CONTEXT_FOLDER_PATH,
-      {
+    let loader;
+    try {
+      loader = new DirectoryLoader(CONTEXT_FOLDER_PATH, {
         ".json": (path) => new JSONLoader(path, "/texts"),
         ".jsonl": (path) => new JSONLinesLoader(path, "/html"),
         ".txt": (path) => new TextLoader(path),
         ".csv": (path) => new CSVLoader(path, "text"),
         ".docx": (path) => new DocxLoader(path, "text"),
-        ".pdf": (path) => new PDFLoader(path,  {
-          splitPages: false,
-        }, "text"),
-      }
-    );
+        ".pdf": (path) => new PDFLoader(path, { splitPages: false }, "text"),
+      });
+    } catch (error) {
+      throw new Error(`Error initializing DirectoryLoader: ${error.message}`);
+    }
+    
     const texts = await loader.load();
     console.log({ texts });
 

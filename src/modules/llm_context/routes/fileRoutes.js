@@ -1,53 +1,122 @@
-// Import necessary modules and middlewares
-import express from 'express';
-import multer from 'multer';
-import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
-import { deleteFile, listFiles, uploadFiles } from '../services/fileService.js';
+import express from "express";
+
+import multiparty from "multiparty";
+import {
+  authenticateJWT,
+  hasPermission,
+} from "../../authentication/middleware/authMiddleware.js";
+import {
+  deleteFile,
+  listFiles,
+  renameFile,
+  uploadFiles,
+  viewFile,
+} from "../services/fileService.js";
+import logger from "../../../../logger.js";
 
 const router = express.Router();
-const upload = multer();
 
 // Protect the '/upload' route with authentication and permission check
 router.post(
-  '/upload',
-  authenticateJWT, // Ensure the user is authenticated
-  hasPermission(["manageLLM"]), // Ensure the user has the 'admin' role
-  upload.array('file', 7), // Handle file upload
+  "/upload",
+  authenticateJWT,
+  hasPermission(["manageLLM"]),
   async (req, res, next) => {
     try {
-      const files = await uploadFiles(req.files);
-      res.json(files);
+      const form = new multiparty.Form();
+
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          return next(err);
+        }
+
+        try {
+          const uploadedFiles = await uploadFiles(files.file);
+          res.json(uploadedFiles);
+        } catch (error) {
+          next(error);
+        }
+      });
     } catch (error) {
-      next(error); // Pass the error to the error handling middleware
+      next(error);
     }
   }
 );
 
 // Protect the '/:filename' (delete) route with authentication and permission check
-router.delete('/:filename', authenticateJWT, hasPermission(["manageLLM"]), async (req, res, next) => {
-  const { filename } = req.params;
-  try {
-    const result = await deleteFile(filename);
-    if (result.success) {
-      res.json(result);
-    } else {
-      res.status(404).json(result);
+router.delete(
+  "/delete/:filename",
+  authenticateJWT,
+  hasPermission(["manageLLM"]),
+  async (req, res, next) => {
+    const { filename } = req.params;
+    try {
+      const result = await deleteFile(filename);
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error); // Pass the error to the error handling middleware
   }
-});
+);
+
+// Protect the '/:filename' (rename) route with authentication and permission check
+router.put(
+  "/rename/:filename",
+  authenticateJWT,
+  hasPermission(["manageLLM"]),
+  async (req, res, next) => {
+    const { filename } = req.params;
+    const { newFilename } = req.body;
+    try {
+      const result = await renameFile(filename, newFilename);
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 // Protect the '/list' route with authentication and permission check
-router.get('/list', authenticateJWT, hasPermission(["manageLLM"]), async (req, res, next) => {
-  try {
-    const files = await listFiles();
-    res.json({ files });
-  } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+router.get(
+  "/list",
+  authenticateJWT,
+  hasPermission(["manageLLM"]),
+  async (req, res, next) => {
+    try {
+      const files = await listFiles();
+      res.json({ files });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
+router.get(
+  "/view/:filename",
+  authenticateJWT,
+  hasPermission(["manageLLM"]),
+  async (req, res, next) => {
+    const { filename } = req.params;
 
-// Export the router
+    try {
+      const { fileStream, contentType } = await viewFile(filename);
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+
+      fileStream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;
