@@ -5,7 +5,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "concurrently \"nodemon src/modules/analytics_engine/messageConsumer.js\" \"nodemon app.js\"",
+    "start": "concurrently \"nodemon src/modules/analytics_engine/messageConsumer.js\" \"nodemon src/modules/audit_logger/messageConsumer.js\" \"nodemon app.js\"",
     "test": "jest"
   },
   "keywords": [],
@@ -60,6 +60,7 @@
     "langchain": "^0.2.4",
     "mammoth": "^1.7.2",
     "multer": "^1.4.5-lts.1",
+    "multiparty": "^4.2.3",
     "ngrok": "^5.0.0-beta.2",
     "nodemailer": "^6.9.7",
     "passport-local": "^1.0.0",
