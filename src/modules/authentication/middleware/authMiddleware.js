@@ -1,17 +1,23 @@
 // src\modules\authentication\middleware\authMiddleware.js
-import jwt from 'jsonwebtoken';
-import { ROLE_PERMISSIONS } from '../config/roles.js'; // Make sure to import ROLE_PERMISSIONS
+import jwt from "jsonwebtoken";
+import { ROLE_PERMISSIONS } from "../config/roles.js"; // Make sure to import ROLE_PERMISSIONS
+import logger from "../../../../logger.js";
 
 const authenticateJWT = (req, res, next) => {
-  const token = req.header('Authorization');
+  const token = req.header("Authorization");
+
 
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized access' });
+    logger.error("Unauthorized access");
+    return res.status(401).json({ message: "Unauthorized access" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ message: 'Forbidden' });
+      logger.error(err.message);
+      return res
+        .status(403)
+        .json({ message: "Forbidden, user is not authenticated!" });
     }
 
     req.user = user;
@@ -25,12 +31,20 @@ const hasPermission = (requiredPermissions) => (req, res, next) => {
   if (user && user.role) {
     const userPermissions = ROLE_PERMISSIONS[user.role];
 
-    if (userPermissions && requiredPermissions.every(permission => userPermissions.includes(permission))) {
+    if (
+      userPermissions &&
+      requiredPermissions.every((permission) =>
+        userPermissions.includes(permission)
+      )
+    ) {
       return next();
     }
   }
+  logger.error("Forbidden, user does not have the permission");
 
-  res.status(403).json({ message: 'Forbidden' });
+  res
+    .status(403)
+    .json({ message: "Forbidden, user does not have the permission" });
 };
 
 export { authenticateJWT, hasPermission };

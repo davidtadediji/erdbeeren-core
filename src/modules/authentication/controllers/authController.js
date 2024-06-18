@@ -117,7 +117,7 @@ export const login = async (req, res, next) => {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      role: user.role, // Assuming the user object has a 'role' property
+      role: user.role, 
       isVerified: user.isVerified,
     };
 
