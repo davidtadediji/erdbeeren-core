@@ -9,14 +9,6 @@ const sendMessageToQueue = (queueName, event, data) => {
   messageQueue.produceMessage(queueName, message);
 }
 
-// // trigger actions when a conversation interactions ends
-// conversationEventEmitter.on("interactionEnded", (message) => {
-//   // add feedback analysis to queue - scheduled for one day after last message
-//   setTimeout(() => {
-//     sendMessageToQueue("feedbackQueue", "interactionEnded", message);
-//   }, 86400000);
-// });
-
 // trigger actions when a new message is sent
 conversationEventEmitter.on(
   "newMessageCreated",
@@ -41,7 +33,6 @@ conversationEventEmitter.on("agentResponded", ({ messageId, conversationId }) =>
   sendMessageToQueue("agentResponseTimeQueue", "agentResponded", conversationId);
 });
 
-
 // trigger actions when a customer responds
 conversationEventEmitter.on(
   "customerResponded",
@@ -64,3 +55,10 @@ conversationEventEmitter.on(
 );
 
 
+// // trigger actions when a conversation interactions ends
+// conversationEventEmitter.on("interactionEnded", (message) => {
+//   // add feedback analysis to queue - scheduled for one day after last message
+//   setTimeout(() => {
+//     sendMessageToQueue("feedbackQueue", "interactionEnded", message);
+//   }, 86400000);
+// });
