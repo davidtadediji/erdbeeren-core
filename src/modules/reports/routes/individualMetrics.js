@@ -6,7 +6,6 @@ import { authenticateJWT, hasPermission } from "../../authentication/middleware/
 const router = express.Router();
 
 
-// Example route for Individual Customer Satisfaction Metrics
 router.get(
   "/:customerId/satisfaction",
   authenticateJWT,
@@ -22,7 +21,6 @@ router.get(
   individualMetricsController.getAllParticipantIds
 );
 
-// Example route for Customer-Specific Conversation Duration
 router.get(
   "/:customerId/conversation-duration",
   authenticateJWT,
@@ -30,7 +28,6 @@ router.get(
   individualMetricsController.getConversationDuration
 );
 
-// Example route for Response Time Metrics for Individual Customers
 router.get(
   "/:customerId/avg-agent-response-time",
   authenticateJWT,
@@ -59,7 +56,6 @@ router.get(
   individualMetricsController.getEntities
 );
 
-// Example route for Frequency of Interactions for Individual Customers
 router.get(
   "/:customerId/frequency-of-interactions",
   authenticateJWT,
@@ -67,7 +63,6 @@ router.get(
   individualMetricsController.getFrequencyOfInteractions
 );
 
-// Example route for Sentiment Report for Individual Customers
 router.get(
   "/:customerId/sentiment-report",
   authenticateJWT,
@@ -84,14 +79,12 @@ router.get(
 
 export default router;
 
-// // Example route for Customer Feedback Report
 // router.get('/:customerId/feedback', (req, res) => {
 //   const customerId = req.params.customerId;
 //   // Implement logic to fetch and return feedback report for the specific customer
 //   res.json({ customer: customerId, metric: 'Feedback Report' });
 // });
 
-// // Example route for Resolution Status for Individual Customers
 // router.get('/:customerId/resolution-status', (req, res) => {
 //   const customerId = req.params.customerId;
 //   // Implement logic to fetch and return resolution status for the specific customer
