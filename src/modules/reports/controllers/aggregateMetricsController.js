@@ -30,7 +30,6 @@ export async function getCustomerSatisfactionTrend(req, res, next) {
     const metrics = JSON.parse(metricsData);
     const customerSatisfactionData = metrics.customerSatisfaction;
 
-    // Implement your logic to process the data as needed
 
     res.json({
       metric: "Customer Satisfaction Trend Report",
@@ -47,7 +46,6 @@ export async function getAverageConversationDuration(req, res, next) {
     const metrics = JSON.parse(metricsData);
     const avgConversationDurationData = metrics.averageConversationDuration;
 
-    // Implement your logic to process the data as needed
 
     res.json({
       metric: "Average Conversation Duration Report",
@@ -85,7 +83,6 @@ export async function getDemographicCustomerReport(req, res, next) {
     const metrics = JSON.parse(metricsData);
     const demographicCustomerData = metrics.demographicCustomerReport;
 
-    // Implement your logic to process the data as needed
 
     res.json({
       metric: "Demographic Customer Report",
@@ -103,7 +100,6 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
     const highFrequencyCustomerData =
       metrics.highFrequencyCustomerIdentification;
 
-    // Implement your logic to process the data as needed
 
     res.json({
       metric: "High-Frequency Customer Identification",

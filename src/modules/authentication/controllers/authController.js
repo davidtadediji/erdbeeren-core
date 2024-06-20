@@ -254,7 +254,7 @@ export const forgotPassword = async (req, res, next) => {
     });
 
     // Send an email with the reset password link
-    // You should implement a function similar to sendVerificationCodeToEmail
+    // Implement a function similar to sendVerificationCodeToEmail
     sendResetPasswordEmail(user.email, resetToken);
 
     return res.json({ message: "Password reset email sent successfully" });

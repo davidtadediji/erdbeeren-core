@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import axios from "axios"; // Import axios library
+import axios from "axios"; 
 import logger from "../../../../logger.js";
 
 const prisma = new PrismaClient();
@@ -45,7 +45,7 @@ export async function handleSentimentAnalysis(messageId) {
 
     logger.info("Sentiment type: " + data.type + " Sentiment score: " + data.score);
 
-    // Update the Message model with sentiment analysis results
+    // Updated the Message model with sentiment analysis results
     await prisma.message.update({
       where: { id: messageId },
       data: {
@@ -54,7 +54,7 @@ export async function handleSentimentAnalysis(messageId) {
       },
     });
 
-    // Update the Conversation model with overall sentiment analysis results
+    // Updated the Conversation model with overall sentiment analysis results
     const conversationId = message.conversationId;
     const messages = await prisma.message.findMany({
       where: { conversationId },
@@ -86,7 +86,7 @@ function calculateOverallSentiment(messages) {
   const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
 
   for (const message of messages) {
-    // Exclude messages with null sentiment
+    // Excluded messages with null sentiment
     if (message.sentiment !== null) {
       sentimentCounts[message.sentiment]++;
     }

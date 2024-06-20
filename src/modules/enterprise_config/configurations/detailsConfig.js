@@ -1,4 +1,4 @@
-import fs from "fs/promises"; // Import the promise-based version of fs
+import fs from "fs/promises";
 import logger from "../../../../logger.js";
 import path from "path";
 
