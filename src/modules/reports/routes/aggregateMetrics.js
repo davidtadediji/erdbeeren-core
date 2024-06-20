@@ -14,6 +14,7 @@ router.get(
   hasPermission(['viewMonitorDashboard']),
   metricsController.getCustomerSatisfactionTrend
 );
+
 router.get(
   "/average-conversation-duration",
   authenticateJWT,

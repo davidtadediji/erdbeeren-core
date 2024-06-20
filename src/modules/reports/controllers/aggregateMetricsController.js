@@ -62,14 +62,13 @@ export async function getResponseTimeTrend(req, res, next) {
   try {
     const responseTimeTrendData = await prisma.conversation.aggregate({
       _avg: {
-        avgCustomerRes,
-        avgAgentRes,
+        avgCustomerResponse,
+        avgAgentResponse,
       },
     });
 
     logger.info(responseTimeTrendData)
 
-    // Implement your logic to process the data as needed
 
     res.json({
       metric: "Response Time Trend Report",

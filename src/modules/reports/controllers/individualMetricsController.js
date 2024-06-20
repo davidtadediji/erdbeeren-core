@@ -8,13 +8,19 @@ export async function getSatisfactionMetric(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return satisfaction metrics for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    // Assuming the 'rating' field is stored in the Conversation model
-    const satisfactionMetric = conversation.rating;
+    if (!conversation || !conversation.metrics) {
+      throw new Error("Conversation or metrics not found");
+    }
+
+    // Extract satisfaction metric from conversation metrics
+    const satisfactionMetric = conversation.metrics.rating;
 
     res.json({
       customer: customerId,
@@ -23,6 +29,8 @@ export async function getSatisfactionMetric(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -30,12 +38,19 @@ export async function getConversationDuration(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return conversation duration for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    const conversationDuration = conversation.duration;
+    if (!conversation || !conversation.metrics) {
+      throw new Error("Conversation or metrics not found");
+    }
+
+    // Extract conversation duration from conversation metrics
+    const conversationDuration = conversation.metrics.duration;
 
     res.json({
       customer: customerId,
@@ -44,6 +59,8 @@ export async function getConversationDuration(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -51,12 +68,19 @@ export async function getAvgAgentResponseTime(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return average agent response time for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    const avgAgentResponseTime = conversation.avgAgentRes;
+    if (!conversation || !conversation.metrics) {
+      throw new Error("Conversation or metrics not found");
+    }
+
+    // Extract average agent response time from conversation metrics
+    const avgAgentResponseTime = conversation.metrics.avgAgentResponse;
 
     res.json({
       customer: customerId,
@@ -65,19 +89,55 @@ export async function getAvgAgentResponseTime(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getAllParticipantIds(req, res, next) {
+  logger.info("Get all particpants triggered");
+  try {
+    const participants = await prisma.conversation.findMany({
+      select: {
+        participantSid: true,
+      },
+    });
+
+    logger.info(JSON.stringify(participants));
+
+    const participantIds = participants.map(
+      (participant) => participant.participantSid
+    );
+    logger.info(JSON.stringify(participantIds));
+
+    res.json({
+      participantIds,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function getAvgCustomerResponseTime(req, res, next) {
   try {
     const customerId = req.params.customerId;
+    logger.info("Triggered!");
 
-    // Use Prisma to fetch and return average customer response time for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    const avgCustomerResponseTime = conversation.avgCustomerRes;
+    if (!conversation || !conversation.metrics) {
+      throw new Error("Conversation or metrics not found");
+    }
+
+    // Extract average customer response time from conversation metrics
+    const avgCustomerResponseTime = conversation.metrics.avgCustomerResponse;
 
     res.json({
       customer: customerId,
@@ -86,6 +146,8 @@ export async function getAvgCustomerResponseTime(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -93,16 +155,19 @@ export async function getCustomerProfile(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    logger.info(customerId);
-
-    // Use Prisma to fetch and return profile-specific report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    logger.info(conversation);
+    if (!conversation || !conversation.metrics) {
+      throw new Error("Conversation or metrics not found");
+    }
 
-    const customerProfile = conversation.profile;
+    // Extract customer profile from conversation metrics
+    const customerProfile = conversation.metrics.customerProfile;
 
     res.json({
       customer: customerId,
@@ -111,6 +176,8 @@ export async function getCustomerProfile(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -118,14 +185,13 @@ export async function getFrequencyOfInteractions(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return frequency of interactions for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
       include: { messages: true },
     });
 
     const messageCount = conversation ? conversation.length : 0;
-we
+
     res.json({
       customer: customerId,
       metric: "Frequency of Interactions",
@@ -140,16 +206,21 @@ export async function getSentimentReport(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
+
+    logger.info("Here");
+    logger.info("Conversation: " + conversation.metrics.overallSentimentScore);
 
     res.json({
       customer: customerId,
       metric: "Sentiment Report",
-      overallSentimentScore: conversation.overallSentimentScore,
-      overallSentiment: conversation.overallSentiment,
+      overallSentimentScore: conversation.metrics.overallSentimentScore,
+      overallSentiment: conversation.metrics.overallSentiment,
     });
   } catch (error) {
     next(error);
@@ -160,7 +231,6 @@ export async function getMessageSentimentReport(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
     });
@@ -178,7 +248,7 @@ export async function getMessageSentimentReport(req, res, next) {
     res.json({
       customer: customerId,
       metric: "Message Sentiment Report",
-      messageSentiments
+      messageSentiments,
     });
   } catch (error) {
     next(error);
@@ -189,12 +259,14 @@ export async function getEntities(req, res, next) {
   try {
     const customerId = req.params.customerId;
 
-    // Use Prisma to fetch and return sentiment report for the specific customer
     const conversation = await prisma.conversation.findUnique({
       where: { participantSid: customerId },
+      include: {
+        metrics: true,
+      },
     });
 
-    const entities = conversation.entities;
+    const entities = conversation.metrics.entities;
 
     res.json({
       customer: customerId,

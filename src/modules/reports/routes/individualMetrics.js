@@ -5,12 +5,21 @@ import { authenticateJWT, hasPermission } from "../../authentication/middleware/
 
 const router = express.Router();
 
+
 // Example route for Individual Customer Satisfaction Metrics
 router.get(
   "/:customerId/satisfaction",
   authenticateJWT,
   hasPermission(['viewReports']),
   individualMetricsController.getSatisfactionMetric
+);
+
+router.get(
+  "/get",
+  authenticateJWT,
+  hasPermission(['viewReports']),
+
+  individualMetricsController.getAllParticipantIds
 );
 
 // Example route for Customer-Specific Conversation Duration
