@@ -33,7 +33,11 @@ const receiveMessage = async (req) => {
       where: { participantSid: phoneNumber },
     });
 
+    let selfPresentation = "";
+
     if (!conversation) {
+      selfPresentation =
+        "You are now interacting with an AI agent. We may collect and use only customer-related information solely for service improvement purposes. Your information is handled responsibly and in accordance with our privacy policies.\n";
       conversation = await createNewConversation(
         phoneNumber,
         isWhatsApp ? "whatsapp" : "sms"
@@ -77,6 +81,8 @@ const receiveMessage = async (req) => {
     );
 
     // const response = { res: { text: "Okay" } };
+
+    //  response.res = selfPresentation + response.res;
 
     logger.info("Agent response: " + response.res);
 
@@ -130,7 +136,7 @@ const sendMessage = async ({
 
     eventEmitter.emit("interactionTurnCompleted", conversation.id);
 
-    const turn = [`Customer: ${messageContent}`, `Agent: ${response.res}`]
+    const turn = [`Customer: ${messageContent}`, `Agent: ${response.res}`];
 
     await generateCustomerVectorStore(conversation.participantSid, turn);
 

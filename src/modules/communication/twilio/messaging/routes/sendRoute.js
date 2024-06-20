@@ -1,4 +1,3 @@
-// Import necessary modules and middlewares
 import express from "express";
 import { sendMessage } from "../services/sendMessageService.js";
 import { validateTwilioBroadcast } from "../middlewares/validationMiddleware.js";
@@ -9,10 +8,9 @@ import {
 
 const router = express.Router();
 
-// Protect the '/' route with authentication and permission check
 router.post(
   "/",
-//   authenticateJWT, // Ensure the user is authenticated
+//   authenticateJWT, 
 //   hasPermission(["sendMessage"]), // Ensure the user has the 'admin' role
   async (req, res) => {
     const { content, phoneNumber } = req.body;

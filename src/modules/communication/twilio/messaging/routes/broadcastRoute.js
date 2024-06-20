@@ -1,4 +1,3 @@
-// Import necessary modules and middlewares
 import express from 'express';
 import { broadcastMessage } from '../controllers/broadcastController.js';
 import { validateTwilioBroadcast } from '../middlewares/validationMiddleware.js';
@@ -6,12 +5,12 @@ import { authenticateJWT, hasPermission } from "../../../../authentication/middl
 
 const router = express.Router();
 
-// Protect the '/' route with authentication and permission check
+
 router.post(
   '/',
-  authenticateJWT, // Ensure the user is authenticated
-  hasPermission(["broadcastMessage"]), // Ensure the user has the 'admin' role
-  validateTwilioBroadcast, // Validate the request payload
+  authenticateJWT, 
+  hasPermission(["broadcastMessage"]),
+  validateTwilioBroadcast, 
   async (req, res) => {
     const { content } = req.body;
 
