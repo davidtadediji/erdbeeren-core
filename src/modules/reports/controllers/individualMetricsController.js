@@ -19,7 +19,6 @@ export async function getSatisfactionMetric(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    // Extract satisfaction metric from conversation metrics
     const satisfactionMetric = conversation.metrics.rating;
 
     res.json({
@@ -49,7 +48,6 @@ export async function getConversationDuration(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    // Extract conversation duration from conversation metrics
     const conversationDuration = conversation.metrics.duration;
 
     res.json({
@@ -79,7 +77,6 @@ export async function getAvgAgentResponseTime(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    // Extract average agent response time from conversation metrics
     const avgAgentResponseTime = conversation.metrics.avgAgentResponse;
 
     res.json({
@@ -136,7 +133,6 @@ export async function getAvgCustomerResponseTime(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    // Extract average customer response time from conversation metrics
     const avgCustomerResponseTime = conversation.metrics.avgCustomerResponse;
 
     res.json({
@@ -166,7 +162,6 @@ export async function getCustomerProfile(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    // Extract customer profile from conversation metrics
     const customerProfile = conversation.metrics.customerProfile;
 
     res.json({
@@ -239,7 +234,6 @@ export async function getMessageSentimentReport(req, res, next) {
       where: { conversationId: conversation.id },
     });
 
-    // Extract sentimentScore and sentiment from each message
     const messageSentiments = messages.map((message) => ({
       sentimentScore: message.sentimentScore,
       sentiment: message.sentiment,

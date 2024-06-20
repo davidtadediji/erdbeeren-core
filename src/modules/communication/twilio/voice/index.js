@@ -100,7 +100,7 @@ const establishNgrokTunnel = async () => {
     console.log("ngrok url is " + url);
 
     // Update the Twilio webhook with the ngrok URL
-    // Note: Make sure the updateWebhook function is accessible here
+    // Making sure the updateWebhook function is accessible here
     // await updateVoiceUrl("(678) 270-2106", url);
   } catch (error) {
     console.error("Error establishing ngrok tunnel:", error.message);

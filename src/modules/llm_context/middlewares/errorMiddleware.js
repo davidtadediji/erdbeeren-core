@@ -2,7 +2,7 @@
 import logger from "../../../../logger.js";
 
 const errorMiddleware = (err, req, res, next) => {
-  // Log the error
+
   logger.error(`Error: ${err.message}`);
 
   if (err.name === "InsufficientQuotaError") {
@@ -14,7 +14,7 @@ const errorMiddleware = (err, req, res, next) => {
           "Insufficient quota. Please check your plan and billing details.",
       });
   }
-  // Handle specific errors and send appropriate responses
+  
   else if (err.name === "MulterError") {
     res.status(400).json({ error: "File upload error" });
   } else {

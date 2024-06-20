@@ -65,7 +65,7 @@ const generateCustomerVectorStore = async (
       );
     }
 
-       // Save the final vector store
+       // To save the final vector store
     await vectorStore.save(CUSTOMER_VECTOR_STORE_PATH);
 
     return vectorStore;

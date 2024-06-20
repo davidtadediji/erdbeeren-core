@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post(
   '/generate',
-  authenticateJWT, // Ensure the user is authenticated
+  authenticateJWT, 
   hasPermission(["manageLLM"]), // Ensure the user has the 'admin' role
   async (req, res, next) => {
     const  {customerSid}= req.body
@@ -15,12 +15,11 @@ router.post(
       await generateCustomerVectorStore(customerSid);
       res.status(200).json({ success: true, message: 'Vector store generated successfully.' });
     } catch (error) {
-      next(error); // Pass the error to the error handling middleware
+      next(error); 
     }
   }
 );
 
 
-// Export the router
 export default router;
 

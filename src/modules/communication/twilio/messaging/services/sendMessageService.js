@@ -25,7 +25,7 @@ const sendMessage = async (messageContent, phoneNumber) => {
       return;
     }
     const isWhatsApp = phoneNumber.startsWith("whatsapp:");
-    // Your logic to send the response back to the user using Twilio
+    // The logic to send the response back to the user using Twilio
     // Check if there's an existing conversation with this phone number
     let conversation = await prisma.conversation.findUnique({
       where: { participantSid: phoneNumber },
@@ -64,7 +64,7 @@ const sendMessage = async (messageContent, phoneNumber) => {
     const agentMessage = await saveMessageToConversation(
       conversation.id,
       "agent", // Use different identifier for WhatsApp messages
-      messageContent // Assuming the response is the content of the agent's message
+      messageContent 
     );
 
     // Emit the newMessageCreated event

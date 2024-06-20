@@ -33,7 +33,7 @@ logger.info("Model Service dir: " + currentModuleDir);
 
 currentModuleDir = currentModuleDir.replace(/^\/([A-Z]:)/, "$1");
 
-// Create a PromptTemplate with placeholders for context and message
+
 const respondToMessage = async (message, customersSid, isAgent = false) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
