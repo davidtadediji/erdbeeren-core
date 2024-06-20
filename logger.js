@@ -1,12 +1,12 @@
 import winston from 'winston';
 
-// Define the log format
+// Log format defined
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.simple()
 );
 
-// Create a logger with a console transport and file transport
+// Logger with a console transport and file transport created
 const logger = winston.createLogger({
   format: logFormat,
   transports: [
