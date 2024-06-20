@@ -77,6 +77,7 @@ export const deleteFile = async (filename) => {
 };
 
 export const listFiles = async () => {
+  logger.info("List files triggered!")
   try {
     const files = fs.readdirSync(FILE_UPLOAD_PATH);
     return files;

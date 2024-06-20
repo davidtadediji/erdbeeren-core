@@ -1,4 +1,3 @@
-// Import necessary modules and middlewares
 import express from "express";
 import Joi from "joi";
 import { respondToMessage } from "../services/modelService.js";
@@ -23,9 +22,8 @@ router.post("/message", messageValidation, async (req, res, next) => {
     const reply = await respondToMessage(req.body.message);
     res.json({ reply });
   } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    next(error); 
   }
 });
 
-// Export the router
 export default router;

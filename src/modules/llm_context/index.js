@@ -8,6 +8,7 @@ import customerContextRoutes from "./routes/customerContextRoutes.js";
 import enterpriseContextRoutes from "./routes/enterpriseContextRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import modelRoutes from "./routes/modelRoutes.js"
+import customerProfilerRoutes from "./routes/customerProfilerRoutes.js"
 
 dotenv.config();
 
@@ -24,7 +25,9 @@ logger.info("Port: " + process.env.PORT);
 app.use("/repository", fileRoutes);
 app.use("/enterprise-context", enterpriseContextRoutes);
 app.use("/customer-context", customerContextRoutes);
+app.use("/profiler", customerProfilerRoutes);
 app.use("/model", modelRoutes);
 app.use(errorMiddleware); 
 
 export default app;
+

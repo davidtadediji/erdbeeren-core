@@ -1,4 +1,3 @@
-// Import necessary modules and middlewares
 import express from 'express';
 import { ROLES } from "../../authentication/config/roles.js";
 import { authenticateJWT, hasPermission } from "../../authentication/middleware/authMiddleware.js";
