@@ -9,6 +9,7 @@ src/modules/llm_context/customer_index/*
 src/modules/analytics_engine/note.txt
 vector_store/
 repository/
+knowledge_base/
 
 tests/
 
