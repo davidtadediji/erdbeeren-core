@@ -20,3 +20,28 @@ export const getSolvedTicketIds = async (agentId) => {
     await prisma.$disconnect();
   }
 };
+
+export const createTicket = async (agentId, conversationId) => {
+  try {
+    await prisma.ticket.create({
+      data: {
+        subject: "Incident Complaint",
+        description: message,
+        status: "Open",
+        priority: "High",
+        assignedTo: {
+          connect: { id: agentId },
+        },
+        conversation: {
+          create: {
+            channelType: "Chat",
+          },
+        },
+      },
+    });
+  } catch (error) {
+    throw new Error(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};

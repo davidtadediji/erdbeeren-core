@@ -9,7 +9,7 @@ import * as customerProfilerController from "../controllers/customerProfilerCont
 const router = express.Router();
 
 router.get(
-  "/generate/:customerId",
+  "/generate/:conversationId",
   authenticateJWT,
   hasPermission(["viewMonitorDashboard"]),
   customerProfilerController.extractCustomerProfile

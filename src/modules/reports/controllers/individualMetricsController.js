@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 
 export async function getSatisfactionMetric(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -22,7 +22,7 @@ export async function getSatisfactionMetric(req, res, next) {
     const satisfactionMetric = conversation.metrics.rating;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Satisfaction Metrics",
       satisfactionMetric,
     });
@@ -35,10 +35,10 @@ export async function getSatisfactionMetric(req, res, next) {
 
 export async function getConversationDuration(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -51,7 +51,7 @@ export async function getConversationDuration(req, res, next) {
     const conversationDuration = conversation.metrics.duration;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Conversation Duration",
       conversationDuration,
     });
@@ -64,10 +64,10 @@ export async function getConversationDuration(req, res, next) {
 
 export async function getAvgAgentResponseTime(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -80,7 +80,7 @@ export async function getAvgAgentResponseTime(req, res, next) {
     const avgAgentResponseTime = conversation.metrics.avgAgentResponse;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Agent Response Time Metrics",
       avgAgentResponseTime,
     });
@@ -91,20 +91,19 @@ export async function getAvgAgentResponseTime(req, res, next) {
   }
 }
 
-export async function getAllParticipantIds(req, res, next) {
-  logger.info("Get all particpants triggered");
+export async function getAllConversationIds(req, res, next) {
+  logger.info("Get all conversation ids triggered");
   try {
     const participants = await prisma.conversation.findMany({
       select: {
-        participantSid: true,
+        id: true,
       },
     });
 
     logger.info(JSON.stringify(participants));
 
-    const participantIds = participants.map(
-      (participant) => participant.participantSid
-    );
+    const participantIds = participants.map((participant) => participant.id);
+
     logger.info(JSON.stringify(participantIds));
 
     res.json({
@@ -119,11 +118,11 @@ export async function getAllParticipantIds(req, res, next) {
 
 export async function getAvgCustomerResponseTime(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
     logger.info("Triggered!");
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -136,7 +135,7 @@ export async function getAvgCustomerResponseTime(req, res, next) {
     const avgCustomerResponseTime = conversation.metrics.avgCustomerResponse;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Customer Response Time Metrics",
       avgCustomerResponseTime,
     });
@@ -149,10 +148,10 @@ export async function getAvgCustomerResponseTime(req, res, next) {
 
 export async function getCustomerProfile(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -165,7 +164,7 @@ export async function getCustomerProfile(req, res, next) {
     const customerProfile = conversation.metrics.customerProfile;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Profile-Specific Report",
       customerProfile,
     });
@@ -178,17 +177,17 @@ export async function getCustomerProfile(req, res, next) {
 
 export async function getFrequencyOfInteractions(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: { messages: true },
     });
 
     const messageCount = conversation ? conversation.length : 0;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Frequency of Interactions",
       messageCount,
     });
@@ -199,10 +198,10 @@ export async function getFrequencyOfInteractions(req, res, next) {
 
 export async function getSentimentReport(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -212,7 +211,7 @@ export async function getSentimentReport(req, res, next) {
     logger.info("Conversation: " + conversation.metrics.overallSentimentScore);
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Sentiment Report",
       overallSentimentScore: conversation.metrics.overallSentimentScore,
       overallSentiment: conversation.metrics.overallSentiment,
@@ -224,10 +223,10 @@ export async function getSentimentReport(req, res, next) {
 
 export async function getMessageSentimentReport(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
     });
 
     const messages = await prisma.message.findMany({
@@ -240,7 +239,7 @@ export async function getMessageSentimentReport(req, res, next) {
     }));
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Message Sentiment Report",
       messageSentiments,
     });
@@ -249,12 +248,33 @@ export async function getMessageSentimentReport(req, res, next) {
   }
 }
 
-export async function getEntities(req, res, next) {
+export async function getParticipantId(req, res, next) {
   try {
-    const customerId = req.params.customerId;
+    const conversationId = req.params.conversationId;
 
     const conversation = await prisma.conversation.findUnique({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
+    });
+
+    const participantSid = conversation.participantSid;
+
+
+    res.json({
+      customer: conversationId,
+      metric: "Participant Sid",
+      participantSid,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEntities(req, res, next) {
+  try {
+    const conversationId = req.params.conversationId;
+
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
       include: {
         metrics: true,
       },
@@ -263,7 +283,7 @@ export async function getEntities(req, res, next) {
     const entities = conversation.metrics.entities;
 
     res.json({
-      customer: customerId,
+      customer: conversationId,
       metric: "Conversation Entities",
       entities,
     });

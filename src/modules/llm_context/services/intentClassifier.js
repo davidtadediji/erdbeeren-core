@@ -2,6 +2,8 @@ import OpenAI from "openai";
 
 import dotenv from "dotenv";
 
+import { respondToMessage } from "./modelService";
+
 dotenv.config();
 
 const openai = new OpenAI({
@@ -60,44 +62,45 @@ const classifyMessage = async (message) => {
   }
 };
 
-const routeRequest = async (message) => {
+const routeRequest = async (message, customerSid, isAgent = false) => {
   const classification = await classifyMessage(message);
 
   switch (classification) {
     case "service request":
-      handleServiceRequest(message);
+      handleServiceRequest(message, customerSid);
       break;
     case "incident complaint":
-      handleIncidentComplaint(message);
+      handleIncidentComplaint(message, customerSid);
       break;
     case "enquiry":
-      handleEnquiry(message);
-      break;
+      return handleEnquiry(message, customerSid);
     default:
-      handleUnknown(message);
+      handleUnknown(message, customerSid);
       break;
   }
 };
 
 // Function to handle service requests
-const handleServiceRequest = (message) => {
+const handleServiceRequest = (message, customerSid) => {
   console.log(`Handling service request: ${message}`);
 };
 
 // Function to handle complaints
-const handleIncidentComplaint = (message) => {
+const handleIncidentComplaint = (message, customerSid) => {
   console.log(`Handling incident complaint: ${message}`);
 };
 
 // Function to handle complaints
-const handleEnquiry = (message) => {
-  console.log(`Handling enquiry: ${message}`);
+const handleEnquiry = async (message, customerSid) => {
+ const res =  await respondToMessage(message, customerSid)
+ return res;
 };
 
 // Function to handle unknown request types
-const handleUnknown = (message) => {
-  console.log(`Handling unknown request type: ${message}`);
-};
+const handleUnknown = async (message, customerSid) => {
+  const res =  await respondToMessage(message, customerSid)
+  return res;
+ };
 
 // Example usage
 const message = "Hello";

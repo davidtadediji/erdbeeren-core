@@ -4,10 +4,10 @@ import { extractProfile } from "../services/customerProfiler.js";
 
 export async function extractCustomerProfile(req, res, next) {
   try {
-    const customerId = req.params.customerId;
-    const profile = await extractProfile(customerId);
+    const conversationId = req.params.conversationId;
+    const profile = await extractProfile(conversationId);
     await prisma.conversation.update({
-      where: { participantSid: customerId },
+      where: { id: conversationId },
       data: { customerProfile: profile },
     });
 
