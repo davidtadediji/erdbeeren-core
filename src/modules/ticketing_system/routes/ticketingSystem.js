@@ -9,7 +9,7 @@ import * as agentController from "../controllers/agentController.js";
 const router = express.Router();
 
 router.get(
-  "/get/:ticketId",
+  "/getConversation/:ticketId",
   authenticateJWT,
   hasPermission(["viewAgentDashboard"]),
   agentController.getAgentConversation

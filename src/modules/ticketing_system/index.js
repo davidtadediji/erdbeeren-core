@@ -2,9 +2,9 @@ import express from "express";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import cors from "cors";
 import dotenv from "dotenv";
-import AgentTicketingRoutes from "./routes/ticketingSystem.js";
-import * as AgentPerformanceRoutes from "./routes/performanceMetrics.js";
-import * as KnowledgeBaseRoutes from "./routes/knowledgeBase.js";
+import AgentTicketingRoutes from "./routes/TicketingSystem.js";
+import AgentPerformanceRoutes from "./routes/performanceMetrics.js";
+import KnowledgeBaseRoutes from "./routes/knowledgeBase.js";
 
 dotenv.config();
 
@@ -18,7 +18,7 @@ app.use(cors());
 // Routes
 app.use("/ticketing", AgentTicketingRoutes);
 app.use("/performance", AgentPerformanceRoutes);
-app.use("/knowledgebase", KnowledgeBaseRoutes);
+app.use("/knowledge-base", KnowledgeBaseRoutes);
 
 // Error handling middleware
 app.use(errorMiddleware);

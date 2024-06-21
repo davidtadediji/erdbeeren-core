@@ -7,8 +7,11 @@ import {
 
 export async function getAgentConversation(req, res, next) {
   try {
-    await getConversation(req.user.id, req.params.ticketId);
-    res.json({});
+    const messages = await getConversation(
+      req.user.id,
+      req.params.ticketId
+    );
+    res.json({ messages });
   } catch (error) {
     next(error);
   }
