@@ -1,7 +1,7 @@
 // app.js
 
-import { PrismaClient } from '@prisma/client';
-import cors from 'cors';
+import { PrismaClient } from "@prisma/client";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import logger from "./logger.js";
@@ -15,7 +15,9 @@ import {
 } from "./src/modules/communication/twilio/voice/index.js";
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
-dotenv.config()
+import ticketingModule from "./src/modules/ticketing_system/index.js";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -24,44 +26,35 @@ const port = process.env.PORT || 3000;
 
 const prisma = new PrismaClient();
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:' + promise + 'reason:' + reason);
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("Unhandled Rejection at:" + promise + "reason:" + reason);
   // Perform cleanup tasks or handle the error gracefully
 });
 
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:'+ error.message);
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught Exception:" + error.message);
   // Perform cleanup tasks or handle the error gracefully
   gracefulShutdown();
 });
- 
+
 // Graceful shutdown function
 const gracefulShutdown = async () => {
   // Close the Prisma client connection (replace this with your actual Prisma cleanup logic)
   await prisma.$disconnect();
 
   // Log a message indicating the cleanup is complete
-  logger.info('Graceful shutdown complete');
+  logger.info("Graceful shutdown complete");
 
   // Allow the process to exit naturally
   process.exit(1);
 };
 
-
 app.use("/api/report", reportsModule);
-// Use middleware/routes from the enterprise_config module with /api/enterprise prefix
 app.use("/api/enterprise", enterpriseConfigModule);
-
-// Use middleware/routes from the llm_context module with /api/llm prefix
 app.use("/api/llm", llmContextModule);
-
-// Use middleware/routes from the authentication module with /api/auth prefix
 app.use("/api/authentication", authenticationModule);
-
-// Use middleware/routes from the twilio messaging module with /api/communication/twilio/messaging prefix
+app.use("/api/agent", ticketingModule);
 app.use("/api/twilio/messaging", twilioMessagingModule);
-
-// Use middleware/routes from the twilio voice module with /api/communication/twilio/voice prefix
 app.use("/api/twilio/voice", twilioVoiceApp);
 
 // Start the centralized API server
