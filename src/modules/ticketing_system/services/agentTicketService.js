@@ -4,6 +4,10 @@ import logger from "../../../../logger.js";
 import express from "express";
 import http from "http";
 import { WebSocketServer } from "ws";
+import eventEmitter from "../../analytics_engine/eventEmitter.js";
+import { saveMessageToConversation } from "../../communication/twilio/messaging/services/messageService.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 
@@ -173,5 +177,76 @@ export const selectRandomAgent = async () => {
     await prisma.$disconnect();
   }
 };
+
+export const sendMessage = async (agentId, ticketId, message) => {
+  const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+  try {
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id: ticketId,
+      },
+      select: {
+        conversation: true,
+      },
+    });
+
+    const humanAgentMessage = await saveMessageToConversation(
+      ticket.conversation.id,
+      agentId.toString(),
+      message
+    );
+
+    // const conversation = await prisma.conversation.findUnique({
+    //   where: { id: conversationId },
+    //   select: { participantSid: true },
+    // });
+
+    const participantSid = ticket.conversation?.participantSid ?? null;
+
+    const isWhatsApp = participantSid.startsWith("whatsapp:");
+    if (isWhatsApp) {
+      // await client.messages.create({
+      //   body: response.res,
+      //   from: "whatsapp:" + twilioPhoneNumber,
+      //   to: participantSid,
+      // });
+    } else {
+      logger.info("sms triggered");
+      // await client.messages.create({
+      //   body: response.res,
+      //   from: twilioPhoneNumber,
+      //   to: participantSid,
+      // });
+    }
+    eventEmitter.emit("newMessageCreated", {
+      conversationId: ticket.conversation.id,
+      messageId: humanAgentMessage.id,
+    });
+
+    eventEmitter.emit("humanResponded", {
+      conversationId: ticket.conversation.id,
+      messageId: humanAgentMessage.id,
+    });
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+export async function updateStatus(ticketId, status) {
+  try {
+    const updatedTicket = await prisma.ticket.update({
+      where: { id: ticketId },
+      data: { status: status },
+    });
+
+    return updatedTicket;
+  } catch (error) {
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
 
 export { server };

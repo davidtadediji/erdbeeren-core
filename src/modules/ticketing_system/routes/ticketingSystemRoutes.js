@@ -29,4 +29,18 @@ router.get(
   agentController.getAgentSolvedTicketIds
 );
 
+router.post(
+  "/update-ticket-status",
+  authenticateJWT,
+  hasPermission(["viewAgentDashboard"]),
+  agentController.updateTicketStatus
+);
+
+router.post(
+  "/send-message",
+  authenticateJWT,
+  hasPermission(["viewAgentDashboard"]),
+  agentController.sendAgentMessage
+);
+
 export default router;

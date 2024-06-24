@@ -2,7 +2,7 @@ import express from "express";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import cors from "cors";
 import dotenv from "dotenv";
-import AgentTicketingRoutes from "./routes/TicketingSystem.js";
+import AgentTicketingRoutes from "./routes/ticketingSystemRoutes.js";
 import AgentPerformanceRoutes from "./routes/performanceMetrics.js";
 import KnowledgeBaseRoutes from "./routes/knowledgeBase.js";
 

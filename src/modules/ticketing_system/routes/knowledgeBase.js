@@ -9,7 +9,6 @@ import { listFiles, viewFile } from "../services/knowledgeBaseService.js";
 
 const router = express.Router();
 
-// Protect the '/list' route with authentication and permission check
 router.get(
   "/list",
   authenticateJWT,
