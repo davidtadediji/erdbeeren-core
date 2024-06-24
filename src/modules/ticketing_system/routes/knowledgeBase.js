@@ -13,7 +13,7 @@ const router = express.Router();
 router.get(
   "/list",
   authenticateJWT,
-  hasPermission(["manageLLM"]),
+  hasPermission(["viewAgentDashboard"]),
   async (req, res, next) => {
     try {
       const files = await listFiles();
@@ -27,7 +27,7 @@ router.get(
 router.get(
   "/view/:filename",
   authenticateJWT,
-  hasPermission(["manageLLM"]),
+  hasPermission(["viewAgentDashboard"]),
   async (req, res, next) => {
     const { filename } = req.params;
 

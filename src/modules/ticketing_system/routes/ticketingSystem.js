@@ -9,21 +9,21 @@ import * as agentController from "../controllers/agentController.js";
 const router = express.Router();
 
 router.get(
-  "/getConversation/:ticketId",
+  "/get-conversation/:ticketId",
   authenticateJWT,
   hasPermission(["viewAgentDashboard"]),
   agentController.getAgentConversation
 );
 
 router.get(
-  "/getPendingTicketIds",
+  "/get-open-pending-tickets",
   authenticateJWT,
   hasPermission(["viewAgentDashboard"]),
-  agentController.getAgentPendingTicketIds
+  agentController.getAgentOpenPendingTickets
 );
 
 router.get(
-  "/getSolvedTicketIds",
+  "/get-solved-tickets",
   authenticateJWT,
   hasPermission(["viewAgentDashboard"]),
   agentController.getAgentSolvedTicketIds
