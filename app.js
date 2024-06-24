@@ -13,9 +13,15 @@ import {
   app as twilioVoiceApp,
   server as twilioVoiceServer,
 } from "./src/modules/communication/twilio/voice/index.js";
+import {
+  server as webSocketServer
+} from "./src/modules/ticketing_system/services/agentTicketService.js";
+
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
 import ticketingModule from "./src/modules/ticketing_system/index.js";
+
+
 
 dotenv.config();
 
@@ -39,10 +45,9 @@ process.on("uncaughtException", (error) => {
 
 // Graceful shutdown function
 const gracefulShutdown = async () => {
-  // Close the Prisma client connection (replace this with your actual Prisma cleanup logic)
+  // Close the Prisma client connection 
   await prisma.$disconnect();
 
-  // Log a message indicating the cleanup is complete
   logger.info("Graceful shutdown complete");
 
   // Allow the process to exit naturally
@@ -61,6 +66,10 @@ app.use("/api/twilio/voice", twilioVoiceApp);
 app.listen(port, () => {
   logger.info(`Centralized API server listening at http://localhost:${port}`);
 });
+
+// webSocketServer.listen(5000, () => {
+//   logger.info(`WebSocket server listening at ws://localhost:5000`);
+// });
 
 // Start the Twilio Voice HTTP server
 twilioVoiceServer.listen(8080, () => {
