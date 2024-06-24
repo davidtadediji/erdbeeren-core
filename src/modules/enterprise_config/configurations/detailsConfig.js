@@ -55,7 +55,6 @@ export const setEnterpriseDetails = async ({
   try {
     const existingConfig = await readConfigFile();
 
-    // Update the properties directly
     existingConfig.name = name || existingConfig.name;
     existingConfig.industry = industry || existingConfig.industry;
     existingConfig.location = location || existingConfig.location;
@@ -70,7 +69,7 @@ export const setEnterpriseDetails = async ({
 
     return await readConfigFile();
   } catch (error) {
-    throw error; // This will propagate the error to the error handling middleware
+    throw error; 
   }
 };
 
@@ -81,6 +80,6 @@ export const getEnterpriseDetails = async () => {
     const configData = await readConfigFile();
     return configData || {};
   } catch (error) {
-    throw error; // This will propagate the error to the error handling middleware
+    throw error; 
   }
 };
