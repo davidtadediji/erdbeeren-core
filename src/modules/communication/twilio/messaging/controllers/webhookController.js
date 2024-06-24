@@ -12,6 +12,7 @@ import { saveMessageToConversation } from "../services/messageService.js";
 import logger from "../../../../../../logger.js";
 import { PrismaClient } from "@prisma/client";
 import eventEmitter from "../../../../analytics_engine/eventEmitter.js";
+import { routeRequest } from "../../../../llm_context/services/intentClassifier.js";
 
 const prisma = new PrismaClient();
 
@@ -74,11 +75,14 @@ const receiveMessage = async (req) => {
 
     const previousMessages = await getConversationThread(conversation.id);
 
-    const response = await respondToMessage(
-      messageContent,
-      conversation.participantSid,
-      true
-    );
+    
+    const response = await routeRequest(message, conversation.id, true)
+
+    // const response = await respondToMessage(
+    //   messageContent,
+    //   conversation.id,
+    //   true
+    // );
 
     // const response = { res: { text: "Okay" } };
 

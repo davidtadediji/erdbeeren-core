@@ -13,6 +13,7 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 const client = twilio(accountSid, authToken);
 
 const broadcastMessage = async (content) => {
+  logger.info("Broadcast triggered")
   try {
     // Get all conversations
     const conversations = await prisma.conversation.findMany();
@@ -20,24 +21,23 @@ const broadcastMessage = async (content) => {
     // Send message to each conversation
     await Promise.all(
       conversations.map(async (conversation) => {
-        // Prefix Twilio phone number based on conversation type
         logger.info("Conversation encountered.")
         const formattedPhoneNumber =
           conversation.type === 'whatsapp'
             ? `whatsapp: ${twilioPhoneNumber}`
             : twilioPhoneNumber;
 
-        // Your Twilio messaging logic here
-        await client.messages.create({
-          body: content,
-          from: formattedPhoneNumber,
-          to: conversation.participantSid, // Assuming participantSid is the phone number
-        });
+      
+        // await client.messages.create({
+        //   body: content,
+        //   from: formattedPhoneNumber,
+        //   to: conversation.participantSid, 
+        // });
 
-        // Save the broadcasted message to the database
-        await saveMessageToConversation(conversation.id, 'agent', content);
+       
+        await saveMessageToConversation(conversation.id, 'broadcast', content);
 
-        // Update conversation timestamp
+      
         await updateConversationTimestamp(conversation.id);
       })
     );
