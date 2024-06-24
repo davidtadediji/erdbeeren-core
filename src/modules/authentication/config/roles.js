@@ -14,7 +14,6 @@ const ROLE_PERMISSIONS = {
     "viewAdminDashboard",
     "viewMonitorDashboard",
     "viewReports",
-    "viewAgentDashboard",
     "submitRequests",
     "sendMessage"
   ],
