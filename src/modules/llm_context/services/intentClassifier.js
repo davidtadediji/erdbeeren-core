@@ -2,7 +2,12 @@ import OpenAI from "openai";
 
 import dotenv from "dotenv";
 
-import { respondToMessage } from "./modelService";
+import { respondToMessage } from "./modelService.js";
+import {
+  createTicket,
+  selectRandomAgent,
+} from "../../ticketing_system/services/agentTicketService.js";
+import logger from "../../../../logger.js";
 
 dotenv.config();
 
@@ -62,46 +67,72 @@ const classifyMessage = async (message) => {
   }
 };
 
-const routeRequest = async (message, customerSid, isAgent = false) => {
+export const routeRequest = async (
+  message,
+  conversationId,
+  isAgent = false
+) => {
   const classification = await classifyMessage(message);
 
   switch (classification) {
     case "service request":
-      handleServiceRequest(message, customerSid);
+      handleServiceRequest(message, conversationId);
       break;
     case "incident complaint":
-      handleIncidentComplaint(message, customerSid);
+      handleIncidentComplaint(message, conversationId);
       break;
     case "enquiry":
-      return handleEnquiry(message, customerSid);
+      return handleEnquiry(message, conversationId, isAgent);
     default:
-      handleUnknown(message, customerSid);
+      handleUnknown(message, conversationId, isAgent);
       break;
   }
 };
 
 // Function to handle service requests
-const handleServiceRequest = (message, customerSid) => {
-  console.log(`Handling service request: ${message}`);
+const handleServiceRequest = async (message, conversationId) => {
+  try {
+    logger.info(`Handling service request: ${message}`);
+    const type = "service request";
+    const agentId = await selectRandomAgent();
+    console.log("Random Agent: ", agentId);
+    await createTicket(agentId, type, conversationId, message);
+  } catch (error) {
+    logger.error(
+      "Error occured while handling service request!",
+      error
+    );
+  }
 };
 
 // Function to handle complaints
-const handleIncidentComplaint = (message, customerSid) => {
-  console.log(`Handling incident complaint: ${message}`);
+const handleIncidentComplaint = async (message, conversationId) => {
+  try {
+    logger.info(`Handling incident complaint: ${message}`);
+    const type = "incident complaint";
+    const agentId = await selectRandomAgent();
+    console.log("Random Agent: ", agentId);
+    await createTicket(agentId, type, conversationId, message);
+  } catch (error) {
+    logger.error(
+      "Error occured while handling incident complaint!",
+      error
+    );
+  }
 };
 
+handleIncidentComplaint("Hello", "eb5669b4-9f51-448d-9de3-1c58b117f23b");
+
 // Function to handle complaints
-const handleEnquiry = async (message, customerSid) => {
- const res =  await respondToMessage(message, customerSid)
- return res;
+const handleEnquiry = async (message, conversationId, isAgent) => {
+  logger.info(`Handling enquiry: ${message}`);
+  const res = await respondToMessage(message, conversationId, isAgent);
+  return res;
 };
 
 // Function to handle unknown request types
-const handleUnknown = async (message, customerSid) => {
-  const res =  await respondToMessage(message, customerSid)
+const handleUnknown = async (message, conversationId, isAgent) => {
+  logger.info(`Handling unknown: ${message}`);
+  const res = await respondToMessage(message, conversationId, isAgent);
   return res;
- };
-
-// Example usage
-const message = "Hello";
-routeRequest(message);
+};

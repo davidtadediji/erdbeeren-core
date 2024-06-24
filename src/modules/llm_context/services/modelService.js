@@ -34,7 +34,7 @@ logger.info("Model Service dir: " + currentModuleDir);
 currentModuleDir = currentModuleDir.replace(/^\/([A-Z]:)/, "$1");
 
 
-const respondToMessage = async (message, customersSid, isAgent = false) => {
+const respondToMessage = async (message, conversationId, isAgent = false) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
     if (!process.env.OPENAI_API_KEY) {
@@ -56,7 +56,7 @@ const respondToMessage = async (message, customersSid, isAgent = false) => {
       )}, ${JSON.stringify(answer[2])},  ${JSON.stringify(answer[3])}`
     );
 
-    const customerVectorStore = await loadCustomerVectorStore(customersSid);
+    const customerVectorStore = await loadCustomerVectorStore(conversationId);
 
     // Merge customer-specific vector store if available
     if (customerVectorStore) {
@@ -185,7 +185,7 @@ const customerProfiling = async (message) => {
 };
 
 // Create a PromptTemplate with placeholders for context and message
-const respondToMessage2 = async (message, customersSid, isAgent = false) => {
+const respondToMessage2 = async (message, conversationId, isAgent = false) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
     if (!process.env.OPENAI_API_KEY) {
@@ -207,7 +207,7 @@ const respondToMessage2 = async (message, customersSid, isAgent = false) => {
       )}, ${JSON.stringify(answer[2])},  ${JSON.stringify(answer[3])}`
     );
 
-    const customerVectorStore = await loadCustomerVectorStore(customersSid);
+    const customerVectorStore = await loadCustomerVectorStore(conversationId);
 
     const retriever2 = customerVectorStore.asRetriever(4);
 
