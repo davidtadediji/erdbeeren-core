@@ -60,10 +60,11 @@ export async function getResponseTimeTrend(req, res, next) {
   try {
     const responseTimeTrendData = await prisma.conversation.aggregate({
       _avg: {
-        avgCustomerResponse,
-        avgAgentResponse,
+        avgCustomerResponse: true,
+        avgAgentResponse: true,
       },
     });
+    
 
     logger.info(responseTimeTrendData)
 
