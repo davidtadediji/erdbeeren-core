@@ -125,7 +125,7 @@ export const getSolvedTicketIds = async (agentId) => {
 export const createTicket = async (agentId, type, conversationId, message) => {
   try {
     logger.info("Handling ticket creation!");
-    const newTicket = await prisma.ticket.create({
+    await prisma.ticket.create({
       data: {
         subject: type,
         description: message,
@@ -248,5 +248,30 @@ export async function updateStatus(ticketId, status) {
     await prisma.$disconnect();
   }
 }
+
+export async function getTicketDetails(ticketId) {
+  try {
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id: ticketId,
+      },
+      include: {
+        assignedTo: true,
+        conversation: true,
+      },
+    });
+
+    if (!ticket) {
+      throw new Error(`Ticket with ID ${ticketId} not found`);
+    }
+
+    return ticket;
+  } catch (error) {
+    throw error
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 
 export { server };

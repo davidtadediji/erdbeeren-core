@@ -43,4 +43,12 @@ router.post(
   agentController.sendAgentMessage
 );
 
+
+router.get(
+  "/get-ticket-details/:ticketId",
+  authenticateJWT,
+  hasPermission(["viewAgentDashboard"]),
+  agentController.getAgentTicketDetails
+);
+
 export default router;

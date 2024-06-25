@@ -2,6 +2,7 @@ import { getTicketConversation } from "../services/conversationService.js";
 import {
   getOpenandPendingTickets,
   getSolvedTicketIds,
+  getTicketDetails,
   sendMessage,
   updateStatus,
 } from "../services/agentTicketService.js";
@@ -48,6 +49,16 @@ export async function updateTicketStatus(req, res, next) {
   try {
     const { ticketId, status } = req.body;
     const response = await updateStatus(ticketId, status);
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAgentTicketDetails(req, res, next) {
+  try {
+    const ticketId = parseInt(req.params.ticketId);
+    const response = await getTicketDetails(ticketId);
     res.json(response);
   } catch (error) {
     next(error);

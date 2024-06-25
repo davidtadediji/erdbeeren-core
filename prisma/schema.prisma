@@ -22,6 +22,13 @@ model User {
   updatedAt   DateTime?  
   ticketsAssigned  Ticket[]   
   auditLogs AuditLog[] 
+  averageResponseTime  Int?       @default(15)
+  firstResponseTime    Int?       @default(30)
+  resolutionTime       Int?       @default(120)
+  customerSatisfaction Int?       @default(85)
+  averageHandlingTime  Int?       @default(180)
+  ticketVolumeAndBacklog Int?     @default(50)
+  
 }
 
 model Conversation {
@@ -83,8 +90,8 @@ model Ticket {
   id             Int         @id @default(autoincrement())
   subject        String
   description    String
-  status         String
-  priority       String
+  status         Status
+  priority       Priority?
   assignedTo     User        @relation(fields: [userId], references: [id])
   userId   Int         
   conversation   Conversation @relation(fields: [conversationId], references: [id])
@@ -94,9 +101,26 @@ model Ticket {
 }
 
 
-// Define enum for Sentiment
+// Define enum for Sentiment Type
 enum Sentiment {
   negative
   neutral
   positive
+}
+
+
+// Define enum for Status Type
+enum Status {
+  open
+  pending
+  closed
+}
+
+
+
+// Define enum for Priority Type
+enum Priority {
+  high
+  medium
+  low
 }
