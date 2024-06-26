@@ -1,5 +1,3 @@
-// src\modules\audit_logger\messageConsumer.js
-
 import amqp from "amqplib";
 import logger from "../../../logger.js";
 import { handleAuditEvent } from "./auditTrailService.js";
@@ -17,16 +15,24 @@ async function consumeAuditEvents(queue, callback) {
     logger.info(`Waiting for audit events from ${queue}`);
 
     amqp_channel.consume(queue, async (message) => {
-      const messageContent = message.content.toString();
-      const parsedMessage = JSON.parse(messageContent);
+      try {
+        const messageContent = message.content.toString();
+        const parsedMessage = JSON.parse(messageContent);
 
-      await callback(parsedMessage);
+        const { userId, actionType, details, date } = parsedMessage;
 
-      amqp_channel.ack(message);
+        logger.info(`Received audit event: userId=${userId}, actionType=${actionType}`);
+
+        await callback({ userId, actionType, details, date });
+
+        amqp_channel.ack(message);
+      } catch (error) {
+        logger.error(`Error processing audit event from ${queue}:`, error);
+      }
     });
   } catch (error) {
     logger.error(`Error while consuming audit events from ${queue}:`, error);
   }
 }
 
-consumeAuditEvents('auditTrailQueue', handleAuditEvent)
+consumeAuditEvents('logEvent', handleAuditEvent);

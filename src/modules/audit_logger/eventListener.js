@@ -1,20 +1,10 @@
 // src\modules\audit_logger\eventListener.js
+import logger from "../../../logger.js";
 import auditEventEmitter from "./eventEmitter.js";
 import { produceAuditEvent } from "./messageQueue.js";
 
-auditEventEmitter.on("action", (message) => {
-  produceAuditEvent(
-    "auditTrailQueue",
-    {
-      userId,
-      actionType: "update",
-      entityName: "User",
-      entityId: userId.toString(),
-      details: {
-        oldValue,
-        newValue,
-      },
-    },
-    message
-  );
+auditEventEmitter.on("auditTrail", ({ userId, actionType, details, date }) => {
+  logger.info("Audit event triggered!");
+
+  produceAuditEvent("logEvent", { userId, actionType, details, date });
 });
