@@ -76,7 +76,7 @@ const receiveMessage = async (req) => {
     const previousMessages = await getConversationThread(conversation.id);
 
     
-    const response = await routeRequest(message, conversation.id, true)
+    const response = await routeRequest(messageContent, conversation.id, true)
 
     // const response = await respondToMessage(
     //   messageContent,
@@ -86,9 +86,9 @@ const receiveMessage = async (req) => {
 
     // const response = { res: { text: "Okay" } };
 
-    //  response.res = selfPresentation + response.res;
+    //  response = selfPresentation + response;
 
-    logger.info("Agent response: " + response.res);
+    logger.info("Agent response: " + response);
 
     return { conversation, response, isWhatsApp, phoneNumber, messageContent };
   } catch (error) {
@@ -110,13 +110,13 @@ const sendMessage = async ({
   try {
     // if (isWhatsApp) {
     //   await client.messages.create({
-    //     body: response.res,
+    //     body: response,
     //     from: "whatsapp:" + twilioPhoneNumber,
     //     to: phoneNumber,
     //   });
     // } else {
     //   await client.messages.create({
-    //     body: response.res,
+    //     body: response,
     //     from: twilioPhoneNumber,
     //     to: phoneNumber,
     //   });
@@ -125,7 +125,7 @@ const sendMessage = async ({
     const agentMessage = await saveMessageToConversation(
       conversation.id,
       "agent",
-      response.res
+      response
     );
 
     eventEmitter.emit("newMessageCreated", {
@@ -140,7 +140,7 @@ const sendMessage = async ({
 
     eventEmitter.emit("interactionTurnCompleted", conversation.id);
 
-    const turn = [`Customer: ${messageContent}`, `Agent: ${response.res}`];
+    const turn = [`Customer: ${messageContent}`, `Agent: ${response}`];
 
     await generateCustomerVectorStore(conversation.participantSid, turn);
 

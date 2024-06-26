@@ -12,7 +12,9 @@ router.post(
   hasPermission(["broadcastMessage"]),
   validateTwilioBroadcast, 
   async (req, res) => {
+    console.log("broadcast triggered")
     const { content } = req.body;
+    
 
     try {
       const result = await broadcastMessage(content);
