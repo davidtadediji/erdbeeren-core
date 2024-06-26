@@ -1,11 +1,7 @@
 // src\modules\llm_context\services\modelService.js
 import { PromptTemplate } from "@langchain/core/prompts";
-// import { RunnableSequence } from "@langchain/core/runnables";
 import { RetrievalQAChain } from "langchain/chains";
-// import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { FaissStore } from "@langchain/community/vectorstores/faiss";
-// import { OpenAI } from "langchain/llms/openai";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import path from "path";
 import logger from "../../../../logger.js";
@@ -13,7 +9,6 @@ import { getEnterpriseVectorStorePath } from "../util/contextFilePathsUtil.js";
 import { loadCustomerVectorStore } from "./customerContextService.js";
 import { loadEnterpriseVectorStore } from "./enterpriseContextService.js";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-// import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import {
@@ -130,7 +125,7 @@ const respondToMessage = async (message, conversationId, isAgent = false) => {
 
     const res = reply2.answer;
 
-    return { res };
+    return  res ;
   } catch (error) {
     throw error;
   }

@@ -15,9 +15,10 @@ const ROLE_PERMISSIONS = {
     "viewMonitorDashboard",
     "viewReports",
     "submitRequests",
-    "sendMessage"
+    "sendMessage",
+    "viewAuditLogs"
   ],
-  [ROLES.MONITOR]: ["viewReports", "viewMonitorDashboard"],
+  [ROLES.MONITOR]: ["viewReports", "viewAuditLogs", "viewMonitorDashboard"],
   [ROLES.AGENT]: [ "submitRequests", "viewAgentDashboard", "sendMessage"],
 };
 

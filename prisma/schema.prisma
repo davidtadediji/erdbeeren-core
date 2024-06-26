@@ -77,10 +77,11 @@ model AuditLog {
   id         Int       @id @default(autoincrement())
   user       User      @relation(fields: [userId], references: [id])
   userId     Int
-  actionType String
-  entityName String
-  entityId   String
-  details    Json
+  event      String
+  entityName String?
+  entityId   String?
+  details    String
+  date       String
   createdAt  DateTime  @default(now())
 
   @@index([userId], name: "idx_user_audit_log")

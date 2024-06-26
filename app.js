@@ -9,19 +9,16 @@ import reportsModule from "./src/modules/reports/index.js";
 import "./src/modules/analytics_engine/eventListener.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
+import auditLoggingModule from "./src/modules/audit_logger/index.js";
 import {
   app as twilioVoiceApp,
   server as twilioVoiceServer,
 } from "./src/modules/communication/twilio/voice/index.js";
-import {
-  server as webSocketServer
-} from "./src/modules/ticketing_system/services/agentTicketService.js";
+import { server as webSocketServer } from "./src/modules/ticketing_system/services/agentTicketService.js";
 
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
 import ticketingModule from "./src/modules/ticketing_system/index.js";
-
-
 
 dotenv.config();
 
@@ -45,7 +42,7 @@ process.on("uncaughtException", (error) => {
 
 // Graceful shutdown function
 const gracefulShutdown = async () => {
-  // Close the Prisma client connection 
+  // Close the Prisma client connection
   await prisma.$disconnect();
 
   logger.info("Graceful shutdown complete");
@@ -61,6 +58,7 @@ app.use("/api/authentication", authenticationModule);
 app.use("/api/agent", ticketingModule);
 app.use("/api/twilio/messaging", twilioMessagingModule);
 app.use("/api/twilio/voice", twilioVoiceApp);
+app.use("/api/audit", auditLoggingModule);
 
 // Start the centralized API server
 app.listen(port, () => {

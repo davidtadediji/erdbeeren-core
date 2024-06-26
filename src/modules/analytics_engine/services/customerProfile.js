@@ -26,34 +26,34 @@ async function updateCustomerProfile(customerInfo, conversationId) {
 }
 
 export async function handleCustomerProfile(messageId) {
-  logger.info("Handle customer profile triggered: " + messageId);
-  try {
-    // find and return the specific message
-    const message = await prisma.message.findUnique({
-      where: { id: messageId },
-      include: { conversation: true },
-    });
+  // logger.info("Handle customer profile triggered: " + messageId);
+  // try {
+  //   // find and return the specific message
+  //   const message = await prisma.message.findUnique({
+  //     where: { id: messageId },
+  //     include: { conversation: true },
+  //   });
 
-    const conversationId = message.conversation.id;
-    logger.info("Conversation id: ", conversationId);
+  //   const conversationId = message.conversation.id;
+  //   logger.info("Conversation id: ", conversationId);
 
-    if (!message) {
-      logger.error("The message does not exist: " + messageId);
-      return;
-    }
+  //   if (!message) {
+  //     logger.error("The message does not exist: " + messageId);
+  //     return;
+  //   }
 
-    // extract customer profile from message content using llm function.
-    // const customerInfo = await customerProfiling(
-    //   encodeURIComponent(message.content)
-    // );
+  //   // extract customer profile from message content using llm function.
+  //   // const customerInfo = await customerProfiling(
+  //   //   encodeURIComponent(message.content)
+  //   // );
 
-    const customerInfo = ""
+  //   const customerInfo = ""
     
-    // update customer profile using the extracted customerInfo object and conversationId
-    await updateCustomerProfile(customerInfo, conversationId);
+  //   // update customer profile using the extracted customerInfo object and conversationId
+  //   await updateCustomerProfile(customerInfo, conversationId);
 
-    logger.info("Customer Profile:", customerInfo);
-  } catch (error) {
-    logger.error("Error handling customer profile: " + error.message);
-  }
+  //   logger.info("Customer Profile:", customerInfo);
+  // } catch (error) {
+  //   logger.error("Error handling customer profile: " + error.message);
+  // }
 }
