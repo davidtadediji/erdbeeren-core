@@ -6,17 +6,16 @@ const prisma = new PrismaClient();
 
 export const getTicketConversation = async (userId, ticketId) => {
   try {
-    eventEmitter.emit("auditTrail", {
-      userId,
-      actionType: "Get Ticket Conversation",
-      details: `Retrieving conversation for ticket ${ticketId}`,
-      date: new Date().toISOString(),
-    });
+    // eventEmitter.emit("auditTrail", {
+    //   userId,
+    //   actionType: "Get Ticket Conversation",
+    //   details: `Retrieving conversation for ticket ${ticketId}`,
+    //   date: new Date().toISOString(),
+    // });
 
-    logger.info("Emission triggered")
-
-
-    
+    logger.info(
+      `Agent ${userId} viewed conversation for ticket: ${ticketId}`
+    );
 
     const conversation = await prisma.conversation.findFirst({
       where: {

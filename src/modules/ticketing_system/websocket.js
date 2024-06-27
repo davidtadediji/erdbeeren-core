@@ -1,7 +1,7 @@
 import http from "http";
 import { WebSocketServer } from "ws";
 import { PrismaClient } from "@prisma/client";
-import logger from "../../../logger";
+import logger from "../../../logger.js";
 
 const prisma = new PrismaClient();
 

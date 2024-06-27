@@ -1,13 +1,15 @@
 // src\modules\authentication\controllers\userController.js
 import { PrismaClient } from "@prisma/client";
+import logger from "../../../../logger.js";
 
 // Create an instance of the Prisma client
 const prisma = new PrismaClient();
 
 export const getUserProfile = async (req, res, next) => {
   try {
-    // Assuming user information is already attached to the request by the authenticateJWT middleware
     const userId = req.user.id;
+    
+    logger.info(`Agent ${userId} viewed profile`)
 
     const userProfile = await prisma.user.findUnique({ where: { id: userId } });
 
