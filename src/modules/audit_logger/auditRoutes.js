@@ -42,7 +42,7 @@ const LOG_FILE_PATH = path.join(
   "..",
   "..",
   "..",
-  "app.log"
+  "audit.log"
 );
 
 router.get("/text", async (req, res, next) => {

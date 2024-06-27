@@ -1,6 +1,7 @@
 // src\modules\authentication\controllers\userController.js
 import { PrismaClient } from "@prisma/client";
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 
 // Create an instance of the Prisma client
 const prisma = new PrismaClient();
@@ -9,7 +10,7 @@ export const getUserProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
     
-    logger.info(`Agent ${userId} viewed profile`)
+    auditLogger.info(`Agent ${userId} viewed profile`)
 
     const userProfile = await prisma.user.findUnique({ where: { id: userId } });
 

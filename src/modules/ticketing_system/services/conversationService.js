@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import eventEmitter from "../../audit_logger/eventEmitter.js";
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,7 @@ export const getTicketConversation = async (userId, ticketId) => {
     //   date: new Date().toISOString(),
     // });
 
-    logger.info(
+    auditLogger.info(
       `Agent ${userId} viewed conversation for ticket: ${ticketId}`
     );
 
