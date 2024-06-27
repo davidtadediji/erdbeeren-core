@@ -118,7 +118,7 @@ const handleIncidentComplaint = async (message, conversationId) => {
   }
 };
 
-// handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
+handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
 
 // Function to handle complaints
 const handleEnquiry = async (message, conversationId, isAgent, previousMessages) => {

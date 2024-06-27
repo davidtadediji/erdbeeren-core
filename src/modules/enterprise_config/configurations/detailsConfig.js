@@ -47,9 +47,10 @@ export const writeConfigFile = async (configData) => {
 export const setEnterpriseDetails = async ({
   name,
   industry,
-  location,
-  contactEmail,
-  customSettings,
+  address,
+  city,
+  country,
+  contactEmail
 }) => {
   logger.info("Set config file triggered: " + name);
   try {
@@ -57,12 +58,11 @@ export const setEnterpriseDetails = async ({
 
     existingConfig.name = name || existingConfig.name;
     existingConfig.industry = industry || existingConfig.industry;
-    existingConfig.location = location || existingConfig.location;
+    existingConfig.address = address || existingConfig.address;
     existingConfig.contactEmail = contactEmail || existingConfig.contactEmail;
-    existingConfig.customSettings = {
-      ...existingConfig.customSettings,
-      ...customSettings,
-    };
+    existingConfig.city = city || existingConfig.city;
+    existingConfig.country = country || existingConfig.country;
+   
 
     // Write the updated configuration to the file
     await writeConfigFile(existingConfig);

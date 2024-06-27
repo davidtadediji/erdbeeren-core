@@ -4,7 +4,7 @@ import Joi from 'joi';
 
 export const enterpriseDetailsSchema = Joi.object().pattern(
   Joi.string(),
-  Joi.string().max(255) // Adjust the maximum length as needed
+  Joi.string().max(255) 
 );
 
 export const validateEnterpriseDetails = (req, res, next) => {

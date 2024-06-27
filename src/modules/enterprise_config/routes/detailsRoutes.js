@@ -8,31 +8,29 @@ import { validateEnterpriseDetails } from "../middlewares/validationMiddleware.j
 
 const router = express.Router();
 
-// Protect the route with authentication and permission check
 router.post(
-  "/setEnterpriseDetails",
-  authenticateJWT, // Ensure the user is authenticated
-  hasPermission(["manageConfiguration"]), // Ensure the user has the 'admin' role
-  validateEnterpriseDetails, // Validate the request payload
+  "/set-enterprise-details",
+  authenticateJWT, 
+  hasPermission(["manageConfiguration"]),
+  validateEnterpriseDetails, 
   async (req, res, next) => {
     try {
       logger.info("Body: ", req.body);
       const details = await enterpriseConfig.setEnterpriseDetails(req.body);
       res.json({ message: "Enterprise details updated successfully", details });
     } catch (error) {
-      next(error); // Pass the error to the error handling middleware
+      next(error); 
     }
   }
 );
 
-router.get("/getEnterpriseDetails", async (req, res, next) => {
+router.get("/get-enterprise-details", async (req, res, next) => {
   try {
     const details = await enterpriseConfig.getEnterpriseDetails();
     res.json(details);
   } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    next(error); 
   }
 });
 
-// Export the router
 export default router;
