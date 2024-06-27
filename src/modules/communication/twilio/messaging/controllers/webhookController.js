@@ -112,11 +112,13 @@ const receiveMessage = async (req) => {
 
     let response = await routeRequest(messageContent, conversation.id, true,  previousMessages);
 
+    
+
     if (!response) {
       logger.info("Routed to human agent successfully");
       return {
         conversation,
-        response: "routed",
+        response: "The matter has been transferred to a human agent for better resolution",
         isWhatsApp,
         phoneNumber,
         messageContent,
@@ -160,10 +162,11 @@ const sendMessage = async ({
     // }
 
     if (
-      response == "Routed to human agent successfully" ||
+      response == "The matter has been transferred to a human agent for better resolution" ||
       response ==
-        "I'm transferring you to a human agent for further assistance."
+        "I'm transferring this message to a human agent for further assistance."
     ) {
+      console.log("Message has been routed")
       return "Message has been routed";
     }
 
