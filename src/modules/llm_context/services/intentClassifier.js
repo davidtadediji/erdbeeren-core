@@ -15,7 +15,7 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-// Function to classify the message using OpenAI API
+// Function to classify the message
 const classifyMessage = async (message) => {
   const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry' or 'other' type: ${message}`;
   const model = "gpt-3.5-turbo-1106";
@@ -118,7 +118,7 @@ const handleIncidentComplaint = async (message, conversationId) => {
   }
 };
 
-handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
+// handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
 
 // Function to handle complaints
 const handleEnquiry = async (message, conversationId, isAgent, previousMessages) => {
