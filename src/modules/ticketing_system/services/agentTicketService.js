@@ -36,6 +36,7 @@ export const getOpenandPendingTickets = async (agentId) => {
       select: {
         id: true,
         status: true,
+        description: true,
         conversationId: true,
         conversation: {
           select: {
@@ -60,7 +61,7 @@ export const getOpenandPendingTickets = async (agentId) => {
       ticketId: ticket.id,
       status: ticket.status,
       conversationId: ticket.conversationId,
-      lastMessageContent: ticket.conversation.messages[0]?.content || null,
+      lastMessageContent: ticket.description,
       lastMessageDeliveryTime:
         ticket.conversation.messages[0]?.deliveredAt || null,
     }));
@@ -129,7 +130,7 @@ export const createTicket = async (agentId, type, conversationId, message) => {
       data: {
         subject: type,
         description: message,
-        status: "open",
+        status: "pending",
         priority: "high",
         assignedTo: {
           connect: { id: agentId },
@@ -244,7 +245,7 @@ export async function updateStatus(agentId, ticketId, status) {
     });
 
     const message =
-      "You have been routed back to the AI agent you are now conversing with an AI agent";
+      "You have been routed to the AI agent you are now conversing with an AI agent";
 
     await saveMessageToConversation(
       updatedTicket.conversation.id,

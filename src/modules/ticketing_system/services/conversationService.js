@@ -15,6 +15,9 @@ export const getTicketConversation = async (userId, ticketId) => {
 
     logger.info("Emission triggered")
 
+
+    
+
     const conversation = await prisma.conversation.findFirst({
       where: {
         tickets: {
@@ -33,6 +36,12 @@ export const getTicketConversation = async (userId, ticketId) => {
     const sortedMessages = conversation.messages.sort(
       (a, b) => new Date(a.sentAt) - new Date(b.sentAt)
     );
+
+    await prisma.ticket.update({
+      where: { id: ticketId },
+      data: { status: "open" },
+      include: { conversation: true },
+    });
 
     return sortedMessages;
   } catch (error) {
