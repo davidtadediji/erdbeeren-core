@@ -30,7 +30,6 @@ export async function getCustomerSatisfactionTrend(req, res, next) {
     const metrics = JSON.parse(metricsData);
     const customerSatisfactionData = metrics.customerSatisfaction;
 
-
     res.json({
       metric: "Customer Satisfaction Trend Report",
       data: customerSatisfactionData,
@@ -42,14 +41,17 @@ export async function getCustomerSatisfactionTrend(req, res, next) {
 
 export async function getAverageConversationDuration(req, res, next) {
   try {
-    const metricsData = await fs.readFile(metricsFilePath, "utf-8");
-    const metrics = JSON.parse(metricsData);
-    const avgConversationDurationData = metrics.averageConversationDuration;
-
+    const conversationDurationData = await prisma.conversationMetrics.aggregate(
+      {
+        _avg: {
+          duration: true,
+        },
+      }
+    );
 
     res.json({
       metric: "Average Conversation Duration Report",
-      data: avgConversationDurationData,
+      data: conversationDurationData,
     });
   } catch (error) {
     next(error);
@@ -58,16 +60,14 @@ export async function getAverageConversationDuration(req, res, next) {
 
 export async function getResponseTimeTrend(req, res, next) {
   try {
-    const responseTimeTrendData = await prisma.conversation.aggregate({
+    const responseTimeTrendData = await prisma.conversationMetrics.aggregate({
       _avg: {
         avgCustomerResponse: true,
         avgAgentResponse: true,
       },
     });
-    
 
-    logger.info(responseTimeTrendData)
-
+    logger.info(responseTimeTrendData);
 
     res.json({
       metric: "Response Time Trend Report",
@@ -84,7 +84,6 @@ export async function getDemographicCustomerReport(req, res, next) {
     const metrics = JSON.parse(metricsData);
     const demographicCustomerData = metrics.demographicCustomerReport;
 
-
     res.json({
       metric: "Demographic Customer Report",
       data: demographicCustomerData,
@@ -96,15 +95,18 @@ export async function getDemographicCustomerReport(req, res, next) {
 
 export async function getHighFrequencyCustomerIdentification(req, res, next) {
   try {
-    const metricsData = await fs.readFile(metricsFilePath, "utf-8");
-    const metrics = JSON.parse(metricsData);
-    const highFrequencyCustomerData =
-      metrics.highFrequencyCustomerIdentification;
-
+    const conversations = await prisma.conversation.findMany({
+      orderBy: {
+        messages: {
+          _count: "desc",
+        },
+      },
+      take: 11,
+    });
 
     res.json({
       metric: "High-Frequency Customer Identification",
-      data: highFrequencyCustomerData,
+      data: conversations,
     });
   } catch (error) {
     next(error);
@@ -113,16 +115,15 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
 
 export async function getOverallSentimentTrend(req, res, next) {
   try {
-    const aggregateSentimentScore = await prisma.conversation.aggregate({
+    const aggregateSentimentScore = await prisma.conversationMetrics.aggregate({
       _avg: {
         overallSentimentScore: true,
       },
     });
 
-    logger.info("Aggregate Sentiment Score: ", aggregateSentimentScore)
-
     const aggregateSentiment =
-      aggregateSentimentScore && aggregateSentimentScore > 0
+      aggregateSentimentScore &&
+      aggregateSentimentScore?._avg?.overallSentimentScore > 0
         ? "positive"
         : "negative";
 
@@ -140,11 +141,6 @@ export async function getOverallSentimentTrend(req, res, next) {
   }
 }
 
-export async function TicketVolume (req, res, next){
+export async function TicketVolume(req, res, next) {}
 
-}
-
-export async function IssueCategory (req, res, next){
-
-}
-
+export async function IssueCategory(req, res, next) {}
