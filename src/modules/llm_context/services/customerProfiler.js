@@ -53,9 +53,10 @@ const customer_profile_functions = [
           },
           description: "List of previous purchases",
         },
-        customer_feedback: {
+        customer_agent_satisfaction: {
           type: "string",
-          description: "Feedback or comments from the customer",
+          description:
+            "User satisfaction on conversation agent's performance, never about product or service directly offered by company",
         },
       },
     },
@@ -64,9 +65,9 @@ const customer_profile_functions = [
 
 // Function to classify the message using OpenAI API
 export const extractProfile = async (message) => {
-  const prompt = `Check this: ${message}, to extract any customer detail, return empty if no info exists`;
+  const prompt = `Check this message: ${message}, to extract any customer detail, must return empty if no info exists, must never add any info non-existent in the message`;
   const model = "gpt-3.5-turbo-1106";
-  const max_tokens = 10;
+  const max_tokens = 100;
   const top_p = 1;
   const frequency_penalty = 0;
   const presence_penalty = 0;

@@ -1,6 +1,7 @@
 // src\modules\reports\controllers\individualMetricsController.js
 import { PrismaClient } from "@prisma/client";
 import logger from "../../../../logger.js";
+import { extractProfile } from "../../llm_context/services/customerProfiler.js";
 
 const prisma = new PrismaClient();
 
@@ -146,26 +147,63 @@ export async function getAvgCustomerResponseTime(req, res, next) {
   }
 }
 
+export async function generateCustomerProfile(req, res, next) {
+  try {
+    const conversationId = req.params.conversationId;
+
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId,
+        sender: "customer",
+      },
+      orderBy: {
+        sentAt: "desc",
+      },
+      take: 10,
+    });
+
+    // console.log(messages)
+    const messagesContent = messages
+      .reverse()
+      .map((message) => message.content)
+      .join(" ");
+
+    console.log(messagesContent);
+
+    const customerProfile = await extractProfile(messagesContent);
+
+    console.log(customerProfile);
+
+    await prisma.conversationMetrics.update({
+      where: { conversationId },
+      data: { customerProfile },
+    });
+
+    res.json({
+      customer: conversationId,
+      metric: "Generated Customer Profile",
+      customerProfile,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function getCustomerProfile(req, res, next) {
   try {
     const conversationId = req.params.conversationId;
 
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: {
-        metrics: true,
-      },
+    const conversationMetrics = await prisma.conversationMetrics.findUnique({
+      where: { conversationId: conversationId },
     });
 
-    if (!conversation || !conversation.metrics) {
-      throw new Error("Conversation or metrics not found");
-    }
-
-    const customerProfile = conversation.metrics.customerProfile;
+    const customerProfile = conversationMetrics.customerProfile;
 
     res.json({
       customer: conversationId,
-      metric: "Profile-Specific Report",
+      metric: "Customer Profile",
       customerProfile,
     });
   } catch (error) {
@@ -193,6 +231,8 @@ export async function getFrequencyOfInteractions(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -218,6 +258,8 @@ export async function getSentimentReport(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -245,6 +287,8 @@ export async function getMessageSentimentReport(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -258,7 +302,6 @@ export async function getParticipantId(req, res, next) {
 
     const participantSid = conversation.participantSid;
 
-
     res.json({
       customer: conversationId,
       metric: "Participant Sid",
@@ -266,6 +309,8 @@ export async function getParticipantId(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -289,5 +334,7 @@ export async function getEntities(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
