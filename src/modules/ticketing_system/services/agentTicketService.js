@@ -234,13 +234,46 @@ export const sendMessage = async (agentId, ticketId, message) => {
   }
 };
 
-export async function updateStatus(ticketId, status) {
+export async function updateStatus(agentId, ticketId, status) {
   try {
+    // Update the ticket status
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticketId },
       data: { status: status },
+      include: { conversation: true },
     });
 
+    const message =
+      "You have been routed back to the AI agent you are now conversing with an AI agent";
+
+    await saveMessageToConversation(
+      updatedTicket.conversation.id,
+      agentId.toString(),
+      message
+    );
+
+    // const conversation = await prisma.conversation.findUnique({
+    //   where: { id: conversationId },
+    //   select: { participantSid: true },
+    // });
+
+    const participantSid = updatedTicket.conversation?.participantSid ?? null;
+
+    const isWhatsApp = participantSid.startsWith("whatsapp:");
+    if (isWhatsApp) {
+      // await client.messages.create({
+      //   body: message,
+      //   from: "whatsapp:" + twilioPhoneNumber,
+      //   to: participantSid,
+      // });
+    } else {
+      logger.info("sms triggered");
+      // await client.messages.create({
+      //   body: response.res,
+      //   from: twilioPhoneNumber,
+      //   to: participantSid,
+      // });
+    }
     return updatedTicket;
   } catch (error) {
     throw error;
@@ -267,11 +300,10 @@ export async function getTicketDetails(ticketId) {
 
     return ticket;
   } catch (error) {
-    throw error
+    throw error;
   } finally {
     await prisma.$disconnect();
   }
 }
-
 
 export { server };

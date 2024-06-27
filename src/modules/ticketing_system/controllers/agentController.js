@@ -48,7 +48,7 @@ export async function sendAgentMessage(req, res, next) {
 export async function updateTicketStatus(req, res, next) {
   try {
     const { ticketId, status } = req.body;
-    const response = await updateStatus(ticketId, status);
+    const response = await updateStatus(req.user.id, ticketId, status);
     res.json(response);
   } catch (error) {
     next(error);

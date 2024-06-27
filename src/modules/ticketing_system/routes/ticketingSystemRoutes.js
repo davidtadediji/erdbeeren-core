@@ -33,7 +33,7 @@ router.post(
   "/update-ticket-status",
   authenticateJWT,
   hasPermission(["viewAgentDashboard"]),
-  agentController.updateTicketStatus
+  agentController.updateTicketStatus,
 );
 
 router.post(

@@ -70,24 +70,25 @@ const classifyMessage = async (message) => {
 export const routeRequest = async (
   message,
   conversationId,
-  isAgent = false
+  isAgent = false,
+  previousMessages,
 ) => {
-  // const classification = await classifyMessage(message);
-  const classification = "enquiry"
+  const classification = await classifyMessage(message);
+  // const classification = "enquiry";
   // const classification = "service request"
-  console.log("Classification: ", classification)
+  console.log("Classification: ", classification);
 
   switch (classification) {
     case "service request":
       handleServiceRequest(message, conversationId);
-      break;
+      return null;
     case "incident complaint":
       handleIncidentComplaint(message, conversationId);
-      break;
+      return null;
     case "enquiry":
-      return handleEnquiry(message, conversationId, isAgent);
+      return handleEnquiry(message, conversationId, isAgent,  previousMessages);
     default:
-      return handleUnknown(message, conversationId, isAgent);
+      return handleUnknown(message, conversationId, isAgent,  previousMessages);
   }
 };
 
@@ -100,10 +101,7 @@ const handleServiceRequest = async (message, conversationId) => {
     console.log("Random Agent: ", agentId);
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
-    logger.error(
-      "Error occured while handling service request!",
-      error
-    );
+    logger.error("Error occured while handling service request!", error);
   }
 };
 
@@ -116,27 +114,47 @@ const handleIncidentComplaint = async (message, conversationId) => {
     console.log("Random Agent: ", agentId);
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
-    logger.error(
-      "Error occured while handling incident complaint!",
-      error
-    );
+    logger.error("Error occured while handling incident complaint!", error);
   }
 };
 
-// handleIncidentComplaint("Hello", "eb5669b4-9f51-448d-9de3-1c58b117f23b");
+// handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
 
 // Function to handle complaints
-const handleEnquiry = async (message, conversationId, isAgent) => {
+const handleEnquiry = async (message, conversationId, isAgent, previousMessages) => {
   logger.info(`Handling enquiry: ${message}`);
-  // const res = await respondToMessage(message, conversationId, isAgent);
-  const res = "Hello"
+  const res = await respondToMessage(
+    message,
+    conversationId,
+    isAgent,
+    previousMessages
+  );
+  // const res = "Hello"
   return res;
 };
 
 // Function to handle unknown request types
-const handleUnknown = async (message, conversationId, isAgent) => {
+const handleUnknown = async (message, conversationId, isAgent, previousMessages) => {
   logger.info(`Handling unknown: ${message}`);
-  // const res = await respondToMessage(message, conversationId, isAgent);
-  const res = "Hello"
+  const res = await respondToMessage(
+    message,
+    conversationId,
+    isAgent,
+    previousMessages
+  );
+  // const res = "Hello";
   return res;
+};
+
+// Function to handle complaints
+export const handlePoorSentiment = async (message, conversationId) => {
+  try {
+    logger.info(`Handling incident complaint: ${message}`);
+    const type = "incident complaint";
+    const agentId = await selectRandomAgent();
+    console.log("Random Agent: ", agentId);
+    await createTicket(agentId, type, conversationId, message);
+  } catch (error) {
+    logger.error("Error occured while handling incident complaint!", error);
+  }
 };

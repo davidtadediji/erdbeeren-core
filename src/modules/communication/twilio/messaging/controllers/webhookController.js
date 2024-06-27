@@ -12,7 +12,10 @@ import { saveMessageToConversation } from "../services/messageService.js";
 import logger from "../../../../../../logger.js";
 import { PrismaClient } from "@prisma/client";
 import eventEmitter from "../../../../analytics_engine/eventEmitter.js";
-import { routeRequest } from "../../../../llm_context/services/intentClassifier.js";
+import {
+  handlePoorSentiment,
+  routeRequest,
+} from "../../../../llm_context/services/intentClassifier.js";
 
 const prisma = new PrismaClient();
 
@@ -23,6 +26,20 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 const client = twilio(accountSid, authToken);
+
+const NEGATIVE_SENTIMENT_THRESHOLD = -0.5;
+
+const checkNegativeSentiments = async (conversationId) => {
+  const lastThreeMessages = await prisma.message.findMany({
+    where: { conversationId },
+    orderBy: { sentAt: "desc" },
+    take: 3,
+  });
+
+  return lastThreeMessages.every(
+    (message) => message.sentimentScore < NEGATIVE_SENTIMENT_THRESHOLD
+  );
+};
 
 const receiveMessage = async (req) => {
   try {
@@ -57,6 +74,9 @@ const receiveMessage = async (req) => {
       });
     }
 
+    
+    const previousMessages = await getConversationThread(conversation.id);
+
     const customerMessage = await saveMessageToConversation(
       conversation.id,
       "customer",
@@ -73,20 +93,37 @@ const receiveMessage = async (req) => {
       messageId: customerMessage.id,
     });
 
-    const previousMessages = await getConversationThread(conversation.id);
 
-    
-    const response = await routeRequest(messageContent, conversation.id, true)
+    const shouldRouteToAgent = await checkNegativeSentiments(conversation.id);
 
-    // const response = await respondToMessage(
-    //   messageContent,
-    //   conversation.id,
-    //   true
-    // );
+    if (shouldRouteToAgent) {
+      logger.info("Routing to human agent due to negative sentiment");
+      handlePoorSentiment(messageContent, conversation.id);
+      const response =
+        "I'm transferring you to a human agent for further assistance.";
+      return {
+        conversation,
+        response,
+        isWhatsApp,
+        phoneNumber,
+        messageContent,
+      };
+    }
 
-    // const response = { res: { text: "Okay" } };
+    let response = await routeRequest(messageContent, conversation.id, true,  previousMessages);
 
-    //  response = selfPresentation + response;
+    if (!response) {
+      logger.info("Routed to human agent successfully");
+      return {
+        conversation,
+        response: "routed",
+        isWhatsApp,
+        phoneNumber,
+        messageContent,
+      };
+    }
+
+    response = `${selfPresentation}\n\n${response}`;
 
     logger.info("Agent response: " + response);
 
@@ -122,6 +159,14 @@ const sendMessage = async ({
     //   });
     // }
 
+    if (
+      response == "Routed to human agent successfully" ||
+      response ==
+        "I'm transferring you to a human agent for further assistance."
+    ) {
+      return "Message has been routed";
+    }
+
     const agentMessage = await saveMessageToConversation(
       conversation.id,
       "agent",
@@ -142,7 +187,7 @@ const sendMessage = async ({
 
     const turn = [`Customer: ${messageContent}`, `Agent: ${response}`];
 
-    await generateCustomerVectorStore(conversation.participantSid, turn);
+    await generateCustomerVectorStore(conversation.id, turn);
 
     return "Message sent successfully";
   } catch (error) {

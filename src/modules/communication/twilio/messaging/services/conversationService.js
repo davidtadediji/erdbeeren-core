@@ -16,12 +16,12 @@ const createNewConversation = async (phoneNumber, channelType) => {
   });
 };
 
-const getConversationThread = async (conversationId, limit = 5) => {
+const getConversationThread = async (conversationId, limit = 2) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId },
-      orderBy: { sentAt: 'desc' }, // Order messages by creation time in descending order
-      take: limit, // Limit the number of messages to retrieve
+      orderBy: { sentAt: 'desc' },
+      take: limit, 
     });
 
     // Organize messages into a conversation thread
@@ -33,7 +33,7 @@ const getConversationThread = async (conversationId, limit = 5) => {
       };
     });
 
-    return conversationThread.reverse(); // Reverse the order to have the oldest messages first
+    return conversationThread.reverse(); 
   } catch (error) {
     throw error;
   }
