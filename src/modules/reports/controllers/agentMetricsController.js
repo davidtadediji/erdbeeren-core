@@ -75,6 +75,52 @@ export async function getEmailAddress(req, res, next) {
   }
 }
 
+export async function getAverageHandlingTime(req, res, next) {
+  try {
+    const agentId = req.params.agentId;
+
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        userId: parseInt(agentId),
+        status: "closed",
+      },
+      select: {
+        createdAt: true,
+        closedAt: true,
+      },
+    });
+
+    const numberOfTickets = tickets.length;
+
+    const totalHandlingTime = tickets.reduce((acc, ticket) => {
+      if (ticket.createdAt && ticket.closedAt) {
+        const difference =
+          (new Date(ticket.closedAt) - new Date(ticket.createdAt)) /
+          (1000 * 60);
+        return acc + difference;
+      } else {
+        return acc;
+      }
+    }, 0);
+
+    const averageHandlingTime = (totalHandlingTime / numberOfTickets).toFixed(
+      2
+    );
+
+    console.log("averageHandlingTime", averageHandlingTime);
+
+    res.json({
+      agent: agentId,
+      metric: "Agent Average Handling Time",
+      averageHandlingTime,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function getTicketVolume(req, res, next) {
   try {
     const agentId = req.params.agentId;

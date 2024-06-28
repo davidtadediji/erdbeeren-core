@@ -241,7 +241,7 @@ export async function updateStatus(agentId, ticketId, status) {
     // Update the ticket status
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticketId },
-      data: { status: status },
+      data: { status: status, closedAt: new Date() },
       include: { conversation: true },
     });
 

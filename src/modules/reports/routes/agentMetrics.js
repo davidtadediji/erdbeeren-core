@@ -35,4 +35,11 @@ router.get(
   metricsController.getTicketVolume
 );
 
+router.get(
+  "/:agentId/average-handling-time",
+  authenticateJWT,
+  hasPermission(["viewReports"]),
+  metricsController.getAverageHandlingTime
+);
+
 export default router;

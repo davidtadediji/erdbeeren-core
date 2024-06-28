@@ -23,11 +23,8 @@ model User {
   ticketsAssigned  Ticket[]   
   auditLogs AuditLog[] 
   averageResponseTime  Int?       @default(15)
-  firstResponseTime    Int?       @default(30)
-  resolutionTime       Int?       @default(120)
-  customerSatisfaction Int?       @default(85)
+  averageCustomerSatisfactionScore Int?       @default(85)
   averageHandlingTime  Int?       @default(180)
-  ticketVolumeAndBacklog Int?     @default(50)  
 }
 
 model Conversation {
@@ -97,7 +94,7 @@ model Ticket {
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   conversationId String
   createdAt      DateTime    @default(now())
-  updatedAt      DateTime?
+  closedAt      DateTime?
 }
 
 
