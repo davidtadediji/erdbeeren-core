@@ -10,7 +10,7 @@ export const getUserProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    auditLogger.info(`Agent ${userId} viewed profile`);
+    auditLogger.info(`Agent ${userId} viewed their user profile`);
 
     const userProfile = await prisma.user.findUnique({ where: { id: userId } });
 
