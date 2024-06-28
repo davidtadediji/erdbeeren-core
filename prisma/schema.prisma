@@ -27,8 +27,7 @@ model User {
   resolutionTime       Int?       @default(120)
   customerSatisfaction Int?       @default(85)
   averageHandlingTime  Int?       @default(180)
-  ticketVolumeAndBacklog Int?     @default(50)
-  
+  ticketVolumeAndBacklog Int?     @default(50)  
 }
 
 model Conversation {
