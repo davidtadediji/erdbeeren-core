@@ -6,6 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import individualMetricsRoutes from "./routes/individualMetrics.js";
 import aggregateMetricsRoutes from "./routes/aggregateMetrics.js";
+import agentMetricsRoutes from "./routes/agentMetrics.js"
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors());
 // Routes
 app.use('/individual', individualMetricsRoutes)
 app.use('/aggregate', aggregateMetricsRoutes)
+app.use('/agent', agentMetricsRoutes)
 
 // Error handling middleware
 app.use(errorMiddleware);

@@ -33,6 +33,7 @@ export const getOpenandPendingTickets = async (agentId) => {
           in: ["open", "pending"],
         },
       },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         status: true,
@@ -225,7 +226,7 @@ export const sendMessage = async (agentId, ticketId, message) => {
     });
 
     eventEmitter.emit("humanResponded", {
-      conversationId: ticket.conversation.id,
+      agentId,
       messageId: humanAgentMessage.id,
     });
   } catch (error) {

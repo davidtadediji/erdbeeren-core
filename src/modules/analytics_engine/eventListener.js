@@ -7,7 +7,7 @@ const sendMessageToQueue = (queueName, event, data) => {
   const message = { event, data };
   // add message to queue
   messageQueue.produceMessage(queueName, message);
-}
+};
 
 // trigger actions when a new message is sent
 conversationEventEmitter.on(
@@ -28,10 +28,29 @@ conversationEventEmitter.on(
   }
 );
 
-// trigger actions when an agent responds
-conversationEventEmitter.on("agentResponded", ({ messageId, conversationId }) => {
-  sendMessageToQueue("agentResponseTimeQueue", "agentResponded", conversationId);
-});
+// trigger actions when an AI agent responds
+conversationEventEmitter.on(
+  "agentResponded",
+  ({ messageId, conversationId }) => {
+    sendMessageToQueue(
+      "agentResponseTimeQueue",
+      "agentResponded",
+      conversationId
+    );
+  }
+);
+
+// trigger actions when a human agent responds
+conversationEventEmitter.on(
+  "humanResponded",
+  ({ agentId, messageId }) => {
+    sendMessageToQueue(
+      "humanAgentResponseTimeQueue",
+      "humanResponded",
+      agentId
+    );
+  }
+);
 
 // trigger actions when a customer responds
 conversationEventEmitter.on(
@@ -53,7 +72,6 @@ conversationEventEmitter.on(
     );
   }
 );
-
 
 // // trigger actions when a conversation interactions ends
 // conversationEventEmitter.on("interactionEnded", (message) => {

@@ -133,3 +133,66 @@ export async function handleAgentResponseTime(conversationId) {
     );
   }
 }
+
+// function to calculate agent response time
+export async function handleHumanAgentResponseTime(agentId) {
+  logger.info("Handle human agent response time triggered: " + agentId);
+
+  try {
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        userId: agentId,
+      },
+      include: {
+        conversation: {
+          include: {
+            messages: true,
+          },
+        },
+      },
+    });
+
+    const ticketMessages = tickets.flatMap(
+      (ticket) => ticket.conversation.messages
+    );
+
+    const agentResponseTimes = [];
+    for (let i = 1; i < ticketMessages.length; i++) {
+      const currentMessage = ticketMessages[i];
+      const previousMessage = ticketMessages[i - 1];
+      if (
+        currentMessage.sender === agentId.toString() &&
+        previousMessage.sender !== agentId.toString()
+      ) {
+        const responseTime =
+          new Date(currentMessage.sentAt) - new Date(previousMessage.sentAt);
+        agentResponseTimes.push(responseTime);
+      }
+    }
+
+    let averageAgentResponseTime = 0;
+    if (agentResponseTimes.length > 0) {
+      const totalResponseTime = agentResponseTimes.reduce(
+        (accumulate, responseTime) => accumulate + responseTime,
+        0
+      );
+      averageAgentResponseTime =
+        totalResponseTime / agentResponseTimes.length / 1000;
+    }
+
+    await prisma.user.update({
+      where: { id: agentId },
+      data: { averageResponseTime: averageAgentResponseTime },
+    });
+
+    logger.info(
+      `Average Agent Response Time for agent ${agentId}: ${averageAgentResponseTime} seconds`
+    );
+  } catch (error) {
+    logger.error(
+      "Error occured while handling agent response time: " + error.message
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
+}

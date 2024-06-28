@@ -9,6 +9,7 @@ import { handleCustomerProfile } from "./services/customerProfile.js";
 import {
   handleAgentResponseTime,
   handleCustomerResponseTime,
+  handleHumanAgentResponseTime
 } from "./services/responseTime.js";
 import { handleSentimentAnalysis } from "./services/sentimentAnalysis.js";
 
@@ -48,5 +49,6 @@ consumeMessage("conversationLengthQueue", handleConversationLength);
 consumeMessage("conversationDurationQueue", handleConversationDuration);
 consumeMessage("customerResponseTimeQueue", handleCustomerResponseTime);
 consumeMessage("agentResponseTimeQueue", handleAgentResponseTime);
+consumeMessage("humanAgentResponseTimeQueue", handleHumanAgentResponseTime);
 consumeMessage("customerProfileQueue", handleCustomerProfile);
 consumeMessage("sentimentAnalysisQueue", handleSentimentAnalysis);
