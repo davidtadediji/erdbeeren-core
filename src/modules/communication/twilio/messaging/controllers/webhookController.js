@@ -118,7 +118,7 @@ const receiveMessage = async (req) => {
       logger.info("Routed to human agent successfully");
       return {
         conversation,
-        response: "The matter has been transferred to a human agent for better resolution",
+        response: "The matter has been transferred to a human agent for better resolution.",
         isWhatsApp,
         phoneNumber,
         messageContent,
@@ -147,22 +147,22 @@ const sendMessage = async ({
   );
 
   try {
-    // if (isWhatsApp) {
-    //   await client.messages.create({
-    //     body: response,
-    //     from: "whatsapp:" + twilioPhoneNumber,
-    //     to: phoneNumber,
-    //   });
-    // } else {
-    //   await client.messages.create({
-    //     body: response,
-    //     from: twilioPhoneNumber,
-    //     to: phoneNumber,
-    //   });
-    // }
+    if (isWhatsApp) {
+      await client.messages.create({
+        body: response,
+        from: "whatsapp:" + twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    } else {
+      await client.messages.create({
+        body: response,
+        from: twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    }
 
     if (
-      response == "The matter has been transferred to a human agent for better resolution" ||
+      response == "The matter has been transferred to a human agent for better resolution." ||
       response ==
         "I'm transferring this message to a human agent for further assistance."
     ) {

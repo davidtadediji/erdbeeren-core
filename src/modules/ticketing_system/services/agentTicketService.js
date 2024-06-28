@@ -207,18 +207,18 @@ export const sendMessage = async (agentId, ticketId, message) => {
 
     const isWhatsApp = participantSid.startsWith("whatsapp:");
     if (isWhatsApp) {
-      // await client.messages.create({
-      //   body: response.res,
-      //   from: "whatsapp:" + twilioPhoneNumber,
-      //   to: participantSid,
-      // });
+      await client.messages.create({
+        body: message,
+        from: "whatsapp:" + twilioPhoneNumber,
+        to: participantSid,
+      });
     } else {
       logger.info("sms triggered");
-      // await client.messages.create({
-      //   body: response.res,
-      //   from: twilioPhoneNumber,
-      //   to: participantSid,
-      // });
+      await client.messages.create({
+        body: message,
+        from: twilioPhoneNumber,
+        to: participantSid,
+      });
     }
     eventEmitter.emit("newMessageCreated", {
       conversationId: ticket.conversation.id,
@@ -263,18 +263,18 @@ export async function updateStatus(agentId, ticketId, status) {
 
     const isWhatsApp = participantSid.startsWith("whatsapp:");
     if (isWhatsApp) {
-      // await client.messages.create({
-      //   body: message,
-      //   from: "whatsapp:" + twilioPhoneNumber,
-      //   to: participantSid,
-      // });
+      await client.messages.create({
+        body: message,
+        from: "whatsapp:" + twilioPhoneNumber,
+        to: participantSid,
+      });
     } else {
       logger.info("sms triggered");
-      // await client.messages.create({
-      //   body: response.res,
-      //   from: twilioPhoneNumber,
-      //   to: participantSid,
-      // });
+      await client.messages.create({
+        body: message,
+        from: twilioPhoneNumber,
+        to: participantSid,
+      });
     }
     return updatedTicket;
   } catch (error) {
