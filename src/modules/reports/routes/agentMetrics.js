@@ -21,4 +21,18 @@ router.get(
   metricsController.getAllAgentIds
 );
 
+router.get(
+  "/:agentId/email-address",
+  authenticateJWT,
+  hasPermission(["viewReports"]),
+  metricsController.getEmailAddress
+);
+
+router.get(
+  "/:agentId/ticket-volume",
+  authenticateJWT,
+  hasPermission(["viewReports"]),
+  metricsController.getTicketVolume
+);
+
 export default router;
