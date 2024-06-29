@@ -9,6 +9,7 @@ const ROLE_PERMISSIONS = {
   [ROLES.ADMIN]: [
     "manageUsers",
     "manageConfiguration",
+    "manageBroadcasts",
     "manageLLM",
     "broadcastMessage",
     "viewAdminDashboard",
@@ -16,10 +17,10 @@ const ROLE_PERMISSIONS = {
     "viewReports",
     "submitRequests",
     "sendMessage",
-    "viewAuditLogs"
+    "viewAuditLogs",
   ],
   [ROLES.MONITOR]: ["viewReports", "viewAuditLogs", "viewMonitorDashboard"],
-  [ROLES.AGENT]: [ "submitRequests", "viewAgentDashboard", "sendMessage"],
+  [ROLES.AGENT]: ["submitRequests", "viewAgentDashboard", "sendMessage"],
 };
 
 export { ROLES, ROLE_PERMISSIONS };
