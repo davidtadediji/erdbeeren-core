@@ -92,6 +92,14 @@ export async function getAverageHandlingTime(req, res, next) {
 
     const numberOfTickets = tickets.length;
 
+    if (!numberOfTickets) {
+      res.json({
+        agent: agentId,
+        metric: "Agent Average Handling Time",
+        averageHandlingTime: 0,
+      });
+    }
+
     const totalHandlingTime = tickets.reduce((acc, ticket) => {
       if (ticket.createdAt && ticket.closedAt) {
         const difference =
@@ -102,6 +110,8 @@ export async function getAverageHandlingTime(req, res, next) {
         return acc;
       }
     }, 0);
+
+    console.log(totalHandlingTime);
 
     const averageHandlingTime = (totalHandlingTime / numberOfTickets).toFixed(
       2
