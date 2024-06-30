@@ -131,6 +131,33 @@ export async function getAverageHandlingTime(req, res, next) {
   }
 }
 
+export async function getAverageCustomerSatisfactionScore(req, res, next) {
+  try {
+    const agentId = req.params.agentId;
+
+    const averageSatisfactionScore = await prisma.ticket.aggregate({
+      where: {
+        userId: parseInt(agentId),
+        status: "closed",
+      },
+      _avg: {
+        customerSatisfactionScore: true,
+      },
+    });
+
+    logger.info(averageSatisfactionScore);
+
+    res.json({
+      metric: "Average Customer Satisfaction Score",
+      data: averageSatisfactionScore,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function getTicketVolume(req, res, next) {
   try {
     const agentId = req.params.agentId;

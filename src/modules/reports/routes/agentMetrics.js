@@ -42,4 +42,11 @@ router.get(
   metricsController.getAverageHandlingTime
 );
 
+router.get(
+  "/:agentId/average-satisfaction-score",
+  authenticateJWT,
+  hasPermission(["viewReports"]),
+  metricsController.getAverageCustomerSatisfactionScore
+);
+
 export default router;
