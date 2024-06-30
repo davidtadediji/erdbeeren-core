@@ -3,7 +3,6 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import AgentTicketingRoutes from "./routes/ticketingSystemRoutes.js";
-import AgentPerformanceRoutes from "./routes/performanceMetrics.js";
 import KnowledgeBaseRoutes from "./routes/knowledgeBase.js";
 
 dotenv.config();
@@ -17,7 +16,6 @@ app.use(cors());
 
 // Routes
 app.use("/ticketing", AgentTicketingRoutes);
-app.use("/performance", AgentPerformanceRoutes);
 app.use("/knowledge-base", KnowledgeBaseRoutes);
 
 // Error handling middleware
