@@ -44,21 +44,21 @@ const sendMessage = async (messageContent, phoneNumber) => {
       conversation = await updateConversationTimestamp(conversation.id);
     }
 
-    if (isWhatsApp) {
-      // Send response in WhatsApp format
-      await client.messages.create({
-        body: messageContent,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    } else {
-      // Send response in SMS format
-      await client.messages.create({
-        body: messageContent,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    }
+    // if (isWhatsApp) {
+    //   // Send response in WhatsApp format
+    //   await client.messages.create({
+    //     body: messageContent,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // } else {
+    //   // Send response in SMS format
+    //   await client.messages.create({
+    //     body: messageContent,
+    //     from: twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // }
 
     // Create a new message in the conversation as the agent
     const agentMessage = await saveMessageToConversation(

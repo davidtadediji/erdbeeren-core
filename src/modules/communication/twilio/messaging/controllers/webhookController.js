@@ -16,6 +16,7 @@ import {
   handlePoorSentiment,
   routeRequest,
 } from "../../../../llm_context/services/intentClassifier.js";
+import { saveCustomerSatisfactionScore } from "../../../../llm_context/services/satisfactionRater.js";
 
 const prisma = new PrismaClient();
 
@@ -74,25 +75,49 @@ const receiveMessage = async (req) => {
       });
     }
 
-    
-    const previousMessages = await getConversationThread(conversation.id);
+    const previousMessages = [
+      {
+        sender: "2",
+        text: "Bring it to baga telle",
+        timestamp: "2024-06-29T17:01:54.666Z",
+      },
+      {
+        sender: "2",
+        text: "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.",
+        timestamp: "2024-06-29T17:01:58.628Z",
+      },
+    ];
+    console.log(previousMessages);
 
-    const customerMessage = await saveMessageToConversation(
-      conversation.id,
-      "customer",
-      messageContent
-    );
+    let isSaved = false;
 
-    eventEmitter.emit("newMessageCreated", {
-      conversationId: conversation.id,
-      messageId: customerMessage.id,
-    });
+    if (
+      previousMessages &&
+      previousMessages[previousMessages.length - 1].text ==
+        "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5."
+    ) {
+      isSaved = await saveCustomerSatisfactionScore(
+        messageContent,
+        conversation.id
+      );
+    }
 
-    eventEmitter.emit("customerResponded", {
-      conversationId: conversation.id,
-      messageId: customerMessage.id,
-    });
+    if (!isSaved) {
+      const customerMessage = await saveMessageToConversation(
+        conversation.id,
+        "customer",
+        messageContent
+      );
+      eventEmitter.emit("newMessageCreated", {
+        conversationId: conversation.id,
+        messageId: customerMessage.id,
+      });
 
+      eventEmitter.emit("customerResponded", {
+        conversationId: conversation.id,
+        messageId: customerMessage.id,
+      });
+    }
 
     const shouldRouteToAgent = await checkNegativeSentiments(conversation.id);
 
@@ -110,15 +135,19 @@ const receiveMessage = async (req) => {
       };
     }
 
-    let response = await routeRequest(messageContent, conversation.id, true,  previousMessages);
-
-    
+    let response = await routeRequest(
+      messageContent,
+      conversation.id,
+      true,
+      previousMessages
+    );
 
     if (!response) {
       logger.info("Routed to human agent successfully");
       return {
         conversation,
-        response: "The matter has been transferred to a human agent for better resolution.",
+        response:
+          "The matter has been transferred to a human agent for better resolution.",
         isWhatsApp,
         phoneNumber,
         messageContent,
@@ -147,27 +176,31 @@ const sendMessage = async ({
   );
 
   try {
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: response,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    } else {
-      await client.messages.create({
-        body: response,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: response,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // } else {
+    //   await client.messages.create({
+    //     body: response,
+    //     from: twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // }
 
     if (
-      response == "The matter has been transferred to a human agent for better resolution." ||
+      response ==
+        "The matter has been transferred to a human agent for better resolution." ||
       response ==
         "I'm transferring this message to a human agent for further assistance."
     ) {
-      console.log("Message has been routed")
+      console.log("Message has been routed");
       return "Message has been routed";
+    } else if (response == "Customer has rated") {
+      console.log("Customer has rated");
+      return "Customer has rated";
     }
 
     const agentMessage = await saveMessageToConversation(

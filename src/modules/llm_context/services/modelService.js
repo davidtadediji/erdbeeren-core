@@ -157,7 +157,12 @@ async function respondToMessage4(message, conversationId) {
 }
 
 // This retrieved company documents well, I implemented some sought of customer history with vector stores, since not proper customer history but RAG, handling follow up questions is poor
-const respondToMessage3 = async (message, conversationId, isAgent = false, previousMessages = []) => {
+const respondToMessage3 = async (
+  message,
+  conversationId,
+  isAgent = false,
+  previousMessages = []
+) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
     if (!process.env.OPENAI_API_KEY) {
@@ -261,7 +266,12 @@ const respondToMessage3 = async (message, conversationId, isAgent = false, previ
 
 // Implementation was supposed to allow good handling of follow up questions, I did not notice any difference.
 // Scratch that! it works pretty well now, I'm so excited. The issue was that I needed to provide some previous messages so that it can follow up.
-const respondToMessage = async (message, conversationId, isAgent = false, previousMessages = []) => {
+const respondToMessage = async (
+  message,
+  conversationId,
+  isAgent = false,
+  previousMessages = []
+) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
     if (!process.env.OPENAI_API_KEY) {
@@ -304,7 +314,7 @@ const respondToMessage = async (message, conversationId, isAgent = false, previo
       ["system", SYSTEM_TEMPLATE],
       new MessagesPlaceholder("messages"),
     ]);
-   
+
     const queryTransformPrompt = ChatPromptTemplate.fromMessages([
       new MessagesPlaceholder("messages"),
       [
@@ -350,16 +360,18 @@ const respondToMessage = async (message, conversationId, isAgent = false, previo
       answer: documentChain,
     });
 
-      // Prepare the messages array
-      const messages = previousMessages.map((msg) => {
-        return msg.sender == "agent || human" ? new AIMessage(msg.text) : new HumanMessage(msg.text);
-      });
-  
-      messages.push(new HumanMessage(message));
+    // Prepare the messages array
+    const messages = previousMessages.map((msg) => {
+      return msg.sender == "agent || human"
+        ? new AIMessage(msg.text)
+        : new HumanMessage(msg.text);
+    });
+
+    messages.push(new HumanMessage(message));
 
     // replaces invocation
     const testReply = await conversationalRetrievalChain.invoke({
-      messages
+      messages,
     });
 
     const res = testReply.answer;

@@ -71,7 +71,7 @@ export const routeRequest = async (
   message,
   conversationId,
   isAgent = false,
-  previousMessages,
+  previousMessages
 ) => {
   const classification = await classifyMessage(message);
   // const classification = "enquiry";
@@ -86,9 +86,9 @@ export const routeRequest = async (
       handleIncidentComplaint(message, conversationId);
       return null;
     case "enquiry":
-      return handleEnquiry(message, conversationId, isAgent,  previousMessages);
+      return handleEnquiry(message, conversationId, isAgent, previousMessages);
     default:
-      return handleUnknown(message, conversationId, isAgent,  previousMessages);
+      return handleUnknown(message, conversationId, isAgent, previousMessages);
   }
 };
 
@@ -118,10 +118,15 @@ const handleIncidentComplaint = async (message, conversationId) => {
   }
 };
 
-// handleIncidentComplaint("Hello", "f82b4202-935a-4593-b5c5-109b805736a1");
+handleIncidentComplaint("Hello", "05f21bc4-6c69-4e0b-9fcf-a46a499bca53");
 
 // Function to handle complaints
-const handleEnquiry = async (message, conversationId, isAgent, previousMessages) => {
+const handleEnquiry = async (
+  message,
+  conversationId,
+  isAgent,
+  previousMessages
+) => {
   logger.info(`Handling enquiry: ${message}`);
   const res = await respondToMessage(
     message,
@@ -134,7 +139,12 @@ const handleEnquiry = async (message, conversationId, isAgent, previousMessages)
 };
 
 // Function to handle unknown request types
-const handleUnknown = async (message, conversationId, isAgent, previousMessages) => {
+const handleUnknown = async (
+  message,
+  conversationId,
+  isAgent,
+  previousMessages
+) => {
   logger.info(`Handling unknown: ${message}`);
   const res = await respondToMessage(
     message,

@@ -3,6 +3,7 @@ import cors from "cors";
 import logger from "../../../../logger.js";
 import express from "express";
 import http from "http";
+import twilio from "twilio";
 import { WebSocketServer } from "ws";
 import eventEmitter from "../../analytics_engine/eventEmitter.js";
 import { saveMessageToConversation } from "../../communication/twilio/messaging/services/messageService.js";
@@ -16,6 +17,12 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 const prisma = new PrismaClient();
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+const client = twilio(accountSid, authToken);
 
 wss.on("connection", (socket) => {
   logger.info("Client is connected");
@@ -192,12 +199,6 @@ export const sendMessage = async (agentId, ticketId, message) => {
       },
     });
 
-    const humanAgentMessage = await saveMessageToConversation(
-      ticket.conversation.id,
-      agentId.toString(),
-      message
-    );
-
     // const conversation = await prisma.conversation.findUnique({
     //   where: { id: conversationId },
     //   select: { participantSid: true },
@@ -206,20 +207,27 @@ export const sendMessage = async (agentId, ticketId, message) => {
     const participantSid = ticket.conversation?.participantSid ?? null;
 
     const isWhatsApp = participantSid.startsWith("whatsapp:");
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: message,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: participantSid,
-      });
-    } else {
-      logger.info("sms triggered");
-      await client.messages.create({
-        body: message,
-        from: twilioPhoneNumber,
-        to: participantSid,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: message,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // } else {
+    //   logger.info("sms triggered");
+    //   await client.messages.create({
+    //     body: message,
+    //     from: twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // }
+
+    const humanAgentMessage = await saveMessageToConversation(
+      ticket.conversation.id,
+      agentId.toString(),
+      message
+    );
+
     eventEmitter.emit("newMessageCreated", {
       conversationId: ticket.conversation.id,
       messageId: humanAgentMessage.id,
@@ -246,13 +254,7 @@ export async function updateStatus(agentId, ticketId, status) {
     });
 
     const message =
-      "You have been routed to the AI agent you are now conversing with an AI agent";
-
-    await saveMessageToConversation(
-      updatedTicket.conversation.id,
-      agentId.toString(),
-      message
-    );
+      "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.";
 
     // const conversation = await prisma.conversation.findUnique({
     //   where: { id: conversationId },
@@ -262,20 +264,27 @@ export async function updateStatus(agentId, ticketId, status) {
     const participantSid = updatedTicket.conversation?.participantSid ?? null;
 
     const isWhatsApp = participantSid.startsWith("whatsapp:");
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: message,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: participantSid,
-      });
-    } else {
-      logger.info("sms triggered");
-      await client.messages.create({
-        body: message,
-        from: twilioPhoneNumber,
-        to: participantSid,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: message,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // } else {
+    //   logger.info("sms triggered");
+    //   await client.messages.create({
+    //     body: message,
+    //     from: twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // }
+
+    await saveMessageToConversation(
+      updatedTicket.conversation.id,
+      agentId.toString(),
+      message
+    );
+
     return updatedTicket;
   } catch (error) {
     throw error;

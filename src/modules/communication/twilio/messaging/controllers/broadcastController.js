@@ -33,11 +33,11 @@ const broadcastMessage = async (title, content) => {
               ? `whatsapp: ${twilioPhoneNumber}`
               : twilioPhoneNumber;
 
-          await client.messages.create({
-            body: messageToSend,
-            from: formattedPhoneNumber,
-            to: conversation.participantSid,
-          });
+          // await client.messages.create({
+          //   body: messageToSend,
+          //   from: formattedPhoneNumber,
+          //   to: conversation.participantSid,
+          // });
 
           receiverConversationIds.push(conversation.id);
 

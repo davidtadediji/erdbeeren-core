@@ -1,5 +1,5 @@
 // src\modules\communication\twilio\messaging\service\conversationService.js
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -20,8 +20,8 @@ const getConversationThread = async (conversationId, limit = 2) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId },
-      orderBy: { sentAt: 'desc' },
-      take: limit, 
+      orderBy: { sentAt: "desc" },
+      take: limit,
     });
 
     // Organize messages into a conversation thread
@@ -33,11 +33,14 @@ const getConversationThread = async (conversationId, limit = 2) => {
       };
     });
 
-    return conversationThread.reverse(); 
+    return conversationThread.reverse();
   } catch (error) {
     throw error;
   }
 };
 
-
-export { updateConversationTimestamp, createNewConversation, getConversationThread };
+export {
+  updateConversationTimestamp,
+  createNewConversation,
+  getConversationThread,
+};
