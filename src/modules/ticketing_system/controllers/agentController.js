@@ -14,7 +14,7 @@ export async function getAgentConversation(req, res, next) {
     const ticketId = parseInt(req.params.ticketId);
     const messages = await getTicketConversation(req.user.id, ticketId);
     auditLogger.info(
-      `Agent ${req.user.id} viewed the conversation for ${ticketId}`
+      `Agent ${req.user.id} viewed the conversation for ticket: ${ticketId}`
     );
     res.json({ messages });
   } catch (error) {
