@@ -248,12 +248,18 @@ export const sendMessage = async (agentId, ticketId, message) => {
 export async function updateStatus(agentId, ticketId, status) {
   try {
     // Update the ticket status
+    const updateData = { status: status };
+
+    if (status === 'closed') {
+      updateData.closedAt = new Date();
+    }
+    
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticketId },
-      data: { status: status, closedAt: new Date() },
+      data: updateData,
       include: { conversation: true },
     });
-
+    
     const message =
       "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.";
 
