@@ -1,6 +1,6 @@
 // src\modules\authentication\middleware\authMiddleware.js
 import jwt from "jsonwebtoken";
-import { ROLE_PERMISSIONS } from "../config/roles.js"; // Make sure to import ROLE_PERMISSIONS
+import { ROLE_PERMISSIONS } from "../config/roles.js"; 
 import logger from "../../../../logger.js";
 
 const authenticateJWT = (req, res, next) => {
