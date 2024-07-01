@@ -63,11 +63,11 @@ const customer_profile_functions = [
   },
 ];
 
-// Function to classify the message using OpenAI API
+// Function to extract customer profile
 export const extractProfile = async (message) => {
   const prompt = `Check this message: ${message}, to extract any customer detail, must return empty if no info exists, must never add any info non-existent in the message`;
   const model = "gpt-3.5-turbo-1106";
-  const max_tokens = 100;
+  const max_tokens = 500;
   const top_p = 1;
   const frequency_penalty = 0;
   const presence_penalty = 0;
