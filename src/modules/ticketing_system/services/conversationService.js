@@ -38,11 +38,7 @@ export const getTicketConversation = async (userId, ticketId) => {
       (a, b) => new Date(a.sentAt) - new Date(b.sentAt)
     );
 
-    await prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: "open" },
-      include: { conversation: true },
-    });
+   
 
     return sortedMessages;
   } catch (error) {
