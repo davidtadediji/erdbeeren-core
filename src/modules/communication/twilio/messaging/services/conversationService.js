@@ -16,7 +16,7 @@ const createNewConversation = async (phoneNumber, channelType) => {
   });
 };
 
-const getConversationThread = async (conversationId, limit = 2) => {
+const getConversationThread = async (conversationId, limit = 5) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId },
