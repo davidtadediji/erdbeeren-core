@@ -1,3 +1,4 @@
+// src\modules\ticketing_system\routes\knowledgeBase.js
 import express from "express";
 import { ROLES } from "../../authentication/config/roles.js";
 import {
@@ -31,7 +32,7 @@ router.get(
     const { filename } = req.params;
 
     try {
-      const { fileStream, contentType } = await viewFile(filename);
+      const { fileStream, contentType } = await listFile(filename);
 
       res.setHeader("Content-Type", contentType);
       res.setHeader("Content-Disposition", `attachment; filename=${filename}`);

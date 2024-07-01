@@ -1,4 +1,4 @@
-
+// src\modules\ticketing_system\middleware\errorMiddleware.js
 import logger from "../../../../logger.js";
 
 const errorHandler = (err, req, res, next) => {

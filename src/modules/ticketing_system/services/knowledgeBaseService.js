@@ -1,4 +1,4 @@
-// src\modules\llm_context\services\fileService.js
+// src\modules\ticketing_system\services\knowledgeBaseService.js
 import fs from "fs";
 import logger from "../../../../logger.js";
 import path from "path";
@@ -18,7 +18,7 @@ const FILE_UPLOAD_PATH = path.join(
 ); 
 
 logger.info("File upload path: " + FILE_UPLOAD_PATH);
-// Ensure the upload directory exists
+
 if (!fs.existsSync(FILE_UPLOAD_PATH)) {
   fs.mkdirSync(FILE_UPLOAD_PATH);
 }
