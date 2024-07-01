@@ -62,7 +62,9 @@ export async function updateTicketStatus(req, res, next) {
   try {
     const { ticketId, status } = req.body;
     const response = await updateStatus(req.user.id, ticketId, status);
-    auditLogger.info(`Agent ${req.user.id} closed ticket ${ticketId}`);
+    auditLogger.info(
+      `Agent ${req.user.id} updated ticket ${ticketId} status to: ${status}`
+    );
     res.json(response);
   } catch (error) {
     next(error);
