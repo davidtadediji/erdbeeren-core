@@ -17,7 +17,7 @@ const openai = new OpenAI({
 
 // Function to classify the message
 const classifyMessage = async (message) => {
-  const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry' or 'other' type: ${message}`;
+  const prompt = `Classify the following message as either 'service request', 'service complaint', 'enquiry' or 'other' type: ${message}`;
   const model = "gpt-3.5-turbo-1106";
   const max_tokens = 10;
   const top_p = 1;
@@ -40,7 +40,7 @@ const classifyMessage = async (message) => {
                 enum: [
                   "enquiry",
                   "service request",
-                  "incident complaint",
+                  "service complaint",
                   "other",
                 ],
               },
@@ -59,6 +59,8 @@ const classifyMessage = async (message) => {
     const args = JSON.parse(bit.arguments);
 
     const intent = args.intent;
+
+    console.log(intent);
 
     return intent;
   } catch (error) {
@@ -82,8 +84,8 @@ export const routeRequest = async (
     case "service request":
       handleServiceRequest(message, conversationId);
       return null;
-    case "incident complaint":
-      handleIncidentComplaint(message, conversationId);
+    case "service complaint":
+      handleServiceComplaint(message, conversationId);
       return null;
     case "enquiry":
       return handleEnquiry(message, conversationId, isAgent, previousMessages);
@@ -106,19 +108,19 @@ const handleServiceRequest = async (message, conversationId) => {
 };
 
 // Function to handle complaints
-const handleIncidentComplaint = async (message, conversationId) => {
+const handleServiceComplaint = async (message, conversationId) => {
   try {
-    logger.info(`Handling incident complaint: ${message}`);
-    const type = "incident complaint";
+    logger.info(`Handling service complaint: ${message}`);
+    const type = "service complaint";
     const agentId = await selectRandomAgent();
     console.log("Random Agent: ", agentId);
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
-    logger.error("Error occured while handling incident complaint!", error);
+    logger.error("Error occured while handling service complaint!", error);
   }
 };
 
-handleIncidentComplaint("Hello", "05f21bc4-6c69-4e0b-9fcf-a46a499bca53");
+// handleServiceComplaint("Hello", "05f21bc4-6c69-4e0b-9fcf-a46a499bca53");
 
 // Function to handle complaints
 const handleEnquiry = async (
@@ -159,12 +161,12 @@ const handleUnknown = async (
 // Function to handle complaints
 export const handlePoorSentiment = async (message, conversationId) => {
   try {
-    logger.info(`Handling incident complaint: ${message}`);
-    const type = "incident complaint";
+    logger.info(`Handling service complaint: ${message}`);
+    const type = "service complaint";
     const agentId = await selectRandomAgent();
     console.log("Random Agent: ", agentId);
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
-    logger.error("Error occured while handling incident complaint!", error);
+    logger.error("Error occured while handling service complaint!", error);
   }
 };
