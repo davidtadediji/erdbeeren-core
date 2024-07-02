@@ -56,8 +56,7 @@ conversationEventEmitter.on(
 conversationEventEmitter.on(
   "customerResponded",
   ({ conversationId, messageId }) => {
-    // add customer profile extraction to queue
-    sendMessageToQueue("customerProfileQueue", "customerResponded", messageId);
+  
     // add customer response time calculation to queue
     sendMessageToQueue(
       "customerResponseTimeQueue",

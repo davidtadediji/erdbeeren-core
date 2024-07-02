@@ -250,48 +250,48 @@ export async function updateStatus(agentId, ticketId, status) {
     // Update the ticket status
     const updateData = { status: status };
 
-    if (status === 'closed') {
+    if (status === "closed") {
       updateData.closedAt = new Date();
     }
-    
+
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticketId },
       data: updateData,
       include: { conversation: true },
     });
-    
-    const message =
-      "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.";
+    if (status === "closed") {
+      const message =
+        "You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.";
 
-    // const conversation = await prisma.conversation.findUnique({
-    //   where: { id: conversationId },
-    //   select: { participantSid: true },
-    // });
+      // const conversation = await prisma.conversation.findUnique({
+      //   where: { id: conversationId },
+      //   select: { participantSid: true },
+      // });
 
-    const participantSid = updatedTicket.conversation?.participantSid ?? null;
+      const participantSid = updatedTicket.conversation?.participantSid ?? null;
 
-    const isWhatsApp = participantSid.startsWith("whatsapp:");
-    // if (isWhatsApp) {
-    //   await client.messages.create({
-    //     body: message,
-    //     from: "whatsapp:" + twilioPhoneNumber,
-    //     to: participantSid,
-    //   });
-    // } else {
-    //   logger.info("sms triggered");
-    //   await client.messages.create({
-    //     body: message,
-    //     from: twilioPhoneNumber,
-    //     to: participantSid,
-    //   });
-    // }
+      const isWhatsApp = participantSid.startsWith("whatsapp:");
+      // if (isWhatsApp) {
+      //   await client.messages.create({
+      //     body: message,
+      //     from: "whatsapp:" + twilioPhoneNumber,
+      //     to: participantSid,
+      //   });
+      // } else {
+      //   logger.info("sms triggered");
+      //   await client.messages.create({
+      //     body: message,
+      //     from: twilioPhoneNumber,
+      //     to: participantSid,
+      //   });
+      // }
 
-    await saveMessageToConversation(
-      updatedTicket.conversation.id,
-      agentId.toString(),
-      message
-    );
-
+      await saveMessageToConversation(
+        updatedTicket.conversation.id,
+        agentId.toString(),
+        message
+      );
+    }
     return updatedTicket;
   } catch (error) {
     throw error;

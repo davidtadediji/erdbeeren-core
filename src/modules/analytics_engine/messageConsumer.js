@@ -5,7 +5,6 @@ import {
   handleConversationDuration,
   handleConversationLength,
 } from "./services/basicMetrics.js";
-import { handleCustomerProfile } from "./services/customerProfile.js";
 import {
   handleAgentResponseTime,
   handleCustomerResponseTime,
@@ -50,5 +49,4 @@ consumeMessage("conversationDurationQueue", handleConversationDuration);
 consumeMessage("customerResponseTimeQueue", handleCustomerResponseTime);
 consumeMessage("agentResponseTimeQueue", handleAgentResponseTime);
 consumeMessage("humanAgentResponseTimeQueue", handleHumanAgentResponseTime);
-consumeMessage("customerProfileQueue", handleCustomerProfile);
 consumeMessage("sentimentAnalysisQueue", handleSentimentAnalysis);
