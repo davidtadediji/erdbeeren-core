@@ -21,7 +21,6 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime?  
   ticketsAssigned  Ticket[]   
-  auditLogs AuditLog[] 
   averageResponseTime  Int?       @default(15)
   averageCustomerSatisfactionScore Int?       @default(85)
   averageHandlingTime  Int?       @default(180)
@@ -69,20 +68,6 @@ model Message {
   createdAt   DateTime    @default(now())
 }
 
-model AuditLog {
-  id         Int       @id @default(autoincrement())
-  user       User      @relation(fields: [userId], references: [id])
-  userId     Int
-  event      String
-  entityName String?
-  entityId   String?
-  details    String
-  date       String
-  createdAt  DateTime  @default(now())
-
-  @@index([userId], name: "idx_user_audit_log")
-}
-
 model Ticket {
   id             Int         @id @default(autoincrement())
   subject        String
@@ -98,7 +83,6 @@ model Ticket {
   closedAt      DateTime?
 }
 
-
 // Define enum for Sentiment Type
 enum Sentiment {
   negative
@@ -106,15 +90,12 @@ enum Sentiment {
   positive
 }
 
-
 // Define enum for Status Type
 enum Status {
   open
   pending
   closed
 }
-
-
 
 // Define enum for Priority Type
 enum Priority {
