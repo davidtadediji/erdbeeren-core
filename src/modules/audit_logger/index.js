@@ -2,23 +2,25 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import logger from "../../../logger.js";
-import errorMiddleware from "./errorMiddleware.js";
 import auditRoutes from "./auditRoutes.js";
+import errorMiddleware from "./errorMiddleware.js";
 
 dotenv.config();
 
+// Create an Express application
 const app = express();
 
-// Middleware
+// Middleware to parse JSON bodies
 app.use(express.json());
+
+// Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware to enable Cross-Origin Resource Sharing (CORS)
 app.use(cors());
 
-logger.info("Port: " + process.env.PORT);
-
 // Routes
-app.use("/logs", auditRoutes);
-app.use(errorMiddleware);
+app.use("/logs", auditRoutes); // Use the audit routes for '/logs' endpoint
+app.use(errorMiddleware); // Use the custom error handling middleware
 
-export default app;
+export default app; // Export the app for use in app.js, (application entry point)
