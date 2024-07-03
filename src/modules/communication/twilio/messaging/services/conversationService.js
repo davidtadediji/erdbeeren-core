@@ -16,16 +16,18 @@ const createNewConversation = async (phoneNumber, channelType) => {
   });
 };
 
-const getConversationThread = async (conversationId, limit = 5) => {
+const getConversationThread = async (conversationId, limit = 2) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId },
-      orderBy: { sentAt: "desc" },
-      take: limit,
+      select: { sender: true, content: true, sentAt: true },
+      orderBy: { sentAt: "asc" },
     });
 
+    const lastTwoMessages = messages.slice(-2);
+
     // Organize messages into a conversation thread
-    const conversationThread = messages.map((message) => {
+    const conversationThread = lastTwoMessages.map((message) => {
       return {
         sender: message.sender,
         text: message.content,
@@ -33,14 +35,14 @@ const getConversationThread = async (conversationId, limit = 5) => {
       };
     });
 
-    return conversationThread.reverse();
+    return conversationThread;
   } catch (error) {
     throw error;
   }
 };
 
 export {
-  updateConversationTimestamp,
   createNewConversation,
-  getConversationThread,
+  getConversationThread, updateConversationTimestamp
 };
+
