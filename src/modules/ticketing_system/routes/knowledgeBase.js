@@ -32,7 +32,7 @@ router.get(
     const { filename } = req.params;
 
     try {
-      const { fileStream, contentType } = await listFile(filename);
+      const { fileStream, contentType } = await viewFile(filename);
 
       res.setHeader("Content-Type", contentType);
       res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
