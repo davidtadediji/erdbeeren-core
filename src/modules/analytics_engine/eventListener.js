@@ -41,22 +41,14 @@ conversationEventEmitter.on(
 );
 
 // trigger actions when a human agent responds
-conversationEventEmitter.on(
-  "humanResponded",
-  ({ agentId, messageId }) => {
-    sendMessageToQueue(
-      "humanAgentResponseTimeQueue",
-      "humanResponded",
-      agentId
-    );
-  }
-);
+conversationEventEmitter.on("humanResponded", ({ agentId, messageId }) => {
+  sendMessageToQueue("humanAgentResponseTimeQueue", "humanResponded", agentId);
+});
 
 // trigger actions when a customer responds
 conversationEventEmitter.on(
   "customerResponded",
   ({ conversationId, messageId }) => {
-  
     // add customer response time calculation to queue
     sendMessageToQueue(
       "customerResponseTimeQueue",
