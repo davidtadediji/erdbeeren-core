@@ -1,6 +1,9 @@
 // src\modules\analyticsEngine\messageConsumer.js
+import dotenv from "dotenv";
+dotenv.config();
 import amqp from "amqplib";
 import logger from "../../../logger.js";
+// import metric functions to be triggered when message is consumed
 import {
   handleConversationDuration,
   handleConversationLength,
@@ -8,15 +11,17 @@ import {
 import {
   handleAgentResponseTime,
   handleCustomerResponseTime,
-  handleHumanAgentResponseTime
+  handleHumanAgentResponseTime,
 } from "./services/responseTime.js";
 import { handleSentimentAnalysis } from "./services/sentimentAnalysis.js";
 
-const AMQP_URL = "amqp://localhost";
+// define the asychronous messaging queue url
+const AMQP_URL = process.env.AMQP_URL;
 
 // function to consume and process message sent to queue
 async function consumeMessage(queue, callback) {
   try {
+    // Establish connection to the amqp url 
     const connection = await amqp.connect(AMQP_URL);
     const amqp_channel = await connection.createChannel();
 
@@ -43,7 +48,7 @@ async function consumeMessage(queue, callback) {
   }
 }
 
-// start consumers
+// start consumers, which will be waiting to receive any message produced
 consumeMessage("conversationLengthQueue", handleConversationLength);
 consumeMessage("conversationDurationQueue", handleConversationDuration);
 consumeMessage("customerResponseTimeQueue", handleCustomerResponseTime);
