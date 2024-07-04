@@ -24,11 +24,14 @@ import { formatDocumentsAsString } from "langchain/util/document";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import OpenAI from "openai";
+import { readConfigFile } from "../../enterprise_config/configurations/detailsConfig.js";
 
 dotenv.config();
 
 // Retrieve OpenAI API key from environment variables
 const openaiApiKey = process.env.OPENAI_API_KEY;
+const config = await readConfigFile();
+const company_name = config.name;
 const currentModuleURL = new URL(import.meta.url);
 let currentModuleDir = path.dirname(currentModuleURL.pathname);
 
@@ -44,6 +47,7 @@ const respondToMessage = async (
   isAgent = false,
   previousMessages = []
 ) => {
+  
   try {
     /*The function takes in the customer's message, their conversation id, previous messages from their conversation,
      isAgent sets the model to behave like customer service agent*/
@@ -72,7 +76,9 @@ const respondToMessage = async (
     const retriever = generalVectorStore.asRetriever(4);
 
     // Prepare context information
-    const context = isAgent ? "You are a customer service agent." : "";
+    const context = isAgent
+      ? `You are a customer service agent for ${company_name}`
+      : "";
     const target = isAgent ? "customer's" : "user's";
 
     const SYSTEM_TEMPLATE = `${context} Answer the ${target} questions based on the below context. 
