@@ -21,7 +21,7 @@ const openai = new OpenAI({
 // Function to classify the message
 const determineCustomerSatisfaction = async (message) => {
   const prompt = `Extract the numeric rating from the following message if there is a numeric rating. Message: "${message}", if there is no number rating in this message you must leave empty, never return a number not specified in the message.`;
-  const model = "gpt-3.5-turbo-1106";
+  const model = "gpt-4";
   const max_tokens = 10;
   const top_p = 1;
   const frequency_penalty = 0;
