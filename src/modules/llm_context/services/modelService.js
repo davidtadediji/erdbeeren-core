@@ -1,45 +1,166 @@
 // src\modules\llm_context\services\modelService.js
-import { OpenAIEmbeddings } from "@langchain/openai";
-import path from "path";
-import logger from "../../../../logger.js";
-import { getEnterpriseVectorStorePath } from "../util/contextFilePathsUtil.js";
-import { loadCustomerVectorStore } from "./customerContextService.js";
-import { loadEnterpriseVectorStore } from "./enterpriseContextService.js";
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { ChatOpenAI } from "@langchain/openai";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
 import {
+  RunnableBranch,
   RunnablePassthrough,
   RunnableSequence,
 } from "@langchain/core/runnables";
-import { RunnableBranch } from "@langchain/core/runnables";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import path from "path";
+import logger from "../../../../logger.js";
+import { getEnterpriseVectorStorePath } from "../util/contextFilePathsUtil.js";
+import { loadCustomerVectorStore } from "./customerContextService.js";
+import { loadEnterpriseVectorStore } from "./enterpriseContextService.js";
 import "cheerio";
-
-import { formatDocumentsAsString } from "langchain/util/document";
-import dotenv from "dotenv";
 import { Redis } from "@upstash/redis";
-
+import dotenv from "dotenv";
+import { formatDocumentsAsString } from "langchain/util/document";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
+import OpenAI from "openai";
 
-// src\modules\llm_context\services\modelService.js
 dotenv.config();
 
 // Retrieve OpenAI API key from environment variables
 const openaiApiKey = process.env.OPENAI_API_KEY;
-
 const currentModuleURL = new URL(import.meta.url);
 let currentModuleDir = path.dirname(currentModuleURL.pathname);
 
 logger.info("Model Service dir: " + currentModuleDir);
 
 currentModuleDir = currentModuleDir.replace(/^\/([A-Z]:)/, "$1");
+
+// The issue was that I needed to provide some previous messages so that it can follow up.
+// Function to generate a response to customer's message
+const respondToMessage = async (
+  message,
+  conversationId,
+  isAgent = false,
+  previousMessages = []
+) => {
+  try {
+    /*The function takes in the customer's message, their conversation id, previous messages from their conversation,
+     isAgent sets the model to behave like customer service agent*/
+    logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
+    // check if the openai key is available
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not defined in the environment");
+    }
+
+    // load the enterprises vector store created from their company documents
+    const generalVectorStore = await loadEnterpriseVectorStore(
+      getEnterpriseVectorStorePath(),
+      new OpenAIEmbeddings()
+    );
+
+    // load the customer's vector store
+    const customerVectorStore = await loadCustomerVectorStore(conversationId);
+
+    // merge the customer-specific vector store with the enterprise vector store, if the customer has one
+    if (customerVectorStore) {
+      logger.info("Gotten customer vector store");
+      generalVectorStore.mergeFrom(customerVectorStore);
+    }
+
+    // create a retriever for the vector store
+    const retriever = generalVectorStore.asRetriever(4);
+
+    // Prepare context information
+    const context = isAgent ? "You are a customer service agent." : "";
+    const target = isAgent ? "customer's" : "user's";
+
+    const SYSTEM_TEMPLATE = `${context} Answer the ${target} questions based on the below context. 
+  <context>
+  {context}
+  </context>
+  `;
+
+    // define prompt template to pass the message to the llm, to be used with a document processing chain
+    const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
+      ["system", SYSTEM_TEMPLATE],
+      new MessagesPlaceholder("messages"),
+    ]);
+
+    /* define prompt template which generates a search query to query the vector store based on last few messages, 
+    important for handing follow up questions*/
+    const queryTransformPrompt = ChatPromptTemplate.fromMessages([
+      new MessagesPlaceholder("messages"),
+      [
+        "user",
+        "Given the above conversation, generate a search query to look up in order to get information relevant to the conversation. Only respond with the query, nothing else.",
+      ],
+    ]);
+
+    // initialize LLM
+    const chat = new ChatOpenAI({
+      model: "gpt-3.5-turbo-1106",
+      temperature: 0.2,
+      maxTokens: 300,
+    });
+    logger.info("LLM created!");
+
+    // Create a document processing chain using the specified LLM and prompt for question answering.
+    const documentChain = await createStuffDocumentsChain({
+      llm: chat,
+      prompt: questionAnsweringPrompt,
+    });
+    logger.info("Document Chain created!");
+
+    //  Create a parser for retrieval input that extracts the content of the last message.
+    const parseRetrieverInput = (params) => {
+      return params.messages[params.messages.length - 1].content;
+    };
+
+    /* The query transforming retriever chain transform queries for more complex retrieval,
+    it processes the contents of the query transform prompt using the llm, retrieves documents based on the results. */
+    const queryTransformingRetrieverChain = RunnableBranch.from([
+      [
+        (params) => params.messages.length === 1,
+        RunnableSequence.from([parseRetrieverInput, retriever]),
+      ],
+      queryTransformPrompt
+        .pipe(chat)
+        .pipe(new StringOutputParser())
+        .pipe(retriever),
+    ]).withConfig({ runName: "chat_retriever_chain" });
+
+    /* this retriver combines the the query tranforming retriver chain with the document chain,
+     allowing retrieval of documents related to the previous conversation turn and use it as context 
+     for answering the current message */
+    const conversationalRetrievalChain = RunnablePassthrough.assign({
+      context: queryTransformingRetrieverChain,
+    }).assign({
+      answer: documentChain,
+    });
+
+    // Convert the previous messages into a LLM friendly format
+    const messages = previousMessages.map((msg) => {
+      return msg.sender == "agent" || !isNaN(parseInt(msg.sender))
+        ? new AIMessage(msg.text)
+        : new HumanMessage(msg.text);
+    });
+
+    messages.push(new HumanMessage(message));
+
+    // invoke the conversational retrieval chain with the messages
+    const testReply = await conversationalRetrievalChain.invoke({
+      messages,
+    });
+
+    // extract and return llm response
+    const res = testReply.answer;
+    logger.info("Generated response: ", res);
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
 
 // This did not retrieve documents well, but has good chat history and can respond to follow up questions!
 async function respondToMessage4(message, conversationId) {
@@ -264,129 +385,6 @@ const respondToMessage3 = async (
   }
 };
 
-// Implementation was supposed to allow good handling of follow up questions, I did not notice any difference.
-// Scratch that! it works pretty well now, I'm so excited. The issue was that I needed to provide some previous messages so that it can follow up.
-const respondToMessage = async (
-  message,
-  conversationId,
-  isAgent = false,
-  previousMessages = []
-) => {
-  try {
-    logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not defined in the environment");
-    }
-
-    const generalVectorStore = await loadEnterpriseVectorStore(
-      getEnterpriseVectorStorePath(),
-      new OpenAIEmbeddings()
-    );
-
-    const customerVectorStore = await loadCustomerVectorStore(conversationId);
-
-    // Merge customer-specific vector store if available
-    if (customerVectorStore) {
-      logger.info("Gotten customer vector store");
-      generalVectorStore.mergeFrom(customerVectorStore);
-    }
-
-    const retriever = generalVectorStore.asRetriever(4);
-
-    const answer3 = await retriever.invoke("What did I say about roses?");
-
-    logger.info(
-      `Answer3: ${JSON.stringify(answer3[0])}, ${JSON.stringify(
-        answer3[1]
-      )}, ${JSON.stringify(answer3[2])},`
-    );
-
-    // Prepare context information
-    const context = isAgent ? "You are a customer service agent." : "";
-
-    const SYSTEM_TEMPLATE = `${context} Answer the user's questions based on the below context. 
-  <context>
-  {context}
-  </context>
-  `;
-
-    const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
-      ["system", SYSTEM_TEMPLATE],
-      new MessagesPlaceholder("messages"),
-    ]);
-
-    const queryTransformPrompt = ChatPromptTemplate.fromMessages([
-      new MessagesPlaceholder("messages"),
-      [
-        "user",
-        "Given the above conversation, generate a search query to look up in order to get information relevant to the conversation. Only respond with the query, nothing else.",
-      ],
-    ]);
-
-    const chat = new ChatOpenAI({
-      model: "gpt-3.5-turbo-1106",
-      temperature: 0.2,
-      maxTokens: 300,
-    });
-
-    logger.info("LLM created!");
-
-    const documentChain = await createStuffDocumentsChain({
-      llm: chat,
-      prompt: questionAnsweringPrompt,
-    });
-
-    logger.info("Document Chain created!");
-
-    const parseRetrieverInput = (params) => {
-      return params.messages[params.messages.length - 1].content;
-    };
-
-    //working on this
-    const queryTransformingRetrieverChain = RunnableBranch.from([
-      [
-        (params) => params.messages.length === 1,
-        RunnableSequence.from([parseRetrieverInput, retriever]),
-      ],
-      queryTransformPrompt
-        .pipe(chat)
-        .pipe(new StringOutputParser())
-        .pipe(retriever),
-    ]).withConfig({ runName: "chat_retriever_chain" });
-
-    //replaces retrivalChain
-    const conversationalRetrievalChain = RunnablePassthrough.assign({
-      context: queryTransformingRetrieverChain,
-    }).assign({
-      answer: documentChain,
-    });
-
-    // Prepare the messages array
-    const messages = previousMessages.map((msg) => {
-      return msg.sender == "agent || human"
-        ? new AIMessage(msg.text)
-        : new HumanMessage(msg.text);
-    });
-
-    messages.push(new HumanMessage(message));
-
-    // replaces invocation
-    const testReply = await conversationalRetrievalChain.invoke({
-      messages,
-    });
-
-    const res = testReply.answer;
-
-    console.log("Generated response: ", res);
-
-    // working on this
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
-};
-
 // This had the most potential, retrieval works fine but to combine retrieval with the chat history is an issue
 // It is saying undefined cannot have function replace, the local of the bug is in OpenAI files, too deep for my experience level
 async function respondToMessage2(message, conversationId) {
@@ -485,7 +483,7 @@ async function respondToMessage2(message, conversationId) {
   return result.data.content.content;
 }
 
-// duplicate of customer_vector_store just in case I missed something
+// duplicate of customer_vector_store implementation just in case I missed something
 const respondToMessage5 = async (message, conversationId, isAgent = false) => {
   try {
     logger.info("OPENAI_API_KEY: " + process.env.OPENAI_API_KEY);
