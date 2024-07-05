@@ -54,4 +54,4 @@ consumeMessage("conversationDurationQueue", handleConversationDuration);
 consumeMessage("customerResponseTimeQueue", handleCustomerResponseTime);
 consumeMessage("agentResponseTimeQueue", handleAgentResponseTime);
 consumeMessage("humanAgentResponseTimeQueue", handleHumanAgentResponseTime);
-consumeMessage("sentimentAnalysisQueue", handleSentimentAnalysis);
+// consumeMessage("sentimentAnalysisQueue", handleSentimentAnalysis);
