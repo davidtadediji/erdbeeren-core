@@ -65,42 +65,38 @@ $ npm install
 
 $ npm start
 
-Functional Requirement-Mandatory:
-• The system should be able to identify service requests and unresolved complaints and
-route them to a service agent.
-• The system’s AI agent should be able to respond to most complaints and enquiries
-including Frequently Asked Questions (FAQs) and inquiries about the company.
-• The system should be able to respond to queries in several languages.
-• The system should be able to track metrics such as customer satisfaction, conversation 
-duration, response time, high-frequency customers, sentiment, ticket volume over time, 
-issue category, profile, and ticketing interaction frequency, providing reports to service 
-staff.
-• The system should provide an audit trail to service staff.
-• The software should have a ticketing system for handling escalated queries.
-• The system should handleinappropriate messages.
-• The system should authenticate service staff before granting access to the system.
-• The system should be able to provide an interface for managing the corporate knowledge 
-base
-• The system should inform customers about the agent attending to them.
-• The system should provide multiple communication channels for customers to access the 
-system.
 
-Functional Requirement-Desirable:
-Given the additional insights garnered from research, coupled with a consideration of the
-development pace and the remaining time, it seems prudent to maintain the following
-requirements as optional, as the system can continue to operate effectively without them.
-• The system may feature voice interaction employing a turn mechanism and TTS 
-technology.
-• The system may include extra features to augment the agent routine for resolving tickets.
-• The system may be able to track the cost of conversations in real-time: the cost of APIs and 
-tokens for each interaction with customers.
-• The system may be able to integrate with the Zoho Customer Relationship Management 
-System.
+# This was inserted by `prisma init`:
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
 
-Non-Functional Requirements:
-• The system should requirefewer resources to train a model using corporate data.
-• The system should present androgynously.
-• The system should be easy for enterprises to set up.
-• The system should be a quality software product
-• The system should be deployed on a cloud platform.
-• The system should be a single-tenant software.
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+
+Add these to the environment variables
+
+OPENAI_API_KEY
+LANGCHAIN_TRACING_V2
+LANGCHAIN_ENDPOINT
+LANGCHAIN_API_KEY
+LANGCHAIN_PROJECT
+DB_USERNAME
+PASSWORD
+DB_HOST
+DB_PORT
+DB_NAME
+DATABASE_URL
+JWT_SECRET
+PORT
+TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN
+TWILIO_PHONE_NUMBER
+NGROK_SUBDOMAIN
+TWILIO_CHAT_SERVICE_SID
+TWILIO_API_SECRET
+TWILIO_API_KEY
+EMAIL_USER
+EMAIL_APP_PASSWORD
+APP_URL
+AMQP_URL

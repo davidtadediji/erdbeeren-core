@@ -18,6 +18,7 @@ import {
   getConversationThread,
   updateConversationTimestamp,
   isSuspended,
+  hasOpenTicket,
 } from "../services/conversationService.js";
 import { saveMessageToConversation } from "../services/messageService.js";
 
@@ -174,6 +175,19 @@ const receiveMessage = async (req) => {
       };
     }
 
+    /* Check if the conversation has an open ticket and if it does, the message is only sent to the agent.
+    The user is not stuck with a particular agent performing badly because of the check negative sentiment function*/
+    if (await hasOpenTicket(conversation.id)) {
+      const response = null;
+      return {
+        conversation,
+        response,
+        isWhatsApp,
+        phoneNumber,
+        messageContent,
+      };
+    }
+
     // if the last three messages don't meet the negativity threshold, send it the message to the intent classifier.
     let response = await routeRequest(
       messageContent,
@@ -225,6 +239,10 @@ const sendMessage = async ({
   );
 
   try {
+    if (!response) {
+      return "Customer has an open ticket";
+    }
+
     // check if the customers channel is sms or whatsapp to know how to respond
     // if (isWhatsApp) {
     //   await client.messages.create({

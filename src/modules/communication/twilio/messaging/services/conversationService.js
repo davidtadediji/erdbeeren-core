@@ -64,3 +64,15 @@ export {
   updateConversationTimestamp,
   isSuspended,
 };
+
+
+export const hasOpenTicket = async (conversationId) => {
+  const openTicket = await prisma.ticket.findFirst({
+    where: {
+      conversationId: conversationId,
+      status: 'open',
+    },
+  });
+
+  return openTicket !== null;
+};
