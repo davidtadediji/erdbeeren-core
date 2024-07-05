@@ -41,8 +41,26 @@ const getConversationThread = async (conversationId, limit = 1) => {
   }
 };
 
-export {
-  createNewConversation,
-  getConversationThread, updateConversationTimestamp
+const isSuspended = async (conversationId) => {
+  try {
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+    });
+
+    if (conversation && conversation.strike >= 5) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error occurred while checking strike limit:", error);
+    throw error;
+  }
 };
 
+export {
+  createNewConversation,
+  getConversationThread,
+  updateConversationTimestamp,
+  isSuspended,
+};

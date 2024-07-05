@@ -17,6 +17,7 @@ import {
   createNewConversation,
   getConversationThread,
   updateConversationTimestamp,
+  isSuspended,
 } from "../services/conversationService.js";
 import { saveMessageToConversation } from "../services/messageService.js";
 
@@ -86,6 +87,16 @@ const receiveMessage = async (req) => {
       );
     } else {
       conversation = await updateConversationTimestamp(conversation.id);
+      if (await isSuspended(conversation.id)) {
+        const response = "You have been suspended from this platform";
+        return {
+          conversation,
+          response,
+          isWhatsApp,
+          phoneNumber,
+          messageContent,
+        };
+      }
     }
 
     // Perform the same check with conversation metrics which is related table, just in case

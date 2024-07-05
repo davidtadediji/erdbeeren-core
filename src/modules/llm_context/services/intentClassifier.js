@@ -1,6 +1,7 @@
 import dotenv from "dotenv"; // Importing dotenv for environment variables
 import OpenAI from "openai"; // Importing OpenAI API wrapper
 import logger from "../../../../logger.js"; // Importing logger module
+import { PrismaClient } from "@prisma/client";
 import auditLogger from "../../../../audit_logger.js"; // Importing logger module
 import {
   createTicket,
@@ -10,15 +11,16 @@ import { respondToMessage } from "./modelService.js"; // Importing local functio
 
 dotenv.config(); // This loads environment variables from .env file
 
+const prisma = new PrismaClient();
 const openai = new OpenAI({
   // This initializes OpenAI with API key from environment variables
   apiKey: process.env["OPENAI_API_KEY"],
 });
 // Function to classify the message using OpenAI API
 const classifyMessage = async (message) => {
-  const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry' or 'other' type: ${message}`;
+  const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry', 'other' type or "explicit content' if it is an inappropriate message: ${message}`;
   const model = "gpt-3.5-turbo-1106";
-  const max_tokens = 10;
+  const max_tokens = 25;
   const top_p = 1;
   const frequency_penalty = 0;
   const presence_penalty = 0;
@@ -40,6 +42,7 @@ const classifyMessage = async (message) => {
                   "enquiry",
                   "service request",
                   "incident complaint",
+                  "explicit content",
                   "other",
                 ],
               },
@@ -84,6 +87,9 @@ export const routeRequest = async (
     case "service complaint":
       handleServiceComplaint(message, conversationId);
       return null;
+    case "explicit content":
+      handleExplicit(conversationId);
+      return null;
     case "enquiry":
       return handleEnquiry(message, conversationId, isAgent, previousMessages);
     default:
@@ -108,6 +114,26 @@ const handleServiceRequest = async (message, conversationId) => {
   }
 };
 
+const handleExplicit = async (conversationId) => {
+  try {
+    logger.info(`Handling explict content in ${conversationId}`);
+    auditLogger.info(`Handling explict content from ${conversationId}`);
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: {
+        strike: {
+          increment: 1,
+        },
+      },
+    });
+  } catch (error) {
+    logger.error("Error occurred while handling explicit content!", error);
+    auditLogger.error(
+      `Error occurred while handling explicit content from ${conversationId}`,
+      error
+    );
+  }
+};
 // Function to handle complaints
 const handleServiceComplaint = async (message, conversationId) => {
   try {

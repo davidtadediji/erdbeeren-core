@@ -68,6 +68,7 @@
     "nodemailer": "^6.9.7",
     "openai": "^4.52.0",
     "pdf-parse": "^1.1.1",
+    "puppeteer": "^19.11.1",
     "twilio": "^4.20.0",
     "winston": "^3.11.0",
     "ws": "^8.16.0"
