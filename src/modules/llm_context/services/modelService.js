@@ -25,6 +25,7 @@ import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/mess
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import OpenAI from "openai";
 import { readConfigFile } from "../../enterprise_config/configurations/detailsConfig.js";
+import { determineFollowUp } from "./followUpDeterminer.js";
 
 dotenv.config();
 
@@ -47,7 +48,6 @@ const respondToMessage = async (
   isAgent = false,
   previousMessages = []
 ) => {
-  
   try {
     /*The function takes in the customer's message, their conversation id, previous messages from their conversation,
      isAgent sets the model to behave like customer service agent*/
@@ -145,14 +145,32 @@ const respondToMessage = async (
       answer: documentChain,
     });
 
-    // Convert the previous messages into a LLM friendly format
-    const messages = previousMessages.map((msg) => {
-      return msg.sender == "agent" || !isNaN(parseInt(msg.sender))
-        ? new AIMessage(msg.text)
-        : new HumanMessage(msg.text);
-    });
+    const newMessage = {
+      sender: "customer",
+      text: message,
+      timestamp: new Date()
+    };
 
-    messages.push(new HumanMessage(message));
+    previousMessages.push(newMessage);
+
+    console.log(previousMessages)
+
+    const result = await determineFollowUp(previousMessages);
+
+    let messages;
+
+    if (result == 1) {
+      console.log("It is not a follow up response");
+      messages = [new HumanMessage(message)];
+    } else {
+      console.log("Seems like a follow up response");
+      // Convert the previous messages into a LLM friendly format
+      messages = previousMessages.map((msg) => {
+        return msg.sender == "agent" || !isNaN(parseInt(msg.sender))
+          ? new AIMessage(msg.text)
+          : new HumanMessage(msg.text);
+      });
+    }
 
     // invoke the conversational retrieval chain with the messages
     const testReply = await conversationalRetrievalChain.invoke({
