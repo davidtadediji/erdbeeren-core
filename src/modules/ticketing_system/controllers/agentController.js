@@ -50,7 +50,7 @@ export async function sendAgentMessage(req, res, next) {
     const { content, ticketId } = req.body;
     await sendMessage(req.user.id, ticketId, content);
     auditLogger.info(
-      `Agent ${req.user.id} sent a message to resolve ${ticketId}`
+      `Agent ${req.user.id} sent a message to resolve ticket ${ticketId}`
     );
     res.json("Message sent successfully");
   } catch (error) {
