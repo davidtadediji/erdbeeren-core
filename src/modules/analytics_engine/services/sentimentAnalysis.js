@@ -19,7 +19,7 @@ export async function handleSentimentAnalysis(messageId) {
     return;
   }
 
-  const text = "Hello";
+  const text = encodeURIComponent(message.content);
 
   logger.info("Analysed text: " + text);
 
