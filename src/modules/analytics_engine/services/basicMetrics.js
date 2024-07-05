@@ -20,10 +20,10 @@ export async function handleConversationDuration(conversationId) {
       conversation.messages.length < 2
     ) {
       logger.error(
-        "Conversation is not valid or insufficient messages for calculating duration."
+        `Insufficient messages for calculating duration or conversation ${conversationId} is not valid.`
       );
       auditLogger.error(
-        "Conversation is not valid or insufficient messages for calculating duration."
+        `Insufficient messages for calculating duration or conversation ${conversationId} is not valid.`
       );
       return;
     }
