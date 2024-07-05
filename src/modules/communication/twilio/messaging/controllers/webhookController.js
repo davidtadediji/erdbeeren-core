@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import twilio from "twilio"; // main package for sms/whatsapp conversation
 import logger from "../../../../../../logger.js";
+import auditLogger from "../../../../../../audit_logger.js";
 import eventEmitter from "../../../../analytics_engine/eventEmitter.js";
 import { generateCustomerVectorStore } from "../../../../llm_context/services/customerContextService.js";
 // import llm services
@@ -54,6 +55,7 @@ const webhookController = async (req, res) => {
     res.status(200).send("Message received and responded successfully");
   } catch (error) {
     logger.error(error);
+    auditLogger.error(error);
     res
       .status(500)
       .json({ error: "Internal server error", message: error.message });

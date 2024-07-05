@@ -1,6 +1,7 @@
 // src\modules\llm_context\services\fileService.js
 import fs from "fs"; // package to access file system
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 import path from "path";
 
 // Get the enterprise repository path
@@ -44,6 +45,7 @@ export const uploadFiles = async (files) => {
         });
       } catch (error) {
         logger.error(`Error saving file ${originalFilename}: ${error.message}`);
+        auditLogger.error(`Error saving file ${originalFilename}: ${error.message}`);
         throw error;
       }
     }
@@ -51,6 +53,7 @@ export const uploadFiles = async (files) => {
     return uploadedFiles;
   } catch (error) {
     logger.error(`Error uploading files: ${error.message}`);
+    auditLogger.error(`Error uploading files: ${error.message}`);
     throw error;
   }
 };
@@ -73,6 +76,7 @@ export const deleteFile = async (filename) => {
       return { success: false, message: `File ${filename} not found.` };
     } else {
       logger.error(`Error deleting file: ${error.message}`);
+      auditLogger.error(`Error deleting file: ${error.message}`);
       throw error;
     }
   }
@@ -87,6 +91,7 @@ export const listFiles = async () => {
     return files;
   } catch (error) {
     logger.error(`Error listing files: ${error.message}`);
+    auditLogger.error(`Error listing files: ${error.message}`);
     throw error;
   }
 };
@@ -112,6 +117,7 @@ export const renameFile = async (filename, newFilename) => {
       return { success: false, message: `File ${filename} not found.` };
     } else {
       logger.error(`Error renaming file: ${error.message}`);
+      auditLogger.error(`Error renaming file: ${error.message}`);
       throw error;
     }
   }
@@ -138,6 +144,7 @@ export const viewFile = async (filename) => {
     } catch (error) {
       // Handle error by rejecting
       logger.error(`Error occured while accessing file: ${error.message}`);
+      auditLogger.error(`Error occured while accessing file: ${error.message}`);
       reject(error);
     }
   });

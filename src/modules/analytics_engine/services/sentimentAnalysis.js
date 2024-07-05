@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios"; 
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,8 @@ export async function handleSentimentAnalysis(messageId) {
   });
 
   if (!message) {
-    logger.error("Message not found: " + messageId);
+    logger.error("Message not found for sentiment analysis: " + messageId);
+    auditLogger.error("Message not found for sentiment analysis: " + messageId);
     return;
   }
 
@@ -79,6 +81,7 @@ export async function handleSentimentAnalysis(messageId) {
     });
   } catch (error) {
     logger.error("Error in Sentiment Analysis: " + messageId, error);
+    auditLogger.error("Error in Sentiment Analysis: " + messageId, error);
   }
 }
 

@@ -1,56 +1,41 @@
 // src\modules\authentication\controllers\authController.js
-
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import jwt from "jsonwebtoken";
-import logger from "../../../../logger.js";
-import { ROLES } from "../config/roles.js";
+import { PrismaClient } from "@prisma/client"; // for user persistence
+import bcrypt from "bcryptjs"; // for crypto password hashing
+import crypto from "crypto"; // for generating reset password token
+import jwt from "jsonwebtoken"; // for identifying users and their sessions/authentication
+import logger from "../../../../logger.js"; // for logging
+import { ROLES } from "../config/roles.js"; // to get the available roles on the system.
+// import utilities
 import {
   generateVerificationCode,
   sendResetPasswordEmail,
   sendVerificationCodeToEmail,
 } from "../utils/verification.js";
+// initialize prisma client
 const prisma = new PrismaClient();
 
-const generateAndSendVerificationCode = async (user) => {
-  const newVerificationCode = generateVerificationCode();
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { verificationCode: newVerificationCode },
-  });
-
-  logger.info("Verification code: " + newVerificationCode);
-
-  sendVerificationCodeToEmail(user.email, newVerificationCode);
-
-  return newVerificationCode;
-};
-
+// Function to create employee/user account
 export const signup = async (req, res, next) => {
-  logger.info("signup triggered: " + JSON.stringify(req.body, null, 2));
+  // "next" allows the function to pass control to the next middleware in the stack e.g. error middleware
 
   try {
+    // get the details from the request body
     const { username, password, email, role } = req.body;
 
     logger.info("Username is: " + username);
 
+    // check if user exists
     const user = await prisma.user.findFirst({
       where: { email: email },
     });
 
-    // check if user exists
     if (user) {
       logger.info("User already exists");
       return res.status(400).json({ message: "User already exists" });
     }
 
-    logger.info("User doesn't exist yet");
-
     // convert the password to hash
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    logger.info("Hashed password: " + hashedPassword);
 
     // check if the role provided is valid
     const existingRoles = Object.values(ROLES);
@@ -63,7 +48,7 @@ export const signup = async (req, res, next) => {
 
     const verificationCode = generateVerificationCode();
 
-    // create the new user
+    // create the new user in the database
     const newUser = await prisma.user.create({
       data: {
         email: email,
@@ -74,8 +59,6 @@ export const signup = async (req, res, next) => {
       },
     });
 
-    logger.info("User was created successfully" + newUser);
-
     // generate jwt for the newly created user
     const token = jwt.sign(
       {
@@ -84,7 +67,7 @@ export const signup = async (req, res, next) => {
         isVerified: newUser.isVerified,
         role: newUser.role,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET
     );
 
     // send the verification code to the user's email
@@ -101,50 +84,14 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res, next) => {
-  logger.info("Login triggered");
-
-  try {
-    const { email, password } = req.body;
-
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: "Authentication failed" });
-    }
-
-    // If verified, generate a token for authentication
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      role: user.role, 
-      isVerified: user.isVerified,
-    };
-
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET,);
-
-    return res.json({ message: "Authentication successful", token, user });
-  } catch (error) {
-    next(error);
-  }
-};
-
+// Function to verify a user after they have created an account.
 export const verify = async (req, res, next) => {
-  logger.info(
-    "verify triggered: " +
-      JSON.stringify(req.body, null, 2) +
-      " " +
-      req.headers.authorization
-  );
-
   try {
+    // get the verification code the user has entered after signing up and retrieving it from their email
     const { verificationCode } = req.body;
 
     // Extract email from the token
     const email = req.user.email;
-
-    logger.info("Email gotten: " + email);
-    logger.info("VerificationCode gotten: " + verificationCode);
 
     // Validate input
     if (!email || !verificationCode) {
@@ -161,7 +108,7 @@ export const verify = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the verification code matches
+    // Check if the verification code matches the one in the database
     if (user.verificationCode !== verificationCode) {
       return res.status(401).json({ message: "Invalid verification code" });
     }
@@ -182,16 +129,52 @@ export const verify = async (req, res, next) => {
 
     const newToken = jwt.sign(tokenPayload, process.env.JWT_SECRET);
 
+    // Add the new token in the response
     return res.json({
       message: "Email verification successful",
       user: updatedUser,
-      token: newToken, // Include the new token in the response
+      token: newToken,
     });
   } catch (error) {
     next(error);
   }
 };
 
+// Function to log users into the system
+export const login = async (req, res, next) => {
+  logger.info("Login triggered");
+
+  try {
+    // get the details from the request body
+    const { email, password } = req.body;
+
+    // find the user based on the email inputted
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // and check the inputted password with the hashed password on the database.
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+
+    // If verified, generate a token for authentication
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+    };
+
+    // generate a fresh token
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
+
+    // send the token back to the frontend
+    return res.json({ message: "Authentication successful", token, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Function to resent verification code if user aborts the verification process.
 export const resendVerificationCode = async (req, res, next) => {
   logger.info("Resend triggered with token: " + req.headers.authorization);
 
@@ -224,15 +207,16 @@ export const resendVerificationCode = async (req, res, next) => {
   }
 };
 
+// Function to recover password if forgotten
 export const forgotPassword = async (req, res, next) => {
   try {
-    // Extract email from the token
+    // Extract the email from the token
     const { email } = req.body;
 
     // Find the user in the database
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Check if the user exists
+    // Check if the user exists and if they don't a password cannot be recovered for them.
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -253,8 +237,7 @@ export const forgotPassword = async (req, res, next) => {
       },
     });
 
-    // Send an email with the reset password link
-    // Implement a function similar to sendVerificationCodeToEmail
+    // Send an email with the reset password link, the reset token is added to the link
     sendResetPasswordEmail(user.email, resetToken);
 
     return res.json({ message: "Password reset email sent successfully" });
@@ -263,8 +246,11 @@ export const forgotPassword = async (req, res, next) => {
   }
 };
 
+// Function to reset password after selecting forgot password
 export const resetPassword = async (req, res, next) => {
   try {
+    // when a user inputs a new password and sends,
+    // the reset token from the page link and new password is sent to the server
     const { resetToken, newPassword } = req.body;
 
     // Convert the timestamp to a Date object
@@ -302,4 +288,20 @@ export const resetPassword = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+// This function is used to generate and then send the verification code,
+// it uses the utility functions and is then used by the resendVerificationCode function.
+const generateAndSendVerificationCode = async (user) => {
+  const newVerificationCode = generateVerificationCode();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { verificationCode: newVerificationCode },
+  });
+
+  logger.info("Verification code: " + newVerificationCode);
+
+  sendVerificationCodeToEmail(user.email, newVerificationCode);
+
+  return newVerificationCode;
 };

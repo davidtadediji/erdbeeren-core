@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 const prisma = new PrismaClient();
 
 // function to calculate customer response time
@@ -19,6 +20,7 @@ export async function handleCustomerResponseTime(conversationId) {
       conversation.messages.length === 0
     ) {
       logger.error("Conversation is invalid or no messages found.");
+      auditLogger.error("Conversation is invalid or no messages found.");
       return;
     }
     logger.info("Conversation found.");
@@ -65,6 +67,9 @@ export async function handleCustomerResponseTime(conversationId) {
     logger.error(
       "Error occured while handling customer response time: " + error.message
     );
+    auditLogger.error(
+      "Error occured while handling customer response time: " + error.message
+    );
   }
 }
 
@@ -85,6 +90,7 @@ export async function handleAgentResponseTime(conversationId) {
       conversation.messages.length === 0
     ) {
       logger.error("Conversation is invalid or no messages found.");
+      auditLogger.error("Conversation is invalid or no messages found.");
       return;
     }
     logger.info("Conversation found.");
@@ -129,6 +135,9 @@ export async function handleAgentResponseTime(conversationId) {
     );
   } catch (error) {
     logger.error(
+      "Error occured while handling agent response time: " + error.message
+    );
+    auditLogger.error(
       "Error occured while handling agent response time: " + error.message
     );
   }
@@ -190,6 +199,9 @@ export async function handleHumanAgentResponseTime(agentId) {
     );
   } catch (error) {
     logger.error(
+      "Error occured while handling agent response time: " + error.message
+    );
+    auditLogger.error(
       "Error occured while handling agent response time: " + error.message
     );
   } finally {

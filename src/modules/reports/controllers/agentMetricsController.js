@@ -2,6 +2,7 @@
 // Import logger and initialize PrismaClient
 import { PrismaClient } from "@prisma/client";
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 
 const prisma = new PrismaClient();
 
@@ -213,6 +214,10 @@ export async function getTicketVolume(req, res, next) {
     });
   } catch (error) {
     logger.error("Error fetching ticket volume data:", error);
+    auditLogger.error(
+      `Error fetching ticket volume data for agent ${agentId}`,
+      error
+    );
     throw error;
   } finally {
     await prisma.$disconnect();

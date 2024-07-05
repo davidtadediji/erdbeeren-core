@@ -2,6 +2,7 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 
 // function to calculate and store conversation duration
 export async function handleConversationDuration(conversationId) {
@@ -21,10 +22,13 @@ export async function handleConversationDuration(conversationId) {
       logger.error(
         "Conversation is not valid or insufficient messages for calculating duration."
       );
+      auditLogger.error(
+        "Conversation is not valid or insufficient messages for calculating duration."
+      );
       return;
     }
-    
-    // sort conversation messages by date from first to last 
+
+    // sort conversation messages by date from first to last
     const sortedMessages = conversation.messages.sort(
       (a, b) => new Date(a.sentAt) - new Date(b.sentAt)
     );
@@ -43,18 +47,19 @@ export async function handleConversationDuration(conversationId) {
     logger.info("Last Message Timestamp:", lastTimestamp);
 
     // subtract the first and last timestamps to get conversation duration
-    const conversationDuration =
-    lastTimestamp - firstTimestamp;
+    const conversationDuration = lastTimestamp - firstTimestamp;
 
     // if the first conversation check is passed but conversations do not have timestamps this check serves to avoid an error
     if (isNaN(conversationDuration) || conversationDuration < 0) {
       logger.error("Invalid duration calculation.");
+      auditLogger.error("Invalid duration calculation.");
       return;
     }
 
-    // convert conversation duration to minutes 
-    const conversationDurationMin = Math.ceil(conversationDuration / (1000 * 60));
-
+    // convert conversation duration to minutes
+    const conversationDurationMin = Math.ceil(
+      conversationDuration / (1000 * 60)
+    );
 
     // update the duration field of the conversation table
     await prisma.conversationMetrics.update({
@@ -65,6 +70,7 @@ export async function handleConversationDuration(conversationId) {
     logger.info(`Conversation Duration: ${conversationDurationMin} minutes`);
   } catch (error) {
     logger.error("Error handling conversation duration:", error.message);
+    auditLogger.error("Error handling conversation duration:", error.message);
   }
 }
 
@@ -81,6 +87,7 @@ export async function handleConversationLength(conversationId) {
     // check if conversation was found
     if (!conversation) {
       logger.error("Conversation was not found.");
+      auditLogger.error("Conversation was not found.");
       return;
     }
 
@@ -102,14 +109,10 @@ export async function handleConversationLength(conversationId) {
     );
   } catch (error) {
     logger.error("Error handling conversation length:" + error.message);
+    auditLogger.error("Error handling conversation length:" + error.message);
   }
 }
 
-export async function handleTicketVolume (conversationId) {
+export async function handleTicketVolume(conversationId) {}
 
-}
-
-
-export async function handleIssueCategory (conversationId) {
-  
-}
+export async function handleIssueCategory(conversationId) {}

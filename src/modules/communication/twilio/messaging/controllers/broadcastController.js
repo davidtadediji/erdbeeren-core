@@ -4,6 +4,7 @@ import { updateConversationTimestamp } from "../services/conversationService.js"
 import { saveMessageToConversation } from "../services/messageService.js";
 import twilio from "twilio";
 import logger from "../../../../../../logger.js";
+import auditLogger from "../../../../../../audit_logger.js";
 import { updateBroadcasts } from "../services/broadcastsManager.js";
 const prisma = new PrismaClient();
 
@@ -55,6 +56,12 @@ const broadcastMessage = async (title, content) => {
             code: error.code,
             moreInfo: error.moreInfo,
           });
+          auditLogger.error("Error sending message to conversation:", {
+            conversationId: conversation.id,
+            error: error.message,
+            code: error.code,
+            moreInfo: error.moreInfo,
+          });
         }
       })
     );
@@ -71,6 +78,7 @@ const broadcastMessage = async (title, content) => {
     return { success: true };
   } catch (error) {
     logger.error("Error broadcasting message:", error);
+    auditLogger.error("Error broadcasting message:", error);
     throw error;
   }
 };

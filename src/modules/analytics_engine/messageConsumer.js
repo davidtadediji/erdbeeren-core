@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import amqp from "amqplib";
 import logger from "../../../logger.js";
+import auditLogger from "../../../audit_logger.js";
 // import metric functions to be triggered when message is consumed
 import {
   handleConversationDuration,
@@ -21,7 +22,7 @@ const AMQP_URL = process.env.AMQP_URL;
 // function to consume and process message sent to queue
 async function consumeMessage(queue, callback) {
   try {
-    // Establish connection to the amqp url 
+    // Establish connection to the amqp url
     const connection = await amqp.connect(AMQP_URL);
     const amqp_channel = await connection.createChannel();
 
@@ -42,6 +43,10 @@ async function consumeMessage(queue, callback) {
     });
   } catch (error) {
     logger.error(
+      `Error occured while consuming messages from ${queue}:`,
+      error
+    );
+    auditLogger.error(
       `Error occured while consuming messages from ${queue}:`,
       error
     );

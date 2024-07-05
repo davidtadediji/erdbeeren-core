@@ -1,6 +1,7 @@
 // src\modules\analyticsEngine\messageQueue.js
 import amqp from "amqplib";
 import logger from "../../../logger.js";
+import auditLogger from "../../../audit_logger.js";
 
 const AMQP_URL = "amqp://localhost";
 
@@ -26,6 +27,7 @@ async function produceMessage(queue, message) {
     await connection.close();
   } catch (error) {
     logger.error("Error occured while producing message:", error);
+    auditLogger.error("Error occured while producing message:", error);
   }
 }
 export default { produceMessage };

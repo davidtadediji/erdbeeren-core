@@ -1,6 +1,7 @@
 import dotenv from "dotenv"; // Importing dotenv for environment variables
 import OpenAI from "openai"; // Importing OpenAI API wrapper
 import logger from "../../../../logger.js"; // Importing logger module
+import auditLogger from "../../../../audit_logger.js"; // Importing logger module
 import {
   createTicket,
   selectRandomAgent,
@@ -100,6 +101,10 @@ const handleServiceRequest = async (message, conversationId) => {
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
     logger.error("Error occurred while handling service request!", error);
+    auditLogger.error(
+      `Error occurred while handling service request from ${conversationId}`,
+      error
+    );
   }
 };
 
@@ -113,6 +118,10 @@ const handleServiceComplaint = async (message, conversationId) => {
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
     logger.error("Error occurred while handling service complaint!", error);
+    auditLogger.error(
+      `Error occurred while handling service complaint from ${conversationId}`,
+      error
+    );
   }
 };
 
@@ -164,5 +173,9 @@ export const handlePoorSentiment = async (message, conversationId) => {
     await createTicket(agentId, type, conversationId, message);
   } catch (error) {
     logger.error("Error occurred while handling service complaint!", error);
+    auditLogger.error(
+      `Error occurred while handling service complaint from ${conversationId}`,
+      error
+    );
   }
 };

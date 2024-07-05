@@ -1,6 +1,7 @@
 // src\modules\authentication\middleware\authMiddleware.js
 import jwt from "jsonwebtoken";
 import logger from "../../../../logger.js";
+import auditLogger from "../../../../audit_logger.js";
 import { ROLE_PERMISSIONS } from "../config/roles.js";
 // Function to authenticate user's request
 const authenticateJWT = (req, res, next) => {
@@ -10,6 +11,7 @@ const authenticateJWT = (req, res, next) => {
   // If there is no token return an unauthorized access response
   if (!token) {
     logger.error("Unauthorized access");
+    auditLogger.error("Unauthorized access");
     return res.status(401).json({ message: "Unauthorized access" });
   }
 
@@ -17,6 +19,7 @@ const authenticateJWT = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       logger.error(err.message);
+      auditLogger.error(err.message);
       return res
         .status(403)
         .json({ message: "Forbidden, user is not authenticated!" });
