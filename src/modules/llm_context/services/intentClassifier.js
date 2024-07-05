@@ -16,10 +16,11 @@ const openai = new OpenAI({
   // This initializes OpenAI with API key from environment variables
   apiKey: process.env["OPENAI_API_KEY"],
 });
+
 // Function to classify the message using OpenAI API
 const classifyMessage = async (message) => {
   const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry', 'other' type or "explicit content' if it is an inappropriate message: ${message}`;
-  const model = "gpt-3.5-turbo-1106";
+  const model = "gpt-4";
   const max_tokens = 25;
   const top_p = 1;
   const frequency_penalty = 0;
@@ -79,38 +80,34 @@ export const routeRequest = async (
   // const classification = "enquiry";
   // const classification = "service request"
   console.log("Classification: ", classification);
-
   switch (classification) {
     case "service request":
-      handleServiceRequest(message, conversationId);
+      handleRequireHuman(message, conversationId, "service request");
+      // no response because it would be routed to agent
       return null;
-    case "service complaint":
-      handleServiceComplaint(message, conversationId);
+    case "incident complaint":
+      handleRequireHuman(message, conversationId, "service complaint");
+      // no response because it would be routed to agent
       return null;
+    case "enquiry":
+      return handleRequireAI(
+        message,
+        conversationId,
+        isAgent,
+        previousMessages,
+        "enquiry"
+      );
     case "explicit content":
       handleExplicit(conversationId);
       return null;
-    case "enquiry":
-      return handleEnquiry(message, conversationId, isAgent, previousMessages);
     default:
-      return handleUnknown(message, conversationId, isAgent, previousMessages);
-  }
-};
-
-// Function to handle service requests
-const handleServiceRequest = async (message, conversationId) => {
-  try {
-    logger.info(`Handling service request: ${message}`);
-    const type = "service request";
-    const agentId = await selectRandomAgent();
-    console.log("Random Agent: ", agentId);
-    await createTicket(agentId, type, conversationId, message);
-  } catch (error) {
-    logger.error("Error occurred while handling service request!", error);
-    auditLogger.error(
-      `Error occurred while handling service request from ${conversationId}`,
-      error
-    );
+      return handleRequireAI(
+        message,
+        conversationId,
+        isAgent,
+        previousMessages,
+        "unknown"
+      );
   }
 };
 
@@ -134,58 +131,39 @@ const handleExplicit = async (conversationId) => {
     );
   }
 };
-// Function to handle complaints
-const handleServiceComplaint = async (message, conversationId) => {
-  try {
-    logger.info(`Handling service complaint: ${message}`);
-    const type = "service complaint";
-    const agentId = await selectRandomAgent();
-    console.log("Random Agent: ", agentId);
-    await createTicket(agentId, type, conversationId, message);
-  } catch (error) {
-    logger.error("Error occurred while handling service complaint!", error);
-    auditLogger.error(
-      `Error occurred while handling service complaint from ${conversationId}`,
-      error
-    );
-  }
-};
 
 // handleServiceComplaint("Hello", "05f21bc4-6c69-4e0b-9fcf-a46a499bca53");
 
-// Function to handle complaints
-const handleEnquiry = async (
-  message,
-  conversationId,
-  isAgent,
-  previousMessages
-) => {
-  logger.info(`Handling enquiry: ${message}`);
-  const res = await respondToMessage(
-    message,
-    conversationId,
-    isAgent,
-    previousMessages
-  );
-  // const res = "Hello"
-  return res;
+// Function to handle requests and incident complaints
+const handleRequireHuman = async (message, conversationId, type) => {
+  try {
+    logger.info(`Handling request: ${message}`);
+    // select a random agent
+    const agentId = await selectRandomAgent();
+    // create a ticket and assign it to the agent to address the issue
+    await createTicket(agentId, type, conversationId, message);
+  } catch (error) {
+    logger.error(`Error occurred while handling ${type}!`, error);
+    auditLogger.error(`Error occurred while handling ${type}!`, error);
+  }
 };
 
-// Function to handle unknown request types
-const handleUnknown = async (
+// Function to handle enquires and messages of undefined type
+const handleRequireAI = async (
   message,
   conversationId,
   isAgent,
-  previousMessages
+  previousMessages,
+  type
 ) => {
-  logger.info(`Handling unknown: ${message}`);
+  logger.info(`Handling ${type}: ${message}`);
+  // pass the message to the LLM to respond
   const res = await respondToMessage(
     message,
     conversationId,
     isAgent,
     previousMessages
   );
-  // const res = "Hello";
   return res;
 };
 
