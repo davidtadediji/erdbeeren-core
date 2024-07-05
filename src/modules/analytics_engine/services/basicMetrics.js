@@ -29,10 +29,10 @@ export async function handleConversationDuration(conversationId) {
       (a, b) => new Date(a.sentAt) - new Date(b.sentAt)
     );
 
-    logger.info(
-      "Sorted Timestamps:",
-      sortedMessages.map((msg) => msg.sentAt)
-    );
+    // logger.info(
+    //   "Sorted Timestamps:",
+    //   sortedMessages.map((msg) => msg.sentAt)
+    // );
 
     const firstTimestamp = new Date(sortedMessages[0].sentAt);
     const lastTimestamp = new Date(
