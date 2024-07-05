@@ -16,7 +16,7 @@ const createNewConversation = async (phoneNumber, channelType) => {
   });
 };
 
-const getConversationThread = async (conversationId, limit = 2) => {
+const getConversationThread = async (conversationId, limit = 1) => {
   try {
     const messages = await prisma.message.findMany({
       where: { conversationId },
@@ -24,7 +24,7 @@ const getConversationThread = async (conversationId, limit = 2) => {
       orderBy: { sentAt: "asc" },
     });
 
-    const lastTwoMessages = messages.slice(-2);
+    const lastTwoMessages = messages.slice(-limit);
 
     // Organize messages into a conversation thread
     const conversationThread = lastTwoMessages.map((message) => {
