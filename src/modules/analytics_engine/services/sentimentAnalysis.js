@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import axios from "axios"; 
+import axios from "axios";
 import logger from "../../../../logger.js";
 import auditLogger from "../../../../audit_logger.js";
 
@@ -19,33 +19,31 @@ export async function handleSentimentAnalysis(messageId) {
     return;
   }
 
-  const text = encodeURIComponent(message.content);
+  const text = "Hello";
 
-  logger.info("Analysed text: " + text)
+  logger.info("Analysed text: " + text);
+
+  const options = {
+    method: "GET",
+    url: "https://twinword-sentiment-analysis.p.rapidapi.com/analyze/",
+    params: {
+      text: text,
+    },
+    headers: {
+      "x-rapidapi-key": "77efa167e9mshbd2544ac809dc95p19ff49jsn256c8b53024e",
+      "x-rapidapi-host": "twinword-sentiment-analysis.p.rapidapi.com",
+    },
+  };
+
   try {
-    const response = await axios.post(
-      "https://api.twinword.com/api/sentiment/analyze/latest/",
-      `text=${text}`,
-      {
-        headers: {
-          accept: "application/json, text/javascript, */*; q=0.01",
-          "accept-language": "en-US,en;q=0.9",
-          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "sec-ch-ua":
-            '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": '"Windows"',
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "same-site",
-        },
-      }
-    );
+    const response = await axios.request(options);
 
     const data = response.data;
     logger.info("Sentiment analysis result: " + messageId, data);
 
-    logger.info("Sentiment type: " + data.type + " Sentiment score: " + data.score);
+    logger.info(
+      "Sentiment type: " + data.type + " Sentiment score: " + data.score
+    );
 
     // Updated the Message model with sentiment analysis results
     await prisma.message.update({
@@ -102,7 +100,6 @@ function calculateOverallSentiment(messages) {
 
   return maxSentiment;
 }
-
 
 function calculateOverallSentimentScore(messages) {
   const totalScore = messages.reduce(
