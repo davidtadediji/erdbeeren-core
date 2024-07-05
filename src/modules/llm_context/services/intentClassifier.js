@@ -9,26 +9,24 @@ import { respondToMessage } from "./modelService.js"; // Importing local functio
 
 dotenv.config(); // This loads environment variables from .env file
 
-const openai = new OpenAI({ // This initializes OpenAI with API key from environment variables
+const openai = new OpenAI({
+  // This initializes OpenAI with API key from environment variables
   apiKey: process.env["OPENAI_API_KEY"],
 });
-
-// Function to classify the message using OpenAI's GPT-3 model
+// Function to classify the message using OpenAI API
 const classifyMessage = async (message) => {
-  const prompt = `Classify the following message as either 'service request', 'service complaint', 'enquiry' or 'other' type: ${message}`;
-  const model = "gpt-4"; // This sets the model version
-  const max_tokens = 10; // This defines the maximum number of tokens for the completion
-  const top_p = 1; // This sets the sampling parameter for diversity
-  const frequency_penalty = 0; // This sets the frequency penalty for the model
-  const presence_penalty = 0; // This sets the presence penalty for the model
-  const temperature = 0; // This sets the temperature parameter for sampling
+  const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry' or 'other' type: ${message}`;
+  const model = "gpt-3.5-turbo-1106";
+  const max_tokens = 10;
+  const top_p = 1;
+  const frequency_penalty = 0;
+  const presence_penalty = 0;
+  const temperature = 0;
 
   try {
-    // This makes an API call to OpenAI for message classification
     const response = await openai.chat.completions.create({
       model,
       messages: [{ role: "assistant", content: prompt }],
-      // function call rre
       functions: [
         {
           name: "getIntent",
@@ -37,11 +35,10 @@ const classifyMessage = async (message) => {
             properties: {
               intent: {
                 type: "string",
-                // These are the four main classifications
                 enum: [
                   "enquiry",
                   "service request",
-                  "service complaint",
+                  "incident complaint",
                   "other",
                 ],
               },
@@ -56,17 +53,15 @@ const classifyMessage = async (message) => {
       presence_penalty,
       temperature,
     });
-
-    // This parses the response to extract the classified intent and we return the intent
     const bit = response.choices[0].message.function_call;
     const args = JSON.parse(bit.arguments);
+
     const intent = args.intent;
 
     return intent;
   } catch (error) {
-    logger.error("Error during classification:", error.message); 
-    return "unknown"; /* We handle errors in classification 
-    by returning 'unknown'  */
+    console.error("Error during classification:", error.message);
+    return "unknown";
   }
 };
 
