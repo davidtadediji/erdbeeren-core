@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export const getTicketConversation = async (userId, ticketId) => {
   try {
     auditLogger.info(
-      `Agent ${userId} viewed conversation for ticket: ${ticketId}`
+      `Agent ${userId} viewed conversation for ticket ${ticketId}`
     );
 
     const conversation = await prisma.conversation.findFirst({
