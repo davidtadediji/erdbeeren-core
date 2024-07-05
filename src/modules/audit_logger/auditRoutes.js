@@ -43,10 +43,10 @@ router.get("/text", async (req, res, next) => {
   try {
     // Read the log file content
     const data = await fs.readFile(LOG_FILE_PATH, "utf8");
-    const lines = data.trim().split("\n"); // Split the file content into lines
-    const last500Lines = lines.slice(-500).join("\n"); // Get the last 500 lines
+    // const lines = data.trim().split("\n"); // Split the file content into lines
+    // const last500Lines = lines.slice(-500).join("\n"); // Get the last 500 lines
     res.setHeader("Content-Type", "text/plain"); // Set the response content type to plain text
-    res.send(last500Lines); // Send the last 500 lines as the response
+    res.send(data); // Send the last 500 lines as the response
   } catch (error) {
     next(error); // Pass any errors to the error handling middleware
   }
