@@ -100,6 +100,8 @@ const receiveMessage = async (req) => {
     // get the last few messages (2-5)
     const previousMessages = await getConversationThread(conversation.id);
 
+    logger.info("previousMessages: " + JSON.stringify(previousMessages));
+
     let isSaved = false;
 
     /* if the previous message contains a message asking the user to rate an agent service
@@ -211,19 +213,19 @@ const sendMessage = async ({
 
   try {
     // check if the customers channel is sms or whatsapp to know how to respond
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: response,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    } else {
-      await client.messages.create({
-        body: response,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: response,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // } else {
+    //   await client.messages.create({
+    //     body: response,
+    //     from: twilioPhoneNumber,
+    //     to: phoneNumber,
+    //   });
+    // }
 
     // Exit the function if the message the customer sent triggered a transfer to a human agent.
     if (
@@ -272,7 +274,7 @@ const NEGATIVE_SENTIMENT_THRESHOLD = -0.5;
 
 const checkNegativeSentiments = async (conversationId) => {
   const lastThreeMessages = await prisma.message.findMany({
-    where: { conversationId },
+    where: { conversationId, sender: { not: "agent" } },
     orderBy: { sentAt: "desc" },
     take: 3,
   });
