@@ -1,5 +1,109 @@
 OBTAIN ENVIRONMENT VARIABLES
 
+
+OPENAI_API_KEY
+LANGCHAIN_TRACING_V2
+LANGCHAIN_ENDPOINT
+LANGCHAIN_API_KEY
+LANGCHAIN_PROJECT
+DB_USERNAME
+PASSWORD
+DB_HOST
+DB_PORT
+DB_NAME
+DATABASE_URL
+JWT_SECRET
+PORT
+TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN
+TWILIO_PHONE_NUMBER
+NGROK_SUBDOMAIN
+TWILIO_CHAT_SERVICE_SID
+TWILIO_API_SECRET
+TWILIO_API_KEY
+EMAIL_USER
+EMAIL_APP_PASSWORD
+APP_URL
+AMQP_URL
+
+
+
+OPENAI_API_KEY
+Obtain: Sign up for an account at OpenAI. Once registered, navigate to the API keys section under your account settings to generate a new API key.
+Add to your environment variables
+
+
+LANGCHAIN_TRACING_V2
+Obtain: Specific to your application setup and requirements. Check the Langchain documentation or setup guides for the appropriate value.
+Add to your environment variables
+
+
+LANGCHAIN_ENDPOINT
+Obtain: The endpoint URL for the Langchain service you're using. Refer to your service provider or setup documentation.
+Add to your environment variables
+
+
+LANGCHAIN_API_KEY
+Obtain: Similar to the OpenAI API key, generate this from your Langchain account or service provider's dashboard.
+Add to your environment variables
+
+
+LANGCHAIN_PROJECT
+Obtain: This would be the project identifier/name from your Langchain account or setup.
+Add to your environment variables
+
+
+DB_USERNAME and PASSWORD
+Obtain: This would be the username and password for your database. These are typically set during the initial database setup.
+Add to your environment variables
+
+
+
+DB_HOST, DB_PORT, and DB_NAME
+Obtain: These details are provided when you set up your database. The host is the server address, the port is the connection port, and the database name is the specific database you're connecting to.
+Add to your environment variables
+
+
+DATABASE_URL
+Obtain: Construct this URL based on the database credentials. Format typically is: protocol://username:password@host:port/database.
+Add to your environment variables
+
+JWT_SECRET
+Obtain: Generate a secret key for JSON Web Token (JWT) signing. You can use an online generator or create one manually.
+Add to your environment variables
+
+PORT
+Obtain: This is the port number your application will run on. Common defaults are 3000 or 8000, but it can be any open port.
+Add to your environment variables
+
+TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER
+Obtain: Sign up for an account at Twilio, navigate to the Console Dashboard to get your Account SID, Auth Token, and phone number.
+Add to your environment variables
+
+NGROK_SUBDOMAIN
+Obtain: Sign up for an account at ngrok, create a subdomain from your account dashboard.
+Add to your environment variables
+
+
+TWILIO_CHAT_SERVICE_SID, TWILIO_API_SECRET, and TWILIO_API_KEY
+Obtain: Generate these from your Twilio Console, specifically under the Chat Services and API Keys sections.
+Add to your environment variables
+
+
+EMAIL_USER and EMAIL_APP_PASSWORD
+Obtain: These are your email service credentials. For services like Gmail, create an App Password under your account settings.
+Add to your environment variables
+
+APP_URL
+Obtain: This is the base URL where your application is hosted.
+Add to your environment variables
+
+AMQP_URL
+Obtain: The URL for your AMQP (Advanced Message Queuing Protocol) server. Usually in the format amqp://username:password@host:port/vhost.
+Add to your environment variables
+
+
+
 1. **OPENAI_API_KEY:**
    - Sign up for an account on the OpenAI platform.
    - Navigate to the API section to obtain your API key.
@@ -75,28 +179,3 @@ $ npm start
 
 
 Add these to the environment variables
-
-OPENAI_API_KEY
-LANGCHAIN_TRACING_V2
-LANGCHAIN_ENDPOINT
-LANGCHAIN_API_KEY
-LANGCHAIN_PROJECT
-DB_USERNAME
-PASSWORD
-DB_HOST
-DB_PORT
-DB_NAME
-DATABASE_URL
-JWT_SECRET
-PORT
-TWILIO_ACCOUNT_SID
-TWILIO_AUTH_TOKEN
-TWILIO_PHONE_NUMBER
-NGROK_SUBDOMAIN
-TWILIO_CHAT_SERVICE_SID
-TWILIO_API_SECRET
-TWILIO_API_KEY
-EMAIL_USER
-EMAIL_APP_PASSWORD
-APP_URL
-AMQP_URL
