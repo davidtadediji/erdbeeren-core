@@ -105,9 +105,9 @@ const respondToMessage = async (
 
     // initialize LLM
     const chat = new ChatOpenAI({
-      model: "gpt-3.5-turbo-1106",
+      model: "gpt-4",
       temperature: 0.2,
-      maxTokens: 300,
+      maxTokens: 500,
     });
     logger.info("LLM created!");
 

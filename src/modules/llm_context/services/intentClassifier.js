@@ -21,7 +21,7 @@ const openai = new OpenAI({
 const classifyMessage = async (message) => {
   const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry', 'other' type or "explicit content' if it is an inappropriate message: ${message}`;
   const model = "gpt-4";
-  const max_tokens = 25;
+  const max_tokens = 100;
   const top_p = 1;
   const frequency_penalty = 0;
   const presence_penalty = 0;
@@ -77,16 +77,14 @@ export const routeRequest = async (
   previousMessages
 ) => {
   const classification = await classifyMessage(message);
-  // const classification = "enquiry";
-  // const classification = "service request"
-  console.log("Classification: ", classification);
+  logger.info("Classification: ", classification);
   switch (classification) {
     case "service request":
       handleRequireHuman(message, conversationId, "service request");
       // no response because it would be routed to agent
       return null;
     case "incident complaint":
-      handleRequireHuman(message, conversationId, "service complaint");
+      handleRequireHuman(message, conversationId, "incident complaint");
       // no response because it would be routed to agent
       return null;
     case "enquiry":
@@ -137,7 +135,7 @@ const handleExplicit = async (conversationId) => {
 // Function to handle requests and incident complaints
 const handleRequireHuman = async (message, conversationId, type) => {
   try {
-    logger.info(`Handling request: ${message}`);
+    logger.info(`Handling ${type}: ${message}`);
     // select a random agent
     const agentId = await selectRandomAgent();
     // create a ticket and assign it to the agent to address the issue
