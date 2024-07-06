@@ -115,11 +115,12 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
 
 export async function getOverallSentimentTrend(req, res, next) {
   try {
-    const aggregateSentimentScore = await prisma.conversationMetrics.aggregate({
-      _avg: {
-        overallSentimentScore: true,
-      },
-    });
+    const aggregateSentimentScore = await prisma.conversationMetrics
+      .aggregate({
+        _avg: {
+          overallSentimentScore: true,
+        },
+      })
 
     const aggregateSentiment =
       aggregateSentimentScore &&

@@ -78,7 +78,9 @@ export async function getAvgAgentResponseTime(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    const avgAgentResponseTime = conversation.metrics.avgAgentResponse;
+    const avgAgentResponseTime = conversation.metrics.avgAgentResponse
+      ? conversation.metrics.avgAgentResponse.toFixed(2)
+      : conversation.metrics.avgAgentResponse;
 
     res.json({
       customer: conversationId,
@@ -133,7 +135,9 @@ export async function getAvgCustomerResponseTime(req, res, next) {
       throw new Error("Conversation or metrics not found");
     }
 
-    const avgCustomerResponseTime = conversation.metrics.avgCustomerResponse;
+    const avgCustomerResponseTime = conversation.metrics.avgCustomerResponse
+      ? conversation.metrics.avgCustomerResponse.toFixed(2)
+      : conversation.metrics.avgCustomerResponse;
 
     res.json({
       customer: conversationId,
