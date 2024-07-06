@@ -10,10 +10,6 @@ import "./src/modules/analytics_engine/eventListener.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
 import auditLoggingModule from "./src/modules/audit_logger/index.js";
-import {
-  app as twilioVoiceApp,
-  server as twilioVoiceServer,
-} from "./src/modules/communication/twilio/voice/index.js";
 import { server as webSocketServer } from "./src/modules/ticketing_system/services/agentTicketService.js";
 
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
@@ -57,19 +53,9 @@ app.use("/api/llm", llmContextModule);
 app.use("/api/authentication", authenticationModule);
 app.use("/api/agent", ticketingModule);
 app.use("/api/twilio/messaging", twilioMessagingModule);
-app.use("/api/twilio/voice", twilioVoiceApp);
 app.use("/api/audit", auditLoggingModule);
 
 // Start the centralized API server
 app.listen(port, () => {
   logger.info(`Centralized API server listening at http://localhost:${port}`);
-});
-
-// webSocketServer.listen(5000, () => {
-//   logger.info(`WebSocket server listening at ws://localhost:5000`);
-// });
-
-// Start the Twilio Voice HTTP server
-twilioVoiceServer.listen(8080, () => {
-  logger.info("Twilio Voice server listening at http://localhost:8080");
 });
