@@ -43,11 +43,13 @@ export async function handleConversationDuration(conversationId) {
       sortedMessages[sortedMessages.length - 1].sentAt
     );
 
-    logger.info("First Message Timestamp:", firstTimestamp);
-    logger.info("Last Message Timestamp:", lastTimestamp);
+    logger.info(`First Message Timestamp: ${firstTimestamp}`);
+    logger.info(`Last Message Timestamp: ${lastTimestamp}`);
 
     // subtract the first and last timestamps to get conversation duration
     const conversationDuration = lastTimestamp - firstTimestamp;
+
+    logger.info(`Conversation Duration: ${conversationDuration}`);
 
     // if the first conversation check is passed but conversations do not have timestamps this check serves to avoid an error
     if (isNaN(conversationDuration) || conversationDuration < 0) {
