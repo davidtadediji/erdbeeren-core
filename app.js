@@ -10,8 +10,6 @@ import "./src/modules/analytics_engine/eventListener.js";
 import authenticationModule from "./src/modules/authentication/index.js";
 import twilioMessagingModule from "./src/modules/communication/twilio/messaging/index.js";
 import auditLoggingModule from "./src/modules/audit_logger/index.js";
-import { server as webSocketServer } from "./src/modules/ticketing_system/services/agentTicketService.js";
-
 import enterpriseConfigModule from "./src/modules/enterprise_config/index.js";
 import llmContextModule from "./src/modules/llm_context/index.js";
 import ticketingModule from "./src/modules/ticketing_system/index.js";

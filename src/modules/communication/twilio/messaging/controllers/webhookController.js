@@ -21,20 +21,6 @@ import {
   hasOpenTicket,
 } from "../services/conversationService.js";
 import { saveMessageToConversation } from "../services/messageService.js";
-import WebSocket, { WebSocketServer } from "ws";
-
-const wss = new WebSocketServer({ port: 8080 });
-
-wss.on("connection", function connection(ws) {
-  ws.on("message", (message) => {
-    logger.info(`Received message from client: ${message}`);
-    // Handle incoming messages from clients if needed
-  });
-
-  ws.on("close", () => {
-    logger.info("WebSocket client disconnected");
-  });
-});
 
 const prisma = new PrismaClient();
 
@@ -139,8 +125,7 @@ const receiveMessage = async (req) => {
       previousMessages &&
       previousMessages.length &&
       previousMessages[previousMessages.length - 1].text ==
-        `You are now connected with an AI agent. Kindly rate the assistance you received 
-        from the service agent on a scale of 1-5.`
+        `You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.`
     ) {
       isSaved = await saveCustomerSatisfactionScore(
         messageContent,
@@ -271,20 +256,7 @@ const sendMessage = async ({
     //     to: phoneNumber,
     //   });
     // }
-
-    //replace with websocket
-    // Send the agent response over WebSocket
-    // wss.clients.forEach((client) => {
-    //   if (client.readyState === WebSocket.OPEN) {
-    //     client.send(
-    //       JSON.stringify({
-    //         conversationId: conversation.id,
-    //         message: response,
-    //       })
-    //     );
-    //   }
-    // });
-
+  
     // Exit the function if the message the customer sent triggered a transfer to a human agent.
 
     // if it was whatsapp/sms based.

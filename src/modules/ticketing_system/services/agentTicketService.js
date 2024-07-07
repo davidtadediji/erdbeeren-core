@@ -5,18 +5,18 @@ import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import twilio from "twilio";
-import { WebSocketServer } from "ws";
 import logger from "../../../../logger.js";
 import eventEmitter from "../../analytics_engine/eventEmitter.js";
 import { saveMessageToConversation } from "../../communication/twilio/messaging/services/messageService.js";
+
+import WebSocket, { WebSocketServer } from "ws";
+
+const wss = new WebSocketServer({ port: 8080 });
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
-
-// Creating HTTP server for WebSocket, my attempt at using WebSocket server to update client end
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
 
 // Initializing Prisma client
 const prisma = new PrismaClient();
@@ -28,16 +28,6 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 // create a twilio client instance
 const client = twilio(accountSid, authToken);
-
-// WebSocket server handling connections
-wss.on("connection", (socket) => {
-  logger.info("Client is connected");
-
-  // Handling disconnect event
-  socket.on("disconnect", () => {
-    logger.info("Client disconnected");
-  });
-});
 
 // Function to fetch open and pending tickets for an agent
 export const getOpenandPendingTickets = async (agentId) => {
@@ -162,6 +152,16 @@ export const createTicket = async (agentId, type, conversationId, message) => {
         },
       },
     });
+
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(
+          JSON.stringify({
+            event: "newTicketCreated",
+          })
+        );
+      }
+    });
   } catch (error) {
     throw error;
   } finally {
@@ -210,24 +210,24 @@ export const sendMessage = async (agentId, ticketId, message) => {
       },
     });
 
-    // determine if the message should be sent via WhatsApp or SMS 
+    // determine if the message should be sent via WhatsApp or SMS
     const participantSid = ticket.conversation?.participantSid ?? null;
     const isWhatsApp = participantSid.startsWith("whatsapp:");
     // and send the agent's message to the customer
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: message,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: participantSid,
-      });
-    } else {
-      logger.info("sms triggered");
-      await client.messages.create({
-        body: message,
-        from: twilioPhoneNumber,
-        to: participantSid,
-      });
-    }
+    // if (isWhatsApp) {
+    //   await client.messages.create({
+    //     body: message,
+    //     from: "whatsapp:" + twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // } else {
+    //   logger.info("sms triggered");
+    //   await client.messages.create({
+    //     body: message,
+    //     from: twilioPhoneNumber,
+    //     to: participantSid,
+    //   });
+    // }
 
     // save the message to the conversation
     const humanAgentMessage = await saveMessageToConversation(
@@ -235,6 +235,18 @@ export const sendMessage = async (agentId, ticketId, message) => {
       agentId.toString(),
       message
     );
+
+    // Send the agent response over WebSocket
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(
+          JSON.stringify({
+            conversationId: ticket.conversation.id,
+            event: "newMessage",
+          })
+        );
+      }
+    });
 
     // emit events for analytics purposes
     eventEmitter.emit("newMessageCreated", {
@@ -246,7 +258,8 @@ export const sendMessage = async (agentId, ticketId, message) => {
       agentId,
       messageId: humanAgentMessage.id,
     });
-  } catch (error) { // handle any errors and finally, disconnect
+  } catch (error) {
+    // handle any errors and finally, disconnect
     throw error;
   } finally {
     await prisma.$disconnect();
@@ -275,28 +288,26 @@ export async function updateStatus(agentId, ticketId, status) {
     /* Then, this prepares a message to the customer indicating that the message has been 
     transferred to AI agent if ticket status is closed */
     if (status === "closed") {
-      const message =
-        `You are now connected with an AI agent. Kindly rate the assistance you 
-        received from the service agent on a scale of 1-5.`;
+      const message = `You are now connected with an AI agent. Kindly rate the assistance you received from the service agent on a scale of 1-5.`;
 
       // send the message via Twilio based on customers's messaging service
       const participantSid = updatedTicket.conversation?.participantSid ?? null;
       const isWhatsApp = participantSid.startsWith("whatsapp:");
 
-      if (isWhatsApp) {
-        await client.messages.create({
-          body: message,
-          from: "whatsapp:" + twilioPhoneNumber,
-          to: participantSid,
-        });
-      } else {
-        logger.info("sms triggered");
-        await client.messages.create({
-          body: message,
-          from: twilioPhoneNumber,
-          to: participantSid,
-        });
-      }
+      // if (isWhatsApp) {
+      //   await client.messages.create({
+      //     body: message,
+      //     from: "whatsapp:" + twilioPhoneNumber,
+      //     to: participantSid,
+      //   });
+      // } else {
+      //   logger.info("sms triggered");
+      //   await client.messages.create({
+      //     body: message,
+      //     from: twilioPhoneNumber,
+      //     to: participantSid,
+      //   });
+      // }
 
       // then, we save the closing message to the conversation
       await saveMessageToConversation(
@@ -304,6 +315,17 @@ export async function updateStatus(agentId, ticketId, status) {
         agentId.toString(),
         message
       );
+
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              conversationId: updatedTicket.conversation.id,
+              event: "newMessage",
+            })
+          );
+        }
+      });
     }
 
     return updatedTicket;
@@ -340,7 +362,3 @@ export async function getTicketDetails(ticketId) {
     await prisma.$disconnect();
   }
 }
-
-// To export the HTTP server instance for the WebSocket
-export { server };
-

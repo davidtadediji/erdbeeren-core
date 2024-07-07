@@ -57,7 +57,6 @@ const getCustomerConversationMessages = async (participantSid) => {
 
     const messages = conversation?.messages || [];
 
-    console.log(messages)
     return messages;
   } catch (error) {
     console.error("Error fetching conversation messages:", error);
