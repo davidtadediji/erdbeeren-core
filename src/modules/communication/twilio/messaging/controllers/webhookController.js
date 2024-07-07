@@ -22,6 +22,10 @@ import {
 } from "../services/conversationService.js";
 import { saveMessageToConversation } from "../services/messageService.js";
 
+import WebSocket, { WebSocketServer } from "ws";
+
+const wss = new WebSocketServer({ port: 8081 });
+
 const prisma = new PrismaClient();
 
 // Get environment variables
@@ -178,6 +182,17 @@ const receiveMessage = async (req) => {
     The user is not stuck with a particular agent performing badly because of the check negative sentiment function*/
     if (await hasOpenTicket(conversation.id)) {
       const response = null;
+      // Send the message to agent over WebSocket
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              conversationId: conversation.id,
+              event: "newMessage",
+            })
+          );
+        }
+      });
       return {
         conversation,
         response,
@@ -256,7 +271,7 @@ const sendMessage = async ({
     //     to: phoneNumber,
     //   });
     // }
-  
+
     // Exit the function if the message the customer sent triggered a transfer to a human agent.
 
     // if it was whatsapp/sms based.
