@@ -41,6 +41,32 @@ const getConversationThread = async (conversationId, limit = 1) => {
   }
 };
 
+const getCustomerConversationMessages = async (participantSid) => {
+  console.log("Get conversation messages triggered:", participantSid);
+  try {
+    const conversation = await prisma.conversation.findUnique({
+      where: { participantSid: participantSid },
+      select: {
+        messages: {
+          orderBy: {
+            sentAt: "asc",
+          },
+        },
+      },
+    });
+
+    const messages = conversation?.messages || [];
+
+    console.log(messages)
+    return messages;
+  } catch (error) {
+    console.error("Error fetching conversation messages:", error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
 const isSuspended = async (conversationId) => {
   try {
     const conversation = await prisma.conversation.findUnique({
@@ -58,21 +84,21 @@ const isSuspended = async (conversationId) => {
   }
 };
 
+export const hasOpenTicket = async (conversationId) => {
+  const openTicket = await prisma.ticket.findFirst({
+    where: {
+      conversationId: conversationId,
+      status: "open",
+    },
+  });
+
+  return openTicket !== null;
+};
+
 export {
   createNewConversation,
   getConversationThread,
   updateConversationTimestamp,
   isSuspended,
-};
-
-
-export const hasOpenTicket = async (conversationId) => {
-  const openTicket = await prisma.ticket.findFirst({
-    where: {
-      conversationId: conversationId,
-      status: 'open',
-    },
-  });
-
-  return openTicket !== null;
+  getCustomerConversationMessages,
 };
