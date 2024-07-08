@@ -210,7 +210,7 @@ const receiveMessage = async (req) => {
       previousMessages
     );
 
-    /* Note: if the message contained an extracted rate, the intent classifier would flag as type 'other' 
+    /* Note: if the message contained an extracted e, the intent claratssifier would flag as type 'other' 
     and the llm would respond with an acknowledgement message, and the message will not be saved only the rating*/
 
     /*if routeRequest function returns null that means a ticket has been created, message routed to human, 

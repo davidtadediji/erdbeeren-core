@@ -15,7 +15,7 @@ export const determineFollowUp = async (previousMessages) => {
   try {
     // Prepare agent and user messages from previousMessages
     const agentMessages = previousMessages
-      .filter((msg) => msg.sender === "agent")
+      .filter((msg) => msg.sender === "agent" || !isNaN(parseInt(msg.sender)))
       .map((msg) => msg.text);
     const userMessages = previousMessages
       .filter((msg) => msg.sender === "customer")
@@ -71,7 +71,7 @@ const determineFollowUp2 = async (previousMessages) => {
   try {
     // Prepare agent and user messages from previousMessages
     const agentMessages = previousMessages
-      .filter((msg) => msg.sender === "agent")
+      .filter((msg) => msg.sender === "agent" || !isNaN(parseInt(msg.sender)))
       .map((msg) => msg.content);
     const userMessages = previousMessages
       .filter((msg) => msg.sender === "customer")

@@ -51,7 +51,7 @@ const generateCustomerVectorStore = async (
     } else {
       logger.info("Customer vector store does not exist. Creating new...");
 
-      const text = "This is your conversation history with the user" + turn.join(" ");
+      const text = "This is your conversation history with the customer, refer to it when you need to remember" + turn.join(" ");
 
       const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: 500,

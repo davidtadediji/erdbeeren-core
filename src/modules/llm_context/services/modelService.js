@@ -81,7 +81,7 @@ const respondToMessage = async (
       : "";
     const target = isAgent ? "customer's" : "user's";
 
-    const SYSTEM_TEMPLATE = `${context} Answer the ${target} questions based on the below context. 
+    const SYSTEM_TEMPLATE = `${context} Answer the ${target} questions based on the below information. 
   <context>
   {context}
   </context>
@@ -106,7 +106,7 @@ const respondToMessage = async (
     // initialize LLM
     const chat = new ChatOpenAI({
       model: "gpt-4",
-      temperature: 0.2,
+      temperature: 0.5,
       maxTokens: 500,
     });
     logger.info("LLM created!");

@@ -18,7 +18,7 @@ const openai = new OpenAI({
 });
 
 // Function to classify the message using OpenAI API
-const classifyMessage = async (message) => {
+const classifyMessage2 = async (message) => {
   const prompt = `Classify the following message as either 'service request', 'incident complaint', 'enquiry', 'other' type or "explicit content' if it is an inappropriate message: ${message}`;
   const model = "gpt-4";
   const max_tokens = 100;
@@ -70,6 +70,52 @@ const classifyMessage = async (message) => {
   }
 };
 
+const classifyMessage = async (message) => {
+  const prompt = `Classify the following message as either 'transfer', if the user is asking to be transferred, "explicit content' if it is an inappropriate message: ${message}, remain if it not any of those.`;
+  const model = "gpt-4";
+  const max_tokens = 100;
+  const top_p = 1;
+  const frequency_penalty = 0;
+  const presence_penalty = 0;
+  const temperature = 0;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      messages: [{ role: "assistant", content: prompt }],
+      functions: [
+        {
+          name: "getIntent",
+          parameters: {
+            type: "object",
+            properties: {
+              intent: {
+                type: "string",
+                enum: ["transfer", "remain", "explicit content"],
+              },
+            },
+          },
+        },
+      ],
+      function_call: { name: "getIntent" },
+      max_tokens,
+      top_p,
+      frequency_penalty,
+      presence_penalty,
+      temperature,
+    });
+    const bit = response.choices[0].message.function_call;
+    const args = JSON.parse(bit.arguments);
+
+    const intent = args.intent;
+
+    return intent;
+  } catch (error) {
+    console.error("Error during classification:", error.message);
+    return "unknown";
+  }
+};
+
 export const routeRequest = async (
   message,
   conversationId,
@@ -79,7 +125,7 @@ export const routeRequest = async (
   const classification = await classifyMessage(message);
   logger.info("Classification: ", classification);
   switch (classification) {
-    case "service request":
+    case "transfer":
       handleRequireHuman(message, conversationId, "service request");
       // no response because it would be routed to agent
       return null;
@@ -87,7 +133,7 @@ export const routeRequest = async (
       handleRequireHuman(message, conversationId, "incident complaint");
       // no response because it would be routed to agent
       return null;
-    case "enquiry":
+    case "remain":
       return handleRequireAI(
         message,
         conversationId,
@@ -107,6 +153,35 @@ export const routeRequest = async (
         "unknown"
       );
   }
+  // switch (classification) {
+  //   case "service request":
+  //     handleRequireHuman(message, conversationId, "service request");
+  //     // no response because it would be routed to agent
+  //     return null;
+  //   case "incident complaint":
+  //     handleRequireHuman(message, conversationId, "incident complaint");
+  //     // no response because it would be routed to agent
+  //     return null;
+  //   case "enquiry":
+  //     return handleRequireAI(
+  //       message,
+  //       conversationId,
+  //       isAgent,
+  //       previousMessages,
+  //       "enquiry"
+  //     );
+  //   case "explicit content":
+  //     handleExplicit(conversationId);
+  //     return null;
+  //   default:
+  //     return handleRequireAI(
+  //       message,
+  //       conversationId,
+  //       isAgent,
+  //       previousMessages,
+  //       "unknown"
+  //     );
+  // }
 };
 
 const handleExplicit = async (conversationId) => {
