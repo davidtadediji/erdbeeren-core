@@ -82,7 +82,9 @@ const receiveMessage = async (req) => {
     let conversation = await prisma.conversation.findUnique({
       where: { participantSid: phoneNumber },
     });
+
     let selfPresentation = "";
+
     if (!conversation) {
       selfPresentation =
         "You are now interacting with an AI agent. We may collect and use only customer-related information solely for service improvement purposes. Your information is handled responsibly and in accordance with our privacy policies.\n";
@@ -258,19 +260,19 @@ const sendMessage = async ({
     }
 
     // check if the customers channel is sms or whatsapp to know how to respond
-    // if (isWhatsApp) {
-    //   await client.messages.create({
-    //     body: response,
-    //     from: "whatsapp:" + twilioPhoneNumber,
-    //     to: phoneNumber,
-    //   });
-    // } else {
-    //   await client.messages.create({
-    //     body: response,
-    //     from: twilioPhoneNumber,
-    //     to: phoneNumber,
-    //   });
-    // }
+    if (isWhatsApp) {
+      await client.messages.create({
+        body: response,
+        from: "whatsapp:" + twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    } else {
+      await client.messages.create({
+        body: response,
+        from: twilioPhoneNumber,
+        to: phoneNumber,
+      });
+    }
 
     // Exit the function if the message the customer sent triggered a transfer to a human agent.
 

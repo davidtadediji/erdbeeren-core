@@ -71,9 +71,9 @@ const classifyMessage2 = async (message) => {
 };
 
 const classifyMessage = async (message) => {
-  const prompt = `Classify the following message as either 'transfer', if the user is asking to be transferred, "explicit content' if it is an inappropriate message: ${message}, remain if it not any of those.`;
+  const prompt = `Classify the following message as either 'transfer', if the user is CLEARLY asking to be transferred, "explicit content' if it is an inappropriate message: ${message}, "remain" if it anything other any of those`;
   const model = "gpt-4";
-  const max_tokens = 100;
+  const max_tokens = 500;
   const top_p = 1;
   const frequency_penalty = 0;
   const presence_penalty = 0;
@@ -126,7 +126,7 @@ export const routeRequest = async (
   logger.info("Classification: ", classification);
   switch (classification) {
     case "transfer":
-      handleRequireHuman(message, conversationId, "service request");
+      handleRequireHuman(message, conversationId, "transfer");
       // no response because it would be routed to agent
       return null;
     case "incident complaint":
