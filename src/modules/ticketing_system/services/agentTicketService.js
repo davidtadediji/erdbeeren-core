@@ -214,20 +214,22 @@ export const sendMessage = async (agentId, ticketId, message) => {
     const participantSid = ticket.conversation?.participantSid ?? null;
     const isWhatsApp = participantSid.startsWith("whatsapp:");
     // and send the agent's message to the customer
-    // if (isWhatsApp) {
-    //   await client.messages.create({
-    //     body: message,
-    //     from: "whatsapp:" + twilioPhoneNumber,
-    //     to: participantSid,
-    //   });
-    // } else {
-    //   logger.info("sms triggered");
-    //   await client.messages.create({
-    //     body: message,
-    //     from: twilioPhoneNumber,
-    //     to: participantSid,
-    //   });
-    // }
+    if (participantSid != "chat") {
+      if (isWhatsApp) {
+        await client.messages.create({
+          body: message,
+          from: "whatsapp:" + twilioPhoneNumber,
+          to: participantSid,
+        });
+      } else {
+        logger.info("sms triggered");
+        await client.messages.create({
+          body: message,
+          from: twilioPhoneNumber,
+          to: participantSid,
+        });
+      }
+    }
 
     // save the message to the conversation
     const humanAgentMessage = await saveMessageToConversation(
@@ -236,17 +238,19 @@ export const sendMessage = async (agentId, ticketId, message) => {
       message
     );
 
-    // Send the agent response over WebSocket
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(
-          JSON.stringify({
-            conversationId: ticket.conversation.id,
-            event: "newMessage",
-          })
-        );
-      }
-    });
+    if (participantSid == "chat") {
+      // Send the agent response over WebSocket
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              conversationId: ticket.conversation.id,
+              event: "newMessage",
+            })
+          );
+        }
+      });
+    }
 
     // emit events for analytics purposes
     eventEmitter.emit("newMessageCreated", {
