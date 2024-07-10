@@ -139,8 +139,6 @@ const receiveMessage = async (req) => {
       );
     }
 
-    logger.info("here");
-
     /* if a score was not successfully saved, meaning the message did not contain a rating, 
     save the message in the database as part of the customers conversation and emit neccesary events (for analytics).
     It does not save the customer's message if a rating was successfully extracted from it and saved in the database*/
@@ -260,18 +258,20 @@ const sendMessage = async ({
     }
 
     // check if the customers channel is sms or whatsapp to know how to respond
-    if (isWhatsApp) {
-      await client.messages.create({
-        body: response,
-        from: "whatsapp:" + twilioPhoneNumber,
-        to: phoneNumber,
-      });
-    } else {
-      await client.messages.create({
-        body: response,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
+    if (conversation.participantSid != "chat") {
+      if (isWhatsApp) {
+        await client.messages.create({
+          body: response,
+          from: "whatsapp:" + twilioPhoneNumber,
+          to: phoneNumber,
+        });
+      } else {
+        await client.messages.create({
+          body: response,
+          from: twilioPhoneNumber,
+          to: phoneNumber,
+        });
+      }
     }
 
     // Exit the function if the message the customer sent triggered a transfer to a human agent.
