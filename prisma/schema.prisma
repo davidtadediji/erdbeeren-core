@@ -21,9 +21,9 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime?  
   ticketsAssigned  Ticket[]   
-  averageResponseTime  Int?       @default(15)
-  averageCustomerSatisfactionScore Int?       @default(85)
-  averageHandlingTime  Int?       @default(180)
+  averageResponseTime  Int?       
+  averageCustomerSatisfactionScore Int?       
+  averageHandlingTime  Int?      
 }
 
 model Conversation {
