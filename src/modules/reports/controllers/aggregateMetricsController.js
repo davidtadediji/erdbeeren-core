@@ -36,6 +36,8 @@ export async function getCustomerSatisfactionTrend(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -55,6 +57,58 @@ export async function getAverageConversationDuration(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getAgentsWithBestCustomerSatisfaction(req, res, next) {
+  try {
+    const agentsWithAvgScores = await prisma.ticket.groupBy({
+      by: ['userId'],
+      where: {
+        status: 'closed',
+        customerSatisfactionScore: {
+          not: null,
+        },
+      },
+      _avg: {
+        customerSatisfactionScore: true,
+      },
+      orderBy: {
+        _avg: {
+          customerSatisfactionScore: 'desc',
+        },
+      },
+      take: 10, 
+    });
+
+    const agents = await Promise.all(agentsWithAvgScores.map(async result => {
+      const agent = await prisma.user.findUnique({
+        where: {
+          id: result.userId,
+        },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+
+      return {
+        id: agent.id,
+        username: agent.username,
+        averageCustomerSatisfactionScore: result._avg.customerSatisfactionScore || 0,
+      };
+    }));
+
+    res.json({
+      metric: "Agents with Best Customer Satisfaction",
+      data: agents,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -75,6 +129,8 @@ export async function getResponseTimeTrend(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -90,6 +146,73 @@ export async function getDemographicCustomerReport(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getLowestHandlingTimeAgents(req, res, next) {
+  try {
+    // Fetch all users
+    const users = await prisma.user.findMany();
+
+    // Calculate the average handling time for each user
+    const userHandlingTimes = await Promise.all(users.map(async user => {
+      // Fetch closed tickets for the user
+      const tickets = await prisma.ticket.findMany({
+        where: {
+          userId: user.id,
+          status: 'closed',
+        },
+        select: {
+          createdAt: true,
+          closedAt: true,
+        },
+      });
+
+      // If there are no tickets, return a high handling time to ensure they're not included in the top
+      if (tickets.length === 0) {
+        return {
+          id: user.id,
+          username: user.username,
+          averageHandlingTime: Infinity,
+        };
+      }
+
+      // Calculate the total handling time
+      const totalHandlingTime = tickets.reduce((acc, ticket) => {
+        if (ticket.createdAt && ticket.closedAt) {
+          const difference = (new Date(ticket.closedAt) - new Date(ticket.createdAt)) / (1000 * 60); 
+          return acc + difference;
+        }
+        return acc;
+      }, 0);
+
+      // Calculate the average handling time
+      const averageHandlingTime = totalHandlingTime / tickets.length;
+
+      return {
+        id: user.id,
+        username: user.username,
+        averageHandlingTime,
+      };
+    }));
+
+    // Sort users by average handling time (ascending), remove users with no closed tickets and take the top 10
+    const sortedUsers = userHandlingTimes
+      .filter(user => user.averageHandlingTime !== Infinity) 
+      .sort((a, b) => a.averageHandlingTime - b.averageHandlingTime)
+      .slice(0, 10);
+
+    // Send the response
+    res.json({
+      metric: "Agents with Lowest Handling Time",
+      data: sortedUsers,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -101,7 +224,7 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
           _count: "desc",
         },
       },
-      take: 11,
+      take: 10,
     });
 
     res.json({
@@ -110,17 +233,43 @@ export async function getHighFrequencyCustomerIdentification(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getLowestResponseTimeAgents(req, res, next) {
+  try {
+    const agents = await prisma.user.findMany({
+      orderBy: {
+        averageResponseTime: "asc",
+      },
+      where: {
+        averageResponseTime: {
+          not: null,
+        },
+      },
+      take: 10,
+    });
+
+    res.json({
+      metric: "Agents with Lowest Response Time",
+      data: agents,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function getOverallSentimentTrend(req, res, next) {
   try {
-    const aggregateSentimentScore = await prisma.conversationMetrics
-      .aggregate({
-        _avg: {
-          overallSentimentScore: true,
-        },
-      })
+    const aggregateSentimentScore = await prisma.conversationMetrics.aggregate({
+      _avg: {
+        overallSentimentScore: true,
+      },
+    });
 
     const aggregateSentiment =
       aggregateSentimentScore &&
@@ -139,9 +288,7 @@ export async function getOverallSentimentTrend(req, res, next) {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
-
-export async function TicketVolume(req, res, next) {}
-
-export async function IssueCategory(req, res, next) {}
