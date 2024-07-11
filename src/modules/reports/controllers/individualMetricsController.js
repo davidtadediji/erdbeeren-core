@@ -221,12 +221,11 @@ export async function getFrequencyOfInteractions(req, res, next) {
   try {
     const conversationId = req.params.conversationId;
 
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: { messages: true },
+    const conversationMetrics = await prisma.conversationMetrics.findUnique({
+      where: { conversationId: conversationId },
     });
 
-    const messageCount = conversation ? conversation.length : 0;
+    const messageCount = conversationMetrics.length;
 
     res.json({
       customer: conversationId,
