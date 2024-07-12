@@ -40,7 +40,7 @@ const broadcastMessage = async (title, content) => {
             to: conversation.participantSid,
           });
 
-          receiverConversationIds.push(conversation.id);
+          receiverConversationIds.push(conversation.participantSid);
 
           await saveMessageToConversation(
             conversation.id,
