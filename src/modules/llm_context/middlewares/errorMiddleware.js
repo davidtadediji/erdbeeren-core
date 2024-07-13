@@ -14,8 +14,7 @@ const errorMiddleware = (err, req, res, next) => {
     });
   } else if (err.name === "MulterError") {
     res.status(400).json({ error: "File upload error" });
-  } else {
-    // Handle other errors with a generic response
+  } else {   
     res
       .status(500)
       .json({ error: "Internal server error", message: err.message });

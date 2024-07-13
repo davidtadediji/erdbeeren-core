@@ -18,7 +18,7 @@ const customer_profile_functions = [
     parameters: {
       type: "object",
       properties: {
-        // extract name, email, phonenumber, preferred mode of contact and purchase history of the customer if stated in the conversation
+        // extract name, email, phonenumber and preferred mode of contact of the customer if stated in the conversation
         name: {
           type: "string",
           description: "Name of the customer",

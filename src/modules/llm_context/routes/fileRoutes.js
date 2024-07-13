@@ -16,7 +16,6 @@ import logger from "../../../../logger.js";
 
 const router = express.Router();
 
-// Protect the '/upload' route with authentication and permission check
 router.post(
   "/upload",
   authenticateJWT,
@@ -43,7 +42,6 @@ router.post(
   }
 );
 
-// Protect the '/:filename' (delete) route with authentication and permission check
 router.delete(
   "/delete/:filename",
   authenticateJWT,
@@ -63,7 +61,6 @@ router.delete(
   }
 );
 
-// Protect the '/:filename' (rename) route with authentication and permission check
 router.put(
   "/rename/:filename",
   authenticateJWT,
@@ -84,7 +81,6 @@ router.put(
   }
 );
 
-// Protect the '/list' route with authentication and permission check
 router.get(
   "/list",
   authenticateJWT,

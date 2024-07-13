@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   "/",
 //   authenticateJWT, 
-//   hasPermission(["sendMessage"]), // Ensure the user has the 'admin' role
+//   hasPermission(["sendMessage"]),
   async (req, res) => {
     const { content, phoneNumber } = req.body;
 
@@ -24,5 +24,4 @@ router.post(
   }
 );
 
-// Export the router
 export default router;

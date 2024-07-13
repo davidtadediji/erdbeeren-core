@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
   '/generate',
   authenticateJWT, 
-  hasPermission(["manageLLM"]), // Ensure the user has the 'admin' role
+  hasPermission(["manageLLM"]), 
   async (req, res, next) => {
     const  {customerSid}= req.body
     try {

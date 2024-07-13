@@ -204,7 +204,6 @@ export async function getLowestHandlingTimeAgents(req, res, next) {
       .sort((a, b) => a.averageHandlingTime - b.averageHandlingTime)
       .slice(0, 10);
 
-    // Send the response
     res.json({
       metric: "Agents with Lowest Handling Time",
       data: sortedUsers,

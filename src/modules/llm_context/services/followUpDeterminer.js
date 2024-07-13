@@ -33,7 +33,7 @@ export const determineFollowUp = async (previousMessages) => {
 
     console.log(prompt);
 
-    // Call OpenAI Chat API to determine follow-up
+    // Call OpenAI model to determine follow-up
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "assistant", content: prompt }],
@@ -145,7 +145,7 @@ const determineFollowUp3 = async (previousMessages) => {
 
     console.log(prompt);
 
-    // Call OpenAI Chat API to determine follow-up
+    // Call OpenAI model to determine follow-up
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "assistant", content: prompt }],
