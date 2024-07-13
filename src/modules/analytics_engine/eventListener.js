@@ -28,7 +28,7 @@ conversationEventEmitter.on(
   }
 );
 
-// trigger actions when an AI agent responds
+// trigger actions when an LLM agent responds
 conversationEventEmitter.on(
   "agentResponded",
   ({ messageId, conversationId }) => {

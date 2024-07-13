@@ -16,8 +16,6 @@ export function generateVerificationCode() {
 
 export const sendResetPasswordEmail = async (email, resetToken) => {
   const transporter = nodemailer.createTransport({
-    // Configure your email provider here
-    // Example for Gmail:
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
@@ -26,7 +24,7 @@ export const sendResetPasswordEmail = async (email, resetToken) => {
   });
   const appUrl = process.env.APP_URL;
   logger.info("App url: " + appUrl);
-  const resetLink = `${appUrl}/reset-password/${resetToken}`; // Replace with your actual reset password page URL
+  const resetLink = `${appUrl}/reset-password/${resetToken}`;
   const configFile = await getEnterpriseDetails();
   const enterpriseName = configFile.name;
   logger.info(enterpriseName);

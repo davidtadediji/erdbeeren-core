@@ -114,7 +114,3 @@ export async function handleConversationLength(conversationId) {
     auditLogger.error("Error handling conversation length:" + error.message);
   }
 }
-
-export async function handleTicketVolume(conversationId) {}
-
-export async function handleIssueCategory(conversationId) {}

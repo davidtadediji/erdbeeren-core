@@ -10,13 +10,13 @@ dotenv.config();
 // Create an Express application
 const app = express();
 
-// Middleware to parse JSON bodies
+// middleware to parse JSON bodies
 app.use(express.json());
 
-// Middleware to parse URL-encoded bodies
+// middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware to enable Cross-Origin Resource Sharing (CORS)
+// middleware to enable Cross-Origin Resource Sharing (CORS)
 app.use(cors());
 
 // Routes

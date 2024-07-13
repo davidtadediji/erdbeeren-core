@@ -45,7 +45,7 @@ export async function handleSentimentAnalysis(messageId) {
       "Sentiment type: " + data.type + " Sentiment score: " + data.score
     );
 
-    // Updated the Message model with sentiment analysis results
+    // Update the Message model with sentiment analysis results
     await prisma.message.update({
       where: { id: messageId },
       data: {
@@ -54,7 +54,7 @@ export async function handleSentimentAnalysis(messageId) {
       },
     });
 
-    // Updated the Conversation model with overall sentiment analysis results
+    // Update the Conversation model with overall sentiment analysis results
     const conversationId = message.conversationId;
     const messages = await prisma.message.findMany({
       where: { conversationId },

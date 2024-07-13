@@ -4,13 +4,11 @@ import Joi from "joi";
 const twilioWebhookSchema = Joi.object({
   Body: Joi.string().required(),
   From: Joi.string().required(),
-  // Add more validation rules as needed
 });
 
 const twilioBroadcastSchema = Joi.object({
   title: Joi.string().required(),
   content: Joi.string().required(),
-  // Add more validation rules as needed
 });
 
 const validateTwilioWebhook = (req, res, next) => {
@@ -22,7 +20,6 @@ const validateTwilioWebhook = (req, res, next) => {
       .json({ error: "Bad Request", message: error.message });
   }
 
-  // If all validations pass, proceed to the next middleware or the controller
   next();
 };
 
@@ -35,7 +32,6 @@ const validateTwilioBroadcast = (req, res, next) => {
       .json({ error: "Bad Request", message: error.message });
   }
 
-  // If all validations pass, proceed to the next middleware or the controller
   next();
 };
 

@@ -27,7 +27,6 @@ const broadcastMessage = async (title, content) => {
     await Promise.all(
       conversations.map(async (conversation) => {
         logger.info("Conversation encountered.");
-        //try catch to handle any errors broadcasting and skip to next
         try {
           const formattedPhoneNumber =
             conversation.type === "whatsapp"

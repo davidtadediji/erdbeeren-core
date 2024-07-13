@@ -35,28 +35,6 @@ const customer_profile_functions = [
           type: "string",
           description: "Preferred method of contact (e.g., email, phone, SMS)",
         },
-        purchase_history: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              item: {
-                type: "string",
-                description: "Name of the purchased item",
-              },
-              date: {
-                type: "string",
-                format: "date",
-                description: "Date of purchase",
-              },
-              amount: {
-                type: "number",
-                description: "Amount spent on the purchase",
-              },
-            },
-          },
-          description: "List of previous purchases",
-        },
       },
     },
   },
@@ -66,7 +44,7 @@ const customer_profile_functions = [
  to generate a customer profile based on customer-related information from a customer's entire conversation. 
  it is then displayed as part of the report, no sensitive information is collected!*/
 export const extractProfile = async (message) => {
-  const prompt = `Check this message: ${message}, to extract any customer detail, must return empty if no info exists, must never add any info non-existent in the message`;
+  const prompt = `Check this message: ${message}, to extract any customer detail, MUST return empty if no information that correctly identifies a customer exists, must never add any info non-existent in the message`;
   const model = "gpt-4";
   const max_tokens = 500;
   const top_p = 1;
