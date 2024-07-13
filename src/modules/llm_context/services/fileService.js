@@ -16,7 +16,7 @@ const FILE_UPLOAD_PATH = path.join(
   "repository"
 ); 
 
-// Ensure the upload directory exists
+// To ensure the upload directory exists
 if (!fs.existsSync(FILE_UPLOAD_PATH)) {
   fs.mkdirSync(FILE_UPLOAD_PATH);
 }
