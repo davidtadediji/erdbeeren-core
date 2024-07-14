@@ -143,7 +143,7 @@ export const routeRequest = async (
       );
     case "explicit content":
       handleExplicit(conversationId);
-      return null;
+      return "We do not allow inappropriate messages on this platform, you will be suspended after 5 strikes.";
     default:
       return handleRequireAI(
         message,

@@ -24,6 +24,7 @@ import { saveMessageToConversation } from "../services/messageService.js";
 
 import WebSocket, { WebSocketServer } from "ws";
 
+// initialise websocket server
 const wss = new WebSocketServer({ port: 8081 });
 
 const prisma = new PrismaClient();
@@ -182,7 +183,7 @@ const receiveMessage = async (req) => {
     The user is not stuck with a particular agent performing badly because of the check negative sentiment function*/
     if (await hasOpenTicket(conversation.id)) {
       const response = null;
-      // Send the message to agent over WebSocket
+      // Send the message to human agent over WebSocket when a message is received
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(
@@ -193,6 +194,10 @@ const receiveMessage = async (req) => {
           );
         }
       });
+      const turn = [`Customer: ${messageContent}`, ``];
+      await generateCustomerVectorStore(conversation.id, turn); // add customer's message to customer's vector store
+      // no response (null) is sent to the sendMessage function because it is the human agent that has to respond
+      // in this case not the llm agent.
       return {
         conversation,
         response,
@@ -210,7 +215,7 @@ const receiveMessage = async (req) => {
       previousMessages
     );
 
-    /* Note: if the message contained an extracted e, the intent claratssifier would flag as type 'other' 
+    /* Note: if the message contained an extracted rating, the intent classifier would flag as type 'other' 
     and the llm would respond with an acknowledgement message, and the message will not be saved only the rating*/
 
     /*if routeRequest function returns null that means a ticket has been created, message routed to human, 
@@ -240,7 +245,7 @@ const receiveMessage = async (req) => {
   }
 };
 
-// Function to reply to customers
+// Function to send reply to customers
 const sendMessage = async ({
   conversation,
   response,
@@ -257,7 +262,8 @@ const sendMessage = async ({
       return "Customer has an open ticket";
     }
 
-    // check if the customers channel is sms or whatsapp to know how to respond
+    // check if the customers channel is sms or whatsapp to know how to respond, do not attempt to
+    // use the twilio api if the message was from the web-based chat interface.
     if (conversation.participantSid != "chat") {
       if (isWhatsApp) {
         await client.messages.create({

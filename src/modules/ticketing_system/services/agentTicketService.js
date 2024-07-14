@@ -10,6 +10,7 @@ import eventEmitter from "../../analytics_engine/eventEmitter.js";
 import { saveMessageToConversation } from "../../communication/twilio/messaging/services/messageService.js";
 
 import WebSocket, { WebSocketServer } from "ws";
+import { generateCustomerVectorStore } from "../../llm_context/services/customerContextService.js";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -262,6 +263,9 @@ export const sendMessage = async (agentId, ticketId, message) => {
       agentId,
       messageId: humanAgentMessage.id,
     });
+    const turn = [``, `Agent: ${message}`];
+    
+    await generateCustomerVectorStore(ticket.conversation.id, turn);
   } catch (error) {
     // handle any errors and finally, disconnect
     throw error;

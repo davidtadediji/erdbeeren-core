@@ -5,9 +5,11 @@ import auditLogger from "../../../../audit_logger.js";
 
 const prisma = new PrismaClient();
 
+// function to calculate message sentiment, to be called by message consumer
 export async function handleSentimentAnalysis(messageId) {
   logger.info("Handle sentiment analysis triggered: " + messageId);
 
+  // Find the message by Id
   const message = await prisma.message.findUnique({
     where: { id: messageId },
     include: { conversation: true },
@@ -19,10 +21,12 @@ export async function handleSentimentAnalysis(messageId) {
     return;
   }
 
+  // get the text of the message
   const text = encodeURIComponent(message.content);
 
   logger.info("Analysed text: " + text);
 
+  // this is to prepare the request and add the text of the message to the options object being prepared
   const options = {
     method: "GET",
     url: "https://twinword-sentiment-analysis.p.rapidapi.com/analyze/",
@@ -36,6 +40,7 @@ export async function handleSentimentAnalysis(messageId) {
   };
 
   try {
+    // use axios to make a get request with the options object as parameter
     const response = await axios.request(options);
 
     const data = response.data;
@@ -60,6 +65,8 @@ export async function handleSentimentAnalysis(messageId) {
       where: { conversationId },
     });
 
+    // calculate the overall sentiment and score of all messages within the conversation
+    // associated with the message that triggered sentiment analysis
     const overallSentiment = calculateOverallSentiment(messages);
     const overallSentimentScore = calculateOverallSentimentScore(messages);
 
@@ -70,6 +77,7 @@ export async function handleSentimentAnalysis(messageId) {
         overallSentimentScore
     );
 
+    // update the conversation kpis
     await prisma.conversationMetrics.update({
       where: { conversationId: conversationId },
       data: {
@@ -83,16 +91,18 @@ export async function handleSentimentAnalysis(messageId) {
   }
 }
 
+// Function to calculate overall sentiment of a conversation based on sentiment count
 function calculateOverallSentiment(messages) {
   const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
 
   for (const message of messages) {
-    // Excluded messages with null sentiment
+    // To exclude messages with null sentiment
     if (message.sentiment !== null) {
       sentimentCounts[message.sentiment]++;
     }
   }
 
+  // return the most occurring conversation sentiment
   const maxSentiment = Object.keys(sentimentCounts).reduce(
     (a, b) => (sentimentCounts[a] > sentimentCounts[b] ? a : b),
     null
@@ -101,7 +111,9 @@ function calculateOverallSentiment(messages) {
   return maxSentiment;
 }
 
+// Function to calculate overall sentiment score of a conversation
 function calculateOverallSentimentScore(messages) {
+  // accummulate all the sentiment scores of messages within the conversation and find the average.
   const totalScore = messages.reduce(
     (sum, message) => sum + message.sentimentScore,
     0
